@@ -1,0 +1,29 @@
+# OS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Results and artifacts
+results/*
+!results/.gitkeep
+artifacts/
+models/
+*.pt
+*.pte
+*.bin
+*.gguf
+*.onnx
+
+# Android / Gradle
+android/.gradle/
+android/**/build/
+*.apk
+*.aab
+local.properties
+
+# Logs
+*.log
