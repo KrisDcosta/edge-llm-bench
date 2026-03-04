@@ -84,6 +84,13 @@ Successful trial records set `failure` to `null`. Failed, blocked, or unsupporte
 }
 ```
 
+## Schema validation
+Run the validator from the repo root to check one or more JSONL files against `schemas/run.schema.json`.
+
+```bash
+python3 scripts/validate_results.py results/run-a.jsonl results/run-b.jsonl
+```
+
 ## Next steps
 1) Implement smoke test producing one JSON record
 2) Add schema validator
