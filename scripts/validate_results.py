@@ -14,11 +14,37 @@ class SchemaValidationError(Exception):
     """Raised when a value does not match the schema."""
 
 
+class SchemaCompatibilityError(Exception):
+    """Raised when the schema uses unsupported JSON Schema features."""
+
+
 class MiniSchemaValidator:
     """Minimal JSON Schema validator for the subset used in run.schema.json."""
 
+    SUPPORTED_SCHEMA_KEYS = {
+        "$schema",
+        "$defs",
+        "$ref",
+        "additionalProperties",
+        "allOf",
+        "anyOf",
+        "const",
+        "else",
+        "enum",
+        "if",
+        "maximum",
+        "minLength",
+        "minimum",
+        "properties",
+        "required",
+        "then",
+        "title",
+        "type",
+    }
+
     def __init__(self, schema: dict[str, Any]) -> None:
         self.schema = schema
+        self._ensure_schema_supported(self.schema, "$")
 
     def validate(self, value: Any) -> None:
         self._validate(value, self.schema, "$")
@@ -148,17 +174,67 @@ class MiniSchemaValidator:
             value, float
         )
 
+    def _ensure_schema_supported(self, schema: Any, path: str) -> None:
+        if not isinstance(schema, dict):
+            raise SchemaCompatibilityError(f"{path}: schema node must be an object")
+
+        unknown_keys = sorted(set(schema) - self.SUPPORTED_SCHEMA_KEYS)
+        if unknown_keys:
+            raise SchemaCompatibilityError(
+                f"{path}: unsupported schema keyword(s): {', '.join(repr(key) for key in unknown_keys)}"
+            )
+
+        if "$ref" in schema:
+            sibling_keys = sorted(set(schema) - {"$ref"})
+            if sibling_keys:
+                raise SchemaCompatibilityError(
+                    f"{path}: $ref cannot appear with sibling keyword(s): {', '.join(repr(key) for key in sibling_keys)}"
+                )
+
+        defs = schema.get("$defs")
+        if defs is not None:
+            if not isinstance(defs, dict):
+                raise SchemaCompatibilityError(f"{path}.$defs: expected object")
+            for key, subschema in defs.items():
+                self._ensure_schema_supported(subschema, f"{path}.$defs.{key}")
+
+        properties = schema.get("properties")
+        if properties is not None:
+            if not isinstance(properties, dict):
+                raise SchemaCompatibilityError(f"{path}.properties: expected object")
+            for key, subschema in properties.items():
+                self._ensure_schema_supported(subschema, f"{path}.properties.{key}")
+
+        for keyword in ("anyOf", "allOf"):
+            subschemas = schema.get(keyword)
+            if subschemas is None:
+                continue
+            if not isinstance(subschemas, list):
+                raise SchemaCompatibilityError(f"{path}.{keyword}: expected array")
+            for index, subschema in enumerate(subschemas):
+                self._ensure_schema_supported(subschema, f"{path}.{keyword}[{index}]")
+
+        for keyword in ("if", "then", "else"):
+            subschema = schema.get(keyword)
+            if subschema is not None:
+                self._ensure_schema_supported(subschema, f"{path}.{keyword}")
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Validate one or more JSONL files against schemas/run.schema.json."
     )
+    parser.add_argument(
+        "--schema",
+        default=str(Path(__file__).resolve().parents[1] / "schemas" / "run.schema.json"),
+        help="Schema file to use (defaults to schemas/run.schema.json).",
+    )
     parser.add_argument("paths", nargs="+", help="One or more JSONL files to validate.")
     return parser.parse_args()
 
 
-def load_schema() -> dict[str, Any]:
-    schema_path = Path(__file__).resolve().parents[1] / "schemas" / "run.schema.json"
+def load_schema(schema_path_str: str) -> dict[str, Any]:
+    schema_path = Path(schema_path_str)
     try:
         with schema_path.open("r", encoding="utf-8") as handle:
             schema = json.load(handle)
@@ -220,7 +296,11 @@ def validate_file(path_str: str, validator: MiniSchemaValidator) -> int:
 
 def main() -> int:
     args = parse_args()
-    validator = MiniSchemaValidator(load_schema())
+    try:
+        validator = MiniSchemaValidator(load_schema(args.schema))
+    except SchemaCompatibilityError as exc:
+        print(f"Unsupported schema: {exc}", file=sys.stderr)
+        return 1
     total_errors = 0
 
     for path_str in args.paths:

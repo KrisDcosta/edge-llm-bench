@@ -93,7 +93,6 @@ python3 scripts/validate_results.py results/run-a.jsonl results/run-b.jsonl
 
 ## Next steps
 1) Implement smoke test producing one JSON record
-2) Add schema validator
-3) Add config runner + experiment registry
-4) Add analysis plots
-5) Add minimal Android UI demo
+2) Add config runner + experiment registry
+3) Add analysis plots
+4) Add minimal Android UI demo
