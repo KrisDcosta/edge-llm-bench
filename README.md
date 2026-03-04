@@ -105,11 +105,12 @@ Prompt selection rules:
 ## Android baseline
 The minimal Android app shell lives under `android/`. It is a single-activity project that opens a basic screen with placeholder inputs for a model path and a prompt.
 
-Prerequisite: install Android Studio or a local Gradle toolchain with the Android SDK configured.
+Prerequisite: use Android Studio or a local setup with a compatible JDK (Java 17 to 21) and the Android SDK configured.
 
 Build and run from the repo root:
-- `cd android && gradle assembleDebug`
-- `cd android && gradle installDebug` (with a connected device or emulator)
+- `cd android && ./gradlew tasks`
+- `cd android && ./gradlew assembleDebug`
+- `cd android && ./gradlew installDebug` (with a connected device or emulator)
 
 Open `android/` in Android Studio if you prefer to sync and run the `app` module there.
 
