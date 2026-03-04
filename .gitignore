@@ -8,8 +8,7 @@ __pycache__/
 .env
 
 # Results and artifacts
-results/*
-!results/.gitkeep
+results/
 artifacts/
 models/
 *.pt
@@ -20,6 +19,7 @@ models/
 
 # Android / Gradle
 android/.gradle/
+android/build/
 android/**/build/
 *.apk
 *.aab
