@@ -1,0 +1,409 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Run Result Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_version",
+    "run_id",
+    "status",
+    "device",
+    "build",
+    "model",
+    "trial",
+    "timing_s",
+    "tokens",
+    "metrics",
+    "resources",
+    "failure"
+  ],
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "non_negative_number": {
+      "type": "number",
+      "minimum": 0
+    },
+    "nullable_non_negative_number": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/non_negative_number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "non_negative_integer": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "nullable_non_negative_integer": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/non_negative_integer"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullable_battery_pct": {
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "failure_details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "stage",
+        "message",
+        "retryable"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "stage": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "message": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "retryable": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "properties": {
+    "record_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "run_id": {
+      "$ref": "#/$defs/non_empty_string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed",
+        "blocked",
+        "unsupported"
+      ]
+    },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manufacturer",
+        "model",
+        "android_version",
+        "build_fingerprint"
+      ],
+      "properties": {
+        "manufacturer": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "model": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "android_version": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "build_fingerprint": {
+          "$ref": "#/$defs/non_empty_string"
+        }
+      }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executorch_version",
+        "app_build_id"
+      ],
+      "properties": {
+        "executorch_version": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "app_build_id": {
+          "$ref": "#/$defs/non_empty_string"
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "artifact_hash",
+        "quant_bits"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "artifact_hash": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "quant_bits": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 16
+        }
+      }
+    },
+    "trial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prompt_id",
+        "context_length",
+        "output_length",
+        "trial_index",
+        "is_warmup"
+      ],
+      "properties": {
+        "prompt_id": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "context_length": {
+          "$ref": "#/$defs/non_negative_integer"
+        },
+        "output_length": {
+          "$ref": "#/$defs/non_negative_integer"
+        },
+        "trial_index": {
+          "$ref": "#/$defs/non_negative_integer"
+        },
+        "is_warmup": {
+          "type": "boolean"
+        }
+      }
+    },
+    "timing_s": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "t_request_start",
+        "t_model_forward_start",
+        "t_first_token",
+        "t_last_token"
+      ],
+      "properties": {
+        "t_request_start": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "t_model_forward_start": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "t_first_token": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "t_last_token": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        }
+      }
+    },
+    "tokens": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_tokens",
+        "output_tokens"
+      ],
+      "properties": {
+        "input_tokens": {
+          "$ref": "#/$defs/nullable_non_negative_integer"
+        },
+        "output_tokens": {
+          "$ref": "#/$defs/nullable_non_negative_integer"
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ttft_s",
+        "prefill_s",
+        "prefill_tps",
+        "gen_s",
+        "decode_tps",
+        "e2e_s",
+        "gen_over_prefill",
+        "prefill_frac",
+        "gen_frac"
+      ],
+      "properties": {
+        "ttft_s": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "prefill_s": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "prefill_tps": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "gen_s": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "decode_tps": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "e2e_s": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "gen_over_prefill": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "prefill_frac": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "gen_frac": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "peak_rss_mb",
+        "battery_start_pct",
+        "battery_end_pct",
+        "battery_drop_pct",
+        "battery_drop_per_1k_tokens",
+        "temperature_c"
+      ],
+      "properties": {
+        "peak_rss_mb": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "battery_start_pct": {
+          "$ref": "#/$defs/nullable_battery_pct"
+        },
+        "battery_end_pct": {
+          "$ref": "#/$defs/nullable_battery_pct"
+        },
+        "battery_drop_pct": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "battery_drop_per_1k_tokens": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "temperature_c": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        }
+      }
+    },
+    "failure": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/failure_details"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "success"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "timing_s": {
+            "type": "object",
+            "properties": {
+              "t_request_start": {
+                "$ref": "#/$defs/non_negative_number"
+              },
+              "t_model_forward_start": {
+                "$ref": "#/$defs/non_negative_number"
+              },
+              "t_first_token": {
+                "$ref": "#/$defs/non_negative_number"
+              },
+              "t_last_token": {
+                "$ref": "#/$defs/non_negative_number"
+              }
+            }
+          },
+          "tokens": {
+            "type": "object",
+            "properties": {
+              "input_tokens": {
+                "$ref": "#/$defs/non_negative_integer"
+              },
+              "output_tokens": {
+                "$ref": "#/$defs/non_negative_integer"
+              }
+            }
+          },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "ttft_s": {
+                "$ref": "#/$defs/non_negative_number"
+              },
+              "prefill_s": {
+                "$ref": "#/$defs/non_negative_number"
+              },
+              "prefill_tps": {
+                "$ref": "#/$defs/non_negative_number"
+              },
+              "gen_s": {
+                "$ref": "#/$defs/non_negative_number"
+              },
+              "decode_tps": {
+                "$ref": "#/$defs/non_negative_number"
+              },
+              "e2e_s": {
+                "$ref": "#/$defs/non_negative_number"
+              },
+              "gen_over_prefill": {
+                "$ref": "#/$defs/non_negative_number"
+              },
+              "prefill_frac": {
+                "$ref": "#/$defs/non_negative_number"
+              },
+              "gen_frac": {
+                "$ref": "#/$defs/non_negative_number"
+              }
+            }
+          },
+          "failure": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "failure": {
+            "$ref": "#/$defs/failure_details"
+          }
+        }
+      }
+    }
+  ]
+}
