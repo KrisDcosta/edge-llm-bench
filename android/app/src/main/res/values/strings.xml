@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EAI Baseline</string>
+    <string name="screen_title">Android Baseline Skeleton</string>
+    <string name="screen_note">This screen is the minimal app shell for later on-device inference work.</string>
+    <string name="model_path_hint">Model path (for example: /sdcard/Download/model.pte)</string>
+    <string name="prompt_hint">Prompt input placeholder</string>
+    <string name="placeholder_status">Inference is not implemented yet. These fields are placeholders for model path and prompt wiring.</string>
+</resources>

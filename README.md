@@ -102,8 +102,19 @@ Prompt selection rules:
 - For benchmark runs, iterate prompts in the file order they are listed.
 - Do not randomize prompt selection unless a later task adds that behavior explicitly.
 
+## Android baseline
+The minimal Android app shell lives under `android/`. It is a single-activity project that opens a basic screen with placeholder inputs for a model path and a prompt.
+
+Prerequisite: install Android Studio or a local Gradle toolchain with the Android SDK configured.
+
+Build and run from the repo root:
+- `cd android && gradle assembleDebug`
+- `cd android && gradle installDebug` (with a connected device or emulator)
+
+Open `android/` in Android Studio if you prefer to sync and run the `app` module there.
+
 ## Next steps
 1) Implement smoke test producing one JSON record
 2) Add config runner
 3) Add analysis plots
-4) Add minimal Android UI demo
+4) Add baseline inference wiring
