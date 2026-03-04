@@ -94,6 +94,14 @@ python3 scripts/validate_results.py results/run-a.jsonl results/run-b.jsonl
 ## Experiment registry
 Planned benchmark configurations live in `experiments/registry.yaml`. Each entry is the audit record for one run configuration and includes explicit `status` (`planned`, `complete`, `failed`, `blocked`) so later runner code does not depend on hidden defaults.
 
+## Prompt suite
+The fixed prompt suite lives in `prompts/prompt-suite-v1.yaml`, matching the `prompt_set_id` already referenced by the experiment registry. Each prompt has a stable `id`, a category, and fixed prompt text.
+
+Prompt selection rules:
+- Use `default_smoke_test_prompt_id` for the single smoke-test prompt.
+- For benchmark runs, iterate prompts in the file order they are listed.
+- Do not randomize prompt selection unless a later task adds that behavior explicitly.
+
 ## Next steps
 1) Implement smoke test producing one JSON record
 2) Add config runner
