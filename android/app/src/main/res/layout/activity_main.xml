@@ -41,7 +41,15 @@
             android:inputType="textMultiLine"
             android:minLines="4" />
 
+        <Button
+            android:id="@+id/runOnceButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/run_once_button" />
+
         <TextView
+            android:id="@+id/statusOutput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"

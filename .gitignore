@@ -19,6 +19,7 @@ local-models/
 *.onnx
 
 # Android / Gradle
+android/.idea/
 android/.gradle/
 android/build/
 android/**/build/
