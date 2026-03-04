@@ -21,6 +21,7 @@ class SchemaCompatibilityError(Exception):
 class MiniSchemaValidator:
     """Minimal JSON Schema validator for the subset used in run.schema.json."""
 
+    SUPPORTED_TYPES = {"object", "string", "number", "integer", "boolean", "null"}
     SUPPORTED_SCHEMA_KEYS = {
         "$schema",
         "$defs",
@@ -185,11 +186,61 @@ class MiniSchemaValidator:
             )
 
         if "$ref" in schema:
+            ref = schema["$ref"]
+            if not isinstance(ref, str) or not ref:
+                raise SchemaCompatibilityError(f"{path}.$ref: expected non-empty string")
             sibling_keys = sorted(set(schema) - {"$ref"})
             if sibling_keys:
                 raise SchemaCompatibilityError(
                     f"{path}: $ref cannot appear with sibling keyword(s): {', '.join(repr(key) for key in sibling_keys)}"
                 )
+
+        schema_uri = schema.get("$schema")
+        if schema_uri is not None and not isinstance(schema_uri, str):
+            raise SchemaCompatibilityError(f"{path}.$schema: expected string")
+
+        title = schema.get("title")
+        if title is not None and not isinstance(title, str):
+            raise SchemaCompatibilityError(f"{path}.title: expected string")
+
+        expected_type = schema.get("type")
+        if expected_type is not None:
+            if not isinstance(expected_type, str):
+                raise SchemaCompatibilityError(f"{path}.type: expected supported string type")
+            if expected_type not in self.SUPPORTED_TYPES:
+                raise SchemaCompatibilityError(
+                    f"{path}.type: unsupported type {expected_type!r}"
+                )
+
+        required = schema.get("required")
+        if required is not None:
+            if not isinstance(required, list):
+                raise SchemaCompatibilityError(f"{path}.required: expected array of non-empty strings")
+            for index, item in enumerate(required):
+                if not isinstance(item, str) or not item:
+                    raise SchemaCompatibilityError(
+                        f"{path}.required[{index}]: expected non-empty string"
+                    )
+
+        enum_values = schema.get("enum")
+        if enum_values is not None and not isinstance(enum_values, list):
+            raise SchemaCompatibilityError(f"{path}.enum: expected array")
+
+        additional_properties = schema.get("additionalProperties")
+        if additional_properties is not None and not isinstance(additional_properties, bool):
+            raise SchemaCompatibilityError(f"{path}.additionalProperties: expected boolean")
+
+        min_length = schema.get("minLength")
+        if min_length is not None:
+            if not self._is_integer(min_length) or min_length < 0:
+                raise SchemaCompatibilityError(
+                    f"{path}.minLength: expected non-negative integer"
+                )
+
+        for keyword in ("minimum", "maximum"):
+            bound = schema.get(keyword)
+            if bound is not None and not self._is_number(bound):
+                raise SchemaCompatibilityError(f"{path}.{keyword}: expected number")
 
         defs = schema.get("$defs")
         if defs is not None:
