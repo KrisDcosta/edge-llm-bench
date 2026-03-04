@@ -114,6 +114,19 @@ Build and run from the repo root:
 
 Open `android/` in Android Studio if you prefer to sync and run the `app` module there.
 
+## Android runtime prerequisites
+On this machine:
+- Android SDK path: `/Users/krisdcosta/Library/Android/sdk`
+- Supported JDK for command-line builds: `/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home`
+- Local SDK config file: `android/local.properties` with `sdk.dir=/Users/krisdcosta/Library/Android/sdk` (keep this local and uncommitted)
+
+Local model artifact convention:
+- Store `.pte` files outside version control in `local-models/`
+- Current baseline artifact path on this machine: `local-models/llama3_2/llama3_2-3B.pte`
+
+Local runtime dependency convention for the next Android wiring step:
+- Use the Maven Central Android runtime dependency `org.pytorch:executorch-android:1.0.1` so Gradle resolves the AAR directly during the next wiring step.
+
 ## Next steps
 1) Implement smoke test producing one JSON record
 2) Add config runner
