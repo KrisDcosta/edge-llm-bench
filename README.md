@@ -91,8 +91,11 @@ Run the validator from the repo root to check one or more JSONL files against `s
 python3 scripts/validate_results.py results/run-a.jsonl results/run-b.jsonl
 ```
 
+## Experiment registry
+Planned benchmark configurations live in `experiments/registry.yaml`. Each entry is the audit record for one run configuration and includes explicit `status` (`planned`, `complete`, `failed`, `blocked`) so later runner code does not depend on hidden defaults.
+
 ## Next steps
 1) Implement smoke test producing one JSON record
-2) Add config runner + experiment registry
+2) Add config runner
 3) Add analysis plots
 4) Add minimal Android UI demo

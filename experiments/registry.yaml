@@ -1,0 +1,74 @@
+# Allowed status values: planned, complete, failed, blocked
+experiments:
+  - id: q16-ctx256
+    quant_bits: 16
+    context_length: 256
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+  - id: q16-ctx1024
+    quant_bits: 16
+    context_length: 1024
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+  - id: q16-ctx4096
+    quant_bits: 16
+    context_length: 4096
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+  - id: q8-ctx256
+    quant_bits: 8
+    context_length: 256
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+  - id: q8-ctx1024
+    quant_bits: 8
+    context_length: 1024
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+  - id: q8-ctx4096
+    quant_bits: 8
+    context_length: 4096
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+  - id: q4-ctx256
+    quant_bits: 4
+    context_length: 256
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+  - id: q4-ctx1024
+    quant_bits: 4
+    context_length: 1024
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+  - id: q4-ctx4096
+    quant_bits: 4
+    context_length: 4096
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
