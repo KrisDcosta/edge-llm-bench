@@ -36,6 +36,21 @@
         }
       ]
     },
+    "fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "nullable_fraction": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/fraction"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "non_negative_integer": {
       "type": "integer",
       "minimum": 0
@@ -157,12 +172,24 @@
           "$ref": "#/$defs/non_empty_string"
         },
         "artifact_hash": {
-          "$ref": "#/$defs/non_empty_string"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/non_empty_string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "quant_bits": {
           "type": "integer",
-          "minimum": 2,
-          "maximum": 16
+          "enum": [
+            16,
+            8,
+            6,
+            4,
+            2
+          ]
         }
       }
     },
@@ -271,10 +298,10 @@
           "$ref": "#/$defs/nullable_non_negative_number"
         },
         "prefill_frac": {
-          "$ref": "#/$defs/nullable_non_negative_number"
+          "$ref": "#/$defs/nullable_fraction"
         },
         "gen_frac": {
-          "$ref": "#/$defs/nullable_non_negative_number"
+          "$ref": "#/$defs/nullable_fraction"
         }
       }
     },
@@ -385,10 +412,18 @@
                 "$ref": "#/$defs/non_negative_number"
               },
               "prefill_frac": {
-                "$ref": "#/$defs/non_negative_number"
+                "$ref": "#/$defs/fraction"
               },
               "gen_frac": {
-                "$ref": "#/$defs/non_negative_number"
+                "$ref": "#/$defs/fraction"
+              }
+            }
+          },
+          "model": {
+            "type": "object",
+            "properties": {
+              "artifact_hash": {
+                "$ref": "#/$defs/non_empty_string"
               }
             }
           },

@@ -22,7 +22,7 @@ This repo benchmarks Llama 3.2 3B on Android (Pixel 6a) using ExecuTorch across 
 - `results/`: generated benchmark outputs (ignored by Git)
 
 ## Example result record
-Successful trial records set `failure` to `null`. Failed or blocked trials keep the same shape and populate `failure`, while any unavailable measurements remain `null`.
+Successful trial records set `failure` to `null`. Failed, blocked, or unsupported trials keep the same shape and populate `failure`, while any unavailable measurements remain `null`.
 
 ```json
 {
