@@ -127,6 +127,20 @@ Local model artifact convention:
 Local runtime dependency convention for the next Android wiring step:
 - Use the Maven Central Android runtime dependency `org.pytorch:executorch-android:1.0.1` so Gradle resolves the AAR directly during the next wiring step.
 
+## Artifact package contract (T05B)
+For the current Android baseline wrapper, an artifact package is valid only when both runtime inputs are available:
+- Model file: one ExecuTorch `.pte` file (prefer a memory-feasible quantized variant for on-device validation).
+- Tokenizer file: a separate tokenizer artifact path is required by the current `LlmModuleConfig`.
+
+Expected device paths:
+- Model path example: `/data/local/tmp/<model_name>.pte`
+- Tokenizer path example: `/data/local/tmp/<tokenizer_name>`
+
+If tokenizer path is left blank in the app, the wrapper tries to auto-discover one of:
+- `tokenizer.model`, `tokenizer.json`, `tokenizer.bin`, `sentencepiece.model`, `spm.model` in the model file directory.
+
+If no tokenizer is found, inference fails explicitly with `ARTIFACT_LOAD_FAILURE` instead of silently proceeding.
+
 ## Next steps
 1) Implement smoke test producing one JSON record
 2) Add config runner

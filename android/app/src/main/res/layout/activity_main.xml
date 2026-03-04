@@ -32,6 +32,15 @@
             android:singleLine="true" />
 
         <EditText
+            android:id="@+id/tokenizerPathInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/tokenizer_path_hint"
+            android:inputType="text"
+            android:singleLine="true" />
+
+        <EditText
             android:id="@+id/promptInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

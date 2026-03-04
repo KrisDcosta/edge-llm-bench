@@ -2,8 +2,9 @@
 <resources>
     <string name="app_name">EAI Baseline</string>
     <string name="screen_title">Android Baseline Inference</string>
-    <string name="screen_note">Enter a device-readable `.pte` path and a prompt, then run one baseline ExecuTorch request.</string>
+    <string name="screen_note">Enter a `.pte` model path, tokenizer path, and prompt, then run one baseline ExecuTorch request.</string>
     <string name="model_path_hint">Model path on device (for example: /data/local/tmp/llama3_2-3B.pte)</string>
+    <string name="tokenizer_path_hint">Tokenizer path on device (for example: /data/local/tmp/tokenizer.model)</string>
     <string name="prompt_hint">Enter one prompt to run once</string>
     <string name="run_once_button">Run once</string>
     <string name="placeholder_status">The app will attempt a real ExecuTorch load and one prompt execution, then show either model output or an explicit failure code.</string>

@@ -9,14 +9,23 @@ import org.pytorch.executorch.extension.llm.LlmModule;
 import org.pytorch.executorch.extension.llm.LlmModuleConfig;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 public final class BaselineInferenceWrapper {
     private static final String TAG = "BaselineInference";
     private static final int MAX_NEW_TOKENS = 16;
     private static final int SEQ_LEN = 256;
     private static final float DEFAULT_TEMPERATURE = 0.0f;
+    private static final List<String> DEFAULT_TOKENIZER_FILES = Arrays.asList(
+        "tokenizer.model",
+        "tokenizer.json",
+        "tokenizer.bin",
+        "sentencepiece.model",
+        "spm.model"
+    );
 
-    public String runOnce(String modelPath, String prompt) throws InferenceException {
+    public String runOnce(String modelPath, String tokenizerPath, String prompt) throws InferenceException {
         String normalizedModelPath = modelPath == null ? "" : modelPath.trim();
         if (normalizedModelPath.isEmpty()) {
             throw new InferenceException(
@@ -60,10 +69,12 @@ public final class BaselineInferenceWrapper {
         if (dataPath == null) {
             dataPath = "";
         }
+
+        String resolvedTokenizerPath = resolveTokenizerPath(modelFile, tokenizerPath);
         try {
             LlmModuleConfig config = LlmModuleConfig.create()
                 .modulePath(normalizedModelPath)
-                .tokenizerPath(normalizedModelPath)
+                .tokenizerPath(resolvedTokenizerPath)
                 .dataPath(dataPath)
                 .temperature(DEFAULT_TEMPERATURE)
                 .modelType(LlmModule.MODEL_TYPE_TEXT)
@@ -143,6 +154,42 @@ public final class BaselineInferenceWrapper {
                 module.resetNative();
             }
         }
+    }
+
+    private static String resolveTokenizerPath(File modelFile, String tokenizerPath) throws InferenceException {
+        String normalizedTokenizerPath = tokenizerPath == null ? "" : tokenizerPath.trim();
+        if (!normalizedTokenizerPath.isEmpty()) {
+            File tokenizerFile = new File(normalizedTokenizerPath);
+            if (!tokenizerFile.isFile()) {
+                throw new InferenceException(
+                    "ARTIFACT_LOAD_FAILURE",
+                    "Tokenizer artifact not found at: " + normalizedTokenizerPath
+                );
+            }
+            if (!tokenizerFile.canRead()) {
+                throw new InferenceException(
+                    "ARTIFACT_LOAD_FAILURE",
+                    "Tokenizer artifact is not readable: " + normalizedTokenizerPath
+                );
+            }
+            return normalizedTokenizerPath;
+        }
+
+        File modelDir = modelFile.getParentFile();
+        if (modelDir != null) {
+            for (String candidate : DEFAULT_TOKENIZER_FILES) {
+                File tokenizerCandidate = new File(modelDir, candidate);
+                if (tokenizerCandidate.isFile() && tokenizerCandidate.canRead()) {
+                    return tokenizerCandidate.getAbsolutePath();
+                }
+            }
+        }
+
+        throw new InferenceException(
+            "ARTIFACT_LOAD_FAILURE",
+            "Tokenizer artifact is required. Set tokenizer path explicitly or place one of "
+                + DEFAULT_TOKENIZER_FILES + " next to the model file."
+        );
     }
 
     public static final class InferenceException extends Exception {

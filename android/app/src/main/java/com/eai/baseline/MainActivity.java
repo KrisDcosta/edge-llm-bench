@@ -15,12 +15,14 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         EditText modelPathInput = findViewById(R.id.modelPathInput);
+        EditText tokenizerPathInput = findViewById(R.id.tokenizerPathInput);
         EditText promptInput = findViewById(R.id.promptInput);
         TextView statusOutput = findViewById(R.id.statusOutput);
         Button runOnceButton = findViewById(R.id.runOnceButton);
 
         runOnceButton.setOnClickListener(view -> {
             String modelPath = modelPathInput.getText().toString();
+            String tokenizerPath = tokenizerPathInput.getText().toString();
             String prompt = promptInput.getText().toString();
 
             runOnceButton.setEnabled(false);
@@ -28,7 +30,7 @@ public class MainActivity extends Activity {
 
             new Thread(() -> {
                 try {
-                    String result = inferenceWrapper.runOnce(modelPath, prompt);
+                    String result = inferenceWrapper.runOnce(modelPath, tokenizerPath, prompt);
                     runOnUiThread(() -> {
                         statusOutput.setText(result);
                         runOnceButton.setEnabled(true);
