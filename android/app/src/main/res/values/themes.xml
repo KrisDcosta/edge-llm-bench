@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. -->
+    <style name="Theme.EdgeLLMBench" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">#388E3C</item>
+        <item name="colorPrimaryDark">#1B5E20</item>
+        <item name="colorAccent">#66BB6A</item>
+    </style>
+</resources>

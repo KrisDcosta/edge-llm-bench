@@ -1,67 +1,200 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="#FAFAFA">
 
+    <!-- ── Top bar: model info + quant selector + load button ── -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/tv_model_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Model: not loaded"
+            android:textSize="13sp"
+            android:textColor="#555555"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <Spinner
+            android:id="@+id/spinner_quant"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"/>
+
+        <Button
+            android:id="@+id/btn_load_model"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Load GGUF"
+            android:textSize="12sp"/>
+    </LinearLayout>
+
+    <!-- ── Live metrics overlay ── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:background="#E8F5E9"
+        android:padding="10dp"
+        android:layout_marginBottom="8dp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/screen_title"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:text="⚡ Live Metrics"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:textColor="#388E3C"
+            android:paddingBottom="4dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_ttft"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="TTFT: —"
+                android:textSize="12sp"
+                android:textColor="#1B5E20"/>
+
+            <TextView
+                android:id="@+id/tv_prefill_tps"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Prefill: —"
+                android:textSize="12sp"
+                android:textColor="#1B5E20"/>
+
+            <TextView
+                android:id="@+id/tv_decode_tps"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Decode: —"
+                android:textSize="12sp"
+                android:textColor="#1B5E20"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="4dp">
+
+            <TextView
+                android:id="@+id/tv_e2e"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="E2E: —"
+                android:textSize="12sp"
+                android:textColor="#1B5E20"/>
+
+            <TextView
+                android:id="@+id/tv_gen_prefill_ratio"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="Gen/Prefill: —"
+                android:textSize="12sp"
+                android:textColor="#1B5E20"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- ── Chat output ── -->
+    <ScrollView
+        android:id="@+id/scroll_chat"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#FFFFFF"
+        android:padding="8dp">
 
         <TextView
+            android:id="@+id/tv_chat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/screen_note" />
+            android:textSize="14sp"
+            android:textColor="#212121"
+            android:lineSpacingExtra="3dp"
+            android:fontFamily="monospace"/>
+    </ScrollView>
+
+    <!-- ── Status bar ── -->
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No model loaded"
+        android:textSize="11sp"
+        android:textColor="#888888"
+        android:gravity="center"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"/>
+
+    <!-- ── Input row ── -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="8dp">
 
         <EditText
-            android:id="@+id/modelPathInput"
-            android:layout_width="match_parent"
+            android:id="@+id/et_input"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="@string/model_path_hint"
-            android:inputType="text"
-            android:singleLine="true" />
-
-        <EditText
-            android:id="@+id/tokenizerPathInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="@string/tokenizer_path_hint"
-            android:inputType="text"
-            android:singleLine="true" />
-
-        <EditText
-            android:id="@+id/promptInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:gravity="top|start"
-            android:hint="@string/prompt_hint"
+            android:layout_weight="1"
+            android:hint="Type a message…"
             android:inputType="textMultiLine"
-            android:minLines="4" />
+            android:maxLines="3"
+            android:minLines="1"/>
 
         <Button
-            android:id="@+id/runOnceButton"
-            android:layout_width="match_parent"
+            android:id="@+id/btn_send"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/run_once_button" />
-
-        <TextView
-            android:id="@+id/statusOutput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/placeholder_status" />
+            android:layout_marginStart="8dp"
+            android:text="Send"
+            android:enabled="false"/>
     </LinearLayout>
-</ScrollView>
+
+    <!-- ── Action buttons row ── -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="8dp"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btn_benchmark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Run Benchmark"
+            android:enabled="false"/>
+
+        <Button
+            android:id="@+id/btn_export_log"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Export Log"/>
+    </LinearLayout>
+
+</LinearLayout>

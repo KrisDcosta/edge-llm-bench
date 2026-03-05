@@ -14,5 +14,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "android-baseline"
+rootProject.name = "EdgeLLMBench"
 include(":app")
+include(":lib")
