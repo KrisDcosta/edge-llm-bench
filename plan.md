@@ -1,136 +1,146 @@
-# plan.md — Project Execution Plan (Agent-Oriented)
+# plan.md — Revised Execution Plan (llama.cpp Pivot)
 
 Guiding principle: **ship the smallest system** that answers the PRD research questions with **reproducible measurements**. No over-engineering.
 
 ---
 
-## Phase 0 — Scope freeze (PRD alignment)
-- Confirm: device, framework, model, quant levels, context sizes, trial counts, prompt suite size.
-- Create/confirm:
-  - `schemas/run.schema.json`
-  - `experiments/registry.yaml` (audit trail)
-  - results directory conventions
+## Context
 
-Exit: PRD choices are frozen; schema + registry exist.
+ExecuTorch was evaluated in T05–T06 and found infeasible for Llama 3.2 3B on Pixel 6a (6GB RAM) due to OOM kills. The project pivots to **llama.cpp** with GGUF models.
+
+Completed infrastructure (T00–T04) is reused. The Android app is rebuilt using llama.cpp.
 
 ---
 
-## Phase 1 — Baseline: ExecuTorch runs Llama 3.2 3B on device
-- Build ExecuTorch Android example
-- Load model and generate text for 1 prompt reliably
-- Create a **smoke test** command/script that:
-  - runs 1 prompt
-  - prints TTFT
-  - writes one JSON record
+## Phase 0 — Pivot Setup
 
-Exit: "hello world" is reliable and produces a JSON record.
+- Update PRD, plan.md, schema, registry for llama.cpp
+- Cross-compile llama.cpp for Android ARM64 using NDK
+- Download one GGUF model (Q4_K_M) from HuggingFace
+- Push binary + model to Pixel 6a via adb
+- Run one prompt: `adb shell /data/local/tmp/llama-cli -m model.gguf -p "What is 2+2?" -n 32`
 
----
-
-## Phase 2 — Instrumentation + logging (core)
-Implement measurement hooks (minimal, correct):
-- timestamps:
-  - `t_request_start`
-  - `t_model_forward_start`
-  - `t_first_token`
-  - `t_last_token`
-- token counts:
-  - `input_tokens`, `output_tokens`
-- derived metrics:
-  - TTFT, Prefill TPS, Decode TPS, E2E latency
-  - Generation vs Prefill (ratio + fractions)
-- resource:
-  - peak RSS sampling (simple periodic sampler)
-  - battery start/end snapshot
-
-Add JSONL logging (one record per trial) + schema validation.
-
-Exit: a single config run produces schema-valid JSONL.
+Exit: one prompt generates text on device.
 
 ---
 
-## Phase 3 — Quantization artifacts
-Prepare model artifacts for:
-- 16-bit (baseline)
-- 8-bit
-- 6-bit
-- 4-bit
-- 2-bit (attempt)
+## Phase 1 — Benchmark Runner + JSONL Logging
 
-Rules:
-- If 2-bit is unsupported/unstable, **do not silently fallback**.
-- Log failure reason and continue with supported levels.
-- Ensure artifacts are named consistently and hashed.
+- Create `scripts/benchmark_runner.py`:
+  - reads config from `experiments/registry.yaml`
+  - runs warmup + recorded trials via `adb shell`
+  - captures llama.cpp stdout (includes `llama_print_timings`)
+  - captures peak RSS via `adb shell dumpsys meminfo`
+  - captures battery via `adb shell dumpsys battery`
+- Create `scripts/parse_llama_output.py`:
+  - parses llama.cpp timing output into schema-valid JSONL
+  - maps prompt_eval → prefill, eval → decode
+- Write `results/<run_id>.jsonl`
+- Validate with existing `scripts/validate_results.py`
 
-Exit: 16/8/6/4 run; 2-bit attempted and documented.
-
----
-
-## Phase 4 — Config-driven runner
-Implement config input (YAML preferred):
-- `quant`
-- `context_length`
-- `output_tokens`
-- `warmups`
-- `trials`
-- `prompt_set_id`
-
-Runner behavior:
-- warmup runs are executed but flagged `warmup=true`
-- recorded runs are `warmup=false`
-- writes JSONL
-- appends metadata from device/build
-
-Exit: runner can execute any registry config and produce logs.
+Exit: `python scripts/benchmark_runner.py --quant Q4_K_M --context 256` produces valid JSONL.
 
 ---
 
-## Phase 5 — Execute sweep (the dataset)
-Run the experiment registry:
-- Quant × Context matrix (at least 3 contexts × 3+ quants)
-- Fixed output length
-- 2 warmups + 5 trials per config
+## Phase 2 — Model Artifacts
 
-Store:
-- `results/<run_id>.jsonl`
-- `results/<run_id>.meta.json` (optional summary)
+Download from `bartowski/Llama-3.2-3B-Instruct-GGUF`:
+- Q2_K (~1.3 GB)
+- Q3_K_M (~1.6 GB) — bonus
+- Q4_K_M (~2.0 GB)
+- Q6_K (~2.7 GB)
+- Q8_0 (~3.4 GB) — attempt
 
-Exit: complete dataset for report figures exists.
+For each:
+- Compute SHA256 hash
+- Push to device, run smoke test
+- Document load success vs OOM
+- Attempt FP16 → document OOM as result
 
----
-
-## Phase 6 — Analysis (one-command figure generation)
-Implement analysis script(s) that:
-- read JSONL logs
-- compute summary stats (mean/std, p50/p90/p99)
-- generate plots:
-  - Prefill TPS vs context (per quant)
-  - Decode TPS vs context (per quant)
-  - TTFT vs context (per quant)
-  - Peak memory vs context (per quant)
-  - Generation vs Prefill (ratio/fractions) vs context (per quant)
-  - Latency distributions (p50/p90/p99)
-
-Strict rule: plots must be reproducible from raw logs with one command.
-
-Exit: `python analysis/generate_figures.py results/*.jsonl` generates all figures.
+Exit: at least Q2_K, Q4_K_M, Q6_K verified. Q8_0 attempted.
 
 ---
 
-## Phase 7 — Android UI demo (minimal)
-Build a minimal chat UI that:
-- runs the same inference wrapper
-- displays live metrics (TTFT, prefill/decode TPS, gen/prefill ratio)
-- includes a "Benchmark mode" button that runs a small fixed suite and exports logs
+## Phase 3 — Full Experiment Sweep
 
-Exit: stable offline demo + exported logs are schema-valid.
+Matrix:
+```
+Quant:    [Q2_K, Q3_K_M, Q4_K_M, Q6_K, Q8_0*]
+Context:  [256, 512, 1024, 2048*]
+Output:   128 tokens (fixed)
+Warmups:  2
+Trials:   5
+```
+
+Protocol: airplane mode, fixed brightness, background apps closed, 2-min cooldown.
+
+Store: `results/<quant>-<context>.jsonl`
+
+Exit: complete dataset. Schema validation passes on all files.
 
 ---
 
-## Phase 8 — Final validation
-- Re-run a subset to confirm repeatability
-- Verify schema validation passes
-- Confirm figures regenerate cleanly
-- Write down findings mapped to each research question
+## Phase 4 — Analysis & Figures
 
-Exit: report-ready results + demo reliability.
+Create `analysis/generate_figures.py`:
+1. Prefill TPS vs Context Length (per quant, with error bars)
+2. Decode TPS vs Context Length (per quant, with error bars)
+3. TTFT vs Context Length (per quant)
+4. Peak Memory vs Quant Level (bar chart)
+5. Battery Drain per 1K Tokens vs Quant Level
+6. Efficiency-Accuracy Pareto Frontier
+7. Prefill vs Decode Time Fraction (stacked bar)
+8. Latency Distribution (box/violin, p50/p90/p99)
+9. Model Size vs Decode TPS
+
+Exit: `python analysis/generate_figures.py results/` generates all plots.
+
+---
+
+## Phase 5 — Android Chat UI Demo
+
+Base: llama.cpp `examples/llama.android/` (Kotlin/Compose + JNI)
+
+Customize:
+- Live metrics overlay (TTFT, Prefill TPS, Decode TPS)
+- Quant selector dropdown
+- Benchmark mode button (runs prompt suite, exports JSONL)
+
+Fallback (if time-pressed): Kotlin wrapper around `Runtime.exec()` calling `llama-cli`
+
+Exit: offline chat works on Pixel 6a, shows metrics, exports logs.
+
+---
+
+## Phase 6 — Report & Polish
+
+- Re-run subset for repeatability
+- Verify schema validation
+- Regenerate all figures from raw logs
+- Map findings to RQ1–RQ5
+- Document ExecuTorch evaluation and pivot rationale
+- Record demo video
+
+Exit: report-ready results + stable demo.
+
+---
+
+## Phase Gates
+
+### Gate A — Baseline
+Do not start sweep until:
+- llama.cpp runs on device reliably
+- one prompt completes end-to-end
+- one schema-valid JSONL record exists
+
+### Gate B — Sweep
+Do not start full matrix until:
+- benchmark runner is stable
+- schema validation passes
+- at least 2 quant levels verified
+
+### Gate C — Report
+Do not write conclusions until:
+- figures regenerate from raw logs in one command
+- repeatability subset rerun
+- failures documented explicitly

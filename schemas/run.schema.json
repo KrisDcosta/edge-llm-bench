@@ -147,14 +147,18 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "executorch_version",
-        "app_build_id"
+        "framework",
+        "framework_version",
+        "gguf_variant"
       ],
       "properties": {
-        "executorch_version": {
+        "framework": {
           "$ref": "#/$defs/non_empty_string"
         },
-        "app_build_id": {
+        "framework_version": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "gguf_variant": {
           "$ref": "#/$defs/non_empty_string"
         }
       }
@@ -188,6 +192,7 @@
             8,
             6,
             4,
+            3,
             2
           ]
         }

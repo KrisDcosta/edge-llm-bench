@@ -7,9 +7,8 @@ __pycache__/
 .venv/
 .env
 
-# Results and artifacts
+# Results and large artifacts (manifest.yaml IS tracked; model files are not)
 results/
-artifacts/
 models/
 local-models/
 *.pt
@@ -29,3 +28,4 @@ local.properties
 
 # Logs
 *.log
+vendor/
