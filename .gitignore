@@ -9,8 +9,10 @@ __pycache__/
 
 # Results and large artifacts (manifest.yaml IS tracked; model files are not)
 results/
-models/
-local-models/
+/models/
+/local-models/
+# Un-ignore Android UI subdirectory that happens to be named "models"
+!android/app/src/main/java/com/eai/edgellmbench/ui/models/
 *.pt
 *.pte
 *.bin
