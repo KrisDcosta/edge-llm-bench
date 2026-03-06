@@ -79,7 +79,9 @@ cmake -S "$LLAMA_CPP_DIR" -B "$BUILD_DIR" \
     -DGGML_LLAMAFILE=OFF \
     2>&1
 
-cmake --build "$BUILD_DIR" --config Release -j$(sysctl -n hw.ncpu) -- llama-cli llama-bench 2>&1
+# Build llama-completion (single-shot, used for benchmarking) and llama-bench
+# Note: llama.cpp b1+ splits old llama-cli into llama-cli (chat) + llama-completion (single-shot)
+cmake --build "$BUILD_DIR" --config Release -j$(sysctl -n hw.ncpu) -- llama-completion llama-bench 2>&1
 
 # --- Verify output ---
 LLAMA_CLI="$BUILD_DIR/bin/llama-cli"
@@ -103,23 +105,39 @@ if [ -f "$LLAMA_BENCH" ]; then
 fi
 
 # --- Find libc++_shared.so ---
-LIBCPP=$(find "$NDK_DIR" -name "libc++_shared.so" -path "*/arm64-v8a/*" | head -1)
+# NDK 29+: lives in sysroot/usr/lib/aarch64-linux-android/
+# NDK ≤27: lives in toolchains/llvm/prebuilt/.../lib64/clang/.../lib/linux/aarch64/
+# or sources/cxx-stl/.../libs/arm64-v8a/ — try all patterns
+LIBCPP=$(find "$NDK_DIR" -name "libc++_shared.so" \
+    \( -path "*/aarch64-linux-android/*" \
+    -o -path "*/arm64-v8a/*" \
+    -o -path "*/aarch64/*" \) | head -1)
+# Last-resort: any libc++_shared.so in the NDK
+if [ -z "$LIBCPP" ]; then
+    LIBCPP=$(find "$NDK_DIR" -name "libc++_shared.so" | head -1)
+fi
 if [ -n "$LIBCPP" ]; then
     echo "libc++_shared.so: $LIBCPP"
     cp "$LIBCPP" "$BUILD_DIR/bin/"
     echo "Copied to build dir for adb push"
 else
-    echo "WARNING: libc++_shared.so not found — may need to push it manually"
+    echo "WARNING: libc++_shared.so not found — may need to push it manually from:"
+    echo "  \$NDK/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so"
 fi
 
 echo ""
 echo "=== Next steps ==="
-echo "1. Push to device:"
+echo "1. Push binary + ALL shared libs to device:"
 echo "   adb push $LLAMA_CLI /data/local/tmp/"
-echo "   adb push $BUILD_DIR/bin/libc++_shared.so /data/local/tmp/"
+for so_file in "$BUILD_DIR/bin/"*.so; do
+    echo "   adb push $so_file /data/local/tmp/"
+done
 echo ""
 echo "2. Push a GGUF model:"
-echo "   adb push /path/to/model.gguf /data/local/tmp/"
+echo "   adb push local-models/llama3_2_3b_gguf/Q4_K_M.gguf /data/local/tmp/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
 echo ""
-echo "3. Run on device:"
-echo "   adb shell 'cd /data/local/tmp && LD_LIBRARY_PATH=. ./llama-cli -m model.gguf -p \"Hello\" -n 32'"
+echo "3. Smoke test:"
+echo "   ./scripts/smoke_test.sh Q4_K_M"
+echo ""
+echo "4. Full benchmark:"
+echo "   python scripts/benchmark_runner.py --all"

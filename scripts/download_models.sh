@@ -16,30 +16,41 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DEST_DIR="$PROJECT_ROOT/local-models/llama3_2_3b_gguf"
-HF_REPO="bartowski/Llama-3.2-3B-Instruct-GGUF"
-BASE_URL="https://huggingface.co/$HF_REPO/resolve/main"
+# Primary repo: bartowski (Q4_K_M, Q6_K, Q8_0, f16)
+# Fallback repo: unsloth (Q2_K, Q3_K_M — not in bartowski)
+BARTOWSKI_URL="https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main"
+UNSLOTH_URL="https://huggingface.co/unsloth/Llama-3.2-3B-Instruct-GGUF/resolve/main"
 
-declare -A VARIANTS
-VARIANTS["Q2_K"]="Llama-3.2-3B-Instruct-Q2_K.gguf"
-VARIANTS["Q3_K_M"]="Llama-3.2-3B-Instruct-Q3_K_M.gguf"
-VARIANTS["Q4_K_M"]="Llama-3.2-3B-Instruct-Q4_K_M.gguf"
-VARIANTS["Q6_K"]="Llama-3.2-3B-Instruct-Q6_K.gguf"
-VARIANTS["Q8_0"]="Llama-3.2-3B-Instruct-Q8_0.gguf"
+# Map: variant → "URL|filename" (| separator)
+declare -A VARIANT_URLS
+VARIANT_URLS["Q2_K"]="$UNSLOTH_URL|Llama-3.2-3B-Instruct-Q2_K.gguf"
+VARIANT_URLS["Q3_K_M"]="$UNSLOTH_URL|Llama-3.2-3B-Instruct-Q3_K_M.gguf"
+VARIANT_URLS["Q4_K_M"]="$BARTOWSKI_URL|Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+VARIANT_URLS["Q6_K"]="$BARTOWSKI_URL|Llama-3.2-3B-Instruct-Q6_K.gguf"
+VARIANT_URLS["Q8_0"]="$BARTOWSKI_URL|Llama-3.2-3B-Instruct-Q8_0.gguf"
+VARIANT_URLS["F16"]="$BARTOWSKI_URL|Llama-3.2-3B-Instruct-f16.gguf"
 
 FEASIBLE_VARIANTS=("Q2_K" "Q3_K_M" "Q4_K_M" "Q6_K" "Q8_0")
+# VARIANTS map for backward compatibility
+declare -A VARIANTS
+for key in "${!VARIANT_URLS[@]}"; do
+    VARIANTS["$key"]="${VARIANT_URLS[$key]##*|}"
+done
 
 mkdir -p "$DEST_DIR"
 
 download_variant() {
     local variant="$1"
-    local filename="${VARIANTS[$variant]:-}"
-    if [ -z "$filename" ]; then
+    local url_and_file="${VARIANT_URLS[$variant]:-}"
+    if [ -z "$url_and_file" ]; then
         echo "ERROR: Unknown variant '$variant'"
         return 1
     fi
 
+    local base_url="${url_and_file%%|*}"
+    local filename="${url_and_file##*|}"
     local dest="$DEST_DIR/$variant.gguf"
-    local url="$BASE_URL/$filename"
+    local url="$base_url/$filename"
 
     if [ -f "$dest" ]; then
         echo "[$variant] Already exists: $dest ($(du -sh "$dest" | cut -f1))"

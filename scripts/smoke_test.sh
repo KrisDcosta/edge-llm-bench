@@ -20,7 +20,9 @@ set -euo pipefail
 
 VARIANT="${1:-Q4_K_M}"
 DEVICE_DIR="/data/local/tmp"
-LLAMA_CLI="$DEVICE_DIR/llama-cli"
+# llama.cpp b1+ uses llama-completion for single-shot inference
+# (llama-cli is now interactive chat only)
+LLAMA_CLI="$DEVICE_DIR/llama-completion"
 MODEL="$DEVICE_DIR/Llama-3.2-3B-Instruct-${VARIANT}.gguf"
 PROMPT="Answer in one sentence: What is the capital of France?"
 N_TOKENS=32
@@ -63,6 +65,7 @@ OUTPUT=$(adb shell \
     --temp 0.0 \
     --seed 42 \
     -t 4 \
+    -no-cnv \
     -p \"$PROMPT\" 2>&1")
 
 echo "=== Raw Output ==="
@@ -70,9 +73,10 @@ echo "$OUTPUT"
 echo ""
 
 # Extract and print key metrics
+# llama.cpp b1+ uses common_perf_print: prefix (older: llama_perf_context_print:)
 echo "=== Key Metrics ==="
 echo "$OUTPUT" | grep -E "load time|prompt eval time|eval time|total time" | \
-    sed 's/llama_perf_context_print://' | sed 's/^[[:space:]]*/  /'
+    sed 's/common_perf_print://;s/llama_perf_context_print://' | sed 's/^[[:space:]]*/  /'
 
 # Check if timings were found
 if echo "$OUTPUT" | grep -q "eval time"; then
