@@ -1,0 +1,86 @@
+# Quality evaluation prompt suite — v1
+# 15 factual QA prompts with deterministic ground-truth answers.
+# Used for exact-match accuracy scoring across GGUF quantization levels.
+#
+# eval: exact_contains — answer string must appear in model output (case-insensitive)
+# All prompts instruct the model to answer with a single short token/number/word
+# to minimise output variability and maximise score reliability.
+
+prompts:
+  # ---- Mathematics (5 prompts) ----
+  - id: qa_math_001
+    prompt: "Answer with only the number and nothing else. What is 17 multiplied by 8?"
+    answer: "136"
+    category: math
+
+  - id: qa_math_002
+    prompt: "Answer with only the number and nothing else. What is the square root of 144?"
+    answer: "12"
+    category: math
+
+  - id: qa_math_003
+    prompt: "Answer with only the number and nothing else. What is 2 to the power of 10?"
+    answer: "1024"
+    category: math
+
+  - id: qa_math_004
+    prompt: "Answer with only the number and nothing else. What is 15 percent of 200?"
+    answer: "30"
+    category: math
+
+  - id: qa_math_005
+    prompt: "Answer with only the number and nothing else. What is 2 times 3 times 7?"
+    answer: "42"
+    category: math
+
+  # ---- Geography (5 prompts) ----
+  - id: qa_geo_001
+    prompt: "Answer with only the city name and nothing else. What is the capital city of Japan?"
+    answer: "Tokyo"
+    category: geography
+
+  - id: qa_geo_002
+    prompt: "Answer with only the country name and nothing else. Which country has the largest land area in the world?"
+    answer: "Russia"
+    category: geography
+
+  - id: qa_geo_003
+    prompt: "Answer with only the city name and nothing else. What is the capital city of Australia?"
+    answer: "Canberra"
+    category: geography
+
+  - id: qa_geo_004
+    prompt: "Answer with only the river name and nothing else. What is the longest river in the world?"
+    answer: "Nile"
+    category: geography
+
+  - id: qa_geo_005
+    prompt: "Answer with only the number and nothing else. How many continents are there on Earth?"
+    answer: "7"
+    category: geography
+
+  # ---- History and Science (5 prompts) ----
+  - id: qa_hist_001
+    prompt: "Answer with only the year and nothing else. In what year was the first iPhone released?"
+    answer: "2007"
+    category: history
+
+  - id: qa_sci_001
+    prompt: "Answer with only the chemical symbol and nothing else. What is the chemical symbol for gold?"
+    answer: "Au"
+    category: science
+
+  - id: qa_sci_002
+    prompt: "Answer with only the number and nothing else. How many planets are in our solar system?"
+    answer: "8"
+    category: science
+
+  - id: qa_sci_003
+    prompt: "Answer with only the planet name and nothing else. Which planet is closest to the Sun?"
+    answer: "Mercury"
+    category: science
+
+  - id: qa_hist_002
+    prompt: "Answer with only the year and nothing else. In what year did World War II end?"
+    answer: "1945"
+    category: history
