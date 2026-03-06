@@ -46,6 +46,12 @@ android {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
+        // Required when android:extractNativeLibs="true" — ensures .so files are
+        // stored uncompressed in the APK so Android can extract them on install,
+        // allowing ggml_backend_load_all_from_path() to dlopen them at runtime.
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 }
 
