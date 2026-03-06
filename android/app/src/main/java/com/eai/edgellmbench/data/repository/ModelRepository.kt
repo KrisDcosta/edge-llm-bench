@@ -2,6 +2,8 @@ package com.eai.edgellmbench.data.repository
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
+import com.arm.aichat.InferenceEngine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -14,11 +16,12 @@ import java.io.FileOutputStream
  */
 object ModelRepository {
 
+    private const val TAG = "ModelRepository"
     private const val MODEL_DIR = "models"
 
     /**
      * The directory where the benchmark pipeline (push_models_to_device.sh)
-     * places GGUF files.  /data/local/tmp/ is world-readable on Android ≥ 5,
+     * places GGUF files.  /data/local/tmp/ is world-readable on Android,
      * so a debug APK can open files there directly without copying.
      */
     private const val DEVICE_TMP = "/data/local/tmp"
@@ -39,6 +42,11 @@ object ModelRepository {
     /**
      * Loads a model directly from an absolute path (e.g. /data/local/tmp/).
      * No copy is needed — the engine opens the file in-place.
+     *
+     * Handles engine state automatically:
+     *  - Initialized  → loadModel() directly (happy path)
+     *  - ModelReady   → cleanUp() (unloads previous model) then loadModel()
+     *  - Error        → cleanUp() (resets state) then loadModel()
      */
     suspend fun loadFromPath(
         context: Context,
@@ -46,7 +54,9 @@ object ModelRepository {
         variant: String,
     ): String = withContext(Dispatchers.IO) {
         InferenceRepository.markLoading(variant)
-        InferenceRepository.getEngine(context).loadModel(path)
+        val engine = InferenceRepository.getEngine(context)
+        resetEngineIfNeeded(engine)
+        engine.loadModel(path)
         InferenceRepository.markLoaded(variant, path)
         File(path).name
     }
@@ -65,11 +75,36 @@ object ModelRepository {
         variant: String,
     ): String = withContext(Dispatchers.IO) {
         InferenceRepository.markLoading(variant)
-
+        val engine = InferenceRepository.getEngine(context)
+        resetEngineIfNeeded(engine)
         val file = copyUriToLocal(context, uri)
-        InferenceRepository.getEngine(context).loadModel(file.absolutePath)
+        engine.loadModel(file.absolutePath)
         InferenceRepository.markLoaded(variant, file.absolutePath)
         file.name
+    }
+
+    /**
+     * If the engine is in Error or ModelReady state, call cleanUp() to reset
+     * it back to Initialized before attempting a new loadModel().
+     *
+     * loadModel() requires state == Initialized; calling it in any other state
+     * throws "Cannot load model in <State>!".
+     */
+    private fun resetEngineIfNeeded(engine: InferenceEngine) {
+        val state = engine.state.value
+        when (state) {
+            is InferenceEngine.State.Error -> {
+                Log.w(TAG, "Engine in Error state — resetting via cleanUp() before reload")
+                engine.cleanUp()
+            }
+            is InferenceEngine.State.ModelReady -> {
+                Log.i(TAG, "Engine has a model loaded — unloading via cleanUp() before reload")
+                engine.cleanUp()
+            }
+            else -> {
+                Log.d(TAG, "Engine state: ${state.javaClass.simpleName} — proceeding directly")
+            }
+        }
     }
 
     /** Lists all .gguf files previously copied to local storage. */
