@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31.6)
+cmake_minimum_required(VERSION 3.10.2)
 
 project("ai-chat" VERSION 1.0.0 LANGUAGES C CXX)
 
@@ -30,7 +30,9 @@ if(DEFINED ANDROID_ABI)
     endif()
 endif()
 
-set(LLAMA_SRC ${CMAKE_CURRENT_LIST_DIR}/../../../../../../)
+# 5 levels up from android/lib/src/main/cpp → project root (291_EAI)
+# then into vendor/llama.cpp
+set(LLAMA_SRC ${CMAKE_CURRENT_LIST_DIR}/../../../../../vendor/llama.cpp)
 add_subdirectory(${LLAMA_SRC} build-llama)
 
 add_library(${CMAKE_PROJECT_NAME} SHARED
