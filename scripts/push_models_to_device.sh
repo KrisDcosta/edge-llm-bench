@@ -15,7 +15,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 BUILD_DIR="$PROJECT_ROOT/vendor/llama.cpp/build-android/bin"
 MODEL_DIR="$PROJECT_ROOT/local-models/llama3_2_3b_gguf"
-DEVICE_DIR="/data/local/tmp"
+DEVICE_DIR="/data/local/tmp"       # used by benchmark pipeline + app auto-discovery
+DEVICE_DOWNLOAD="/sdcard/Download" # visible to Android file picker as fallback
 
 # Find adb
 ADB="${ADB:-}"
@@ -97,6 +98,13 @@ push_model() {
     echo -n "  [$variant] Pushing $(du -sh "$local_path" | cut -f1) → $device_path ... "
     "$ADB" push "$local_path" "$device_path"
     echo "OK"
+
+    # Also copy to /sdcard/Download/ so Android file picker can see it
+    # (the app's auto-discovery reads from /data/local/tmp/ directly,
+    #  but the file picker Browse button needs the file in user-accessible storage)
+    local download_path="$DEVICE_DOWNLOAD/Llama-3.2-3B-Instruct-$variant.gguf"
+    echo -n "  [$variant] Symlinking to Downloads (for file picker) ... "
+    "$ADB" shell "cp '$device_path' '$download_path' 2>/dev/null || true" && echo "OK" || echo "SKIP (storage not writable)"
 }
 
 # --- Parse arguments ---
