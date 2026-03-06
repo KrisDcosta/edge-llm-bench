@@ -339,6 +339,15 @@
         },
         "temperature_c": {
           "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "power_mw_mean": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "energy_mj": {
+          "$ref": "#/$defs/nullable_non_negative_number"
+        },
+        "energy_per_1k_tokens_mj": {
+          "$ref": "#/$defs/nullable_non_negative_number"
         }
       }
     },
@@ -428,7 +437,10 @@
             "type": "object",
             "properties": {
               "artifact_hash": {
-                "$ref": "#/$defs/non_empty_string"
+                "anyOf": [
+                  {"$ref": "#/$defs/non_empty_string"},
+                  {"type": "null"}
+                ]
               }
             }
           },

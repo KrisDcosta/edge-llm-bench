@@ -157,3 +157,78 @@ experiments:
     prompt_set_id: prompt-suite-v1
     status: planned
     notes: "Expected OOM on 6GB device. Attempt and document."
+
+  # ===================================================================
+  # Phase B Extended Experiments — Novel contributions for paper
+  # ===================================================================
+
+  # --- Thread Count Scaling Sweep (Q4_K_M, ctx=256) ---
+  # Pixel 6a: Tensor G2 = 2× Cortex-X1 (big) + 2× Cortex-A76 + 4× Cortex-A55 (LITTLE)
+  # Tests ARM big.LITTLE parallelism scaling behaviour
+  - id: q4km-threads-1
+    quant_bits: 4
+    gguf_variant: Q4_K_M
+    context_length: 256
+    output_length: 128
+    threads: 1
+    warmups: 1
+    trials: 3
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Thread sweep: 1 thread baseline"
+  - id: q4km-threads-2
+    quant_bits: 4
+    gguf_variant: Q4_K_M
+    context_length: 256
+    output_length: 128
+    threads: 2
+    warmups: 1
+    trials: 3
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Thread sweep: 2 threads"
+  - id: q4km-threads-4
+    quant_bits: 4
+    gguf_variant: Q4_K_M
+    context_length: 256
+    output_length: 128
+    threads: 4
+    warmups: 1
+    trials: 3
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Thread sweep: 4 threads (default — reference point)"
+  - id: q4km-threads-8
+    quant_bits: 4
+    gguf_variant: Q4_K_M
+    context_length: 256
+    output_length: 128
+    threads: 8
+    warmups: 1
+    trials: 3
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Thread sweep: 8 threads (all cores including LITTLE cores)"
+
+  # --- Extended Context to 2048 (Q2_K + Q4_K_M) ---
+  # Tests whether context-invariant throughput finding holds at longer sequences
+  - id: q2k-ctx2048
+    quant_bits: 2
+    gguf_variant: Q2_K
+    context_length: 2048
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Extended context: validate context-invariance at 2048 tokens"
+  - id: q4km-ctx2048
+    quant_bits: 4
+    gguf_variant: Q4_K_M
+    context_length: 2048
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Extended context: validate context-invariance at 2048 tokens"
