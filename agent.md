@@ -10,6 +10,7 @@ Optimize for: **correctness, simplicity, reproducibility, and clear documentatio
 - Do not introduce new frameworks/tools unless strictly necessary.
 - Prefer a few clear scripts over complex orchestration.
 - Every change should move the repo toward: **(1) working runner, (2) trustworthy logs, (3) reproducible plots, (4) stable demo**.
+- The first execution target is one working Android baseline path plus one trustworthy JSON record before expanding scope.
 
 ---
 
@@ -32,6 +33,7 @@ Before adding helpers:
 ## No silent failures
 - Never silently skip measurements.
 - Never silently fallback when a config fails (e.g., 2-bit quant).
+- Treat model artifact export/load readiness failures as explicit blockers; surface them clearly instead of papering over them.
 - If something fails:
   - surface the error clearly
   - log it as a result when appropriate
@@ -46,6 +48,8 @@ Allowed components only:
 3. config-driven runner producing JSONL
 4. analysis scripts generating plots from logs
 5. minimal Android UI that uses the same wrapper and exports logs
+
+For the first implementation milestone, it is acceptable to stop after the inference wrapper, instrumentation, and single-run logging are working; the config runner and UI come later.
 
 Do NOT add:
 - databases
@@ -83,6 +87,8 @@ A subtask is done only when:
 - outputs are produced (logs/plots/UI)
 - a short verification step is included (command to run)
 - docs are updated briefly (README or relevant .md)
+
+For early milestones, a subtask can be considered done when it satisfies that phase gate (for example: smoke test + one trustworthy JSON record), even if later project phases are still pending.
 
 ---
 

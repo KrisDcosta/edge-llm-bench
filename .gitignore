@@ -7,11 +7,12 @@ __pycache__/
 .venv/
 .env
 
-# Results and artifacts
-results/*
-!results/.gitkeep
-artifacts/
-models/
+# Results and large artifacts (manifest.yaml IS tracked; model files are not)
+results/
+/models/
+/local-models/
+# Un-ignore Android UI subdirectory that happens to be named "models"
+!android/app/src/main/java/com/eai/edgellmbench/ui/models/
 *.pt
 *.pte
 *.bin
@@ -19,7 +20,9 @@ models/
 *.onnx
 
 # Android / Gradle
+android/.idea/
 android/.gradle/
+android/build/
 android/**/build/
 *.apk
 *.aab
@@ -27,3 +30,4 @@ local.properties
 
 # Logs
 *.log
+vendor/

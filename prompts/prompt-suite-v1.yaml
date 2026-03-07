@@ -1,0 +1,22 @@
+suite_id: prompt-suite-v1
+version: 1
+default_smoke_test_prompt_id: qa_short_001
+prompts:
+  - id: qa_short_001
+    category: factual_qa
+    prompt: |
+      Answer with only the capital city name.
+
+      Question: What is the capital of France?
+  - id: summarize_short_001
+    category: summarization
+    prompt: |
+      Summarize the following passage in one sentence.
+
+      Passage: ExecuTorch runs machine learning models directly on a device so inference can stay local and work without a network connection.
+  - id: reasoning_short_001
+    category: reasoning
+    prompt: |
+      Answer with only the number.
+
+      A recipe uses 3 apples for each pie. How many apples are needed for 4 pies?

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Base XML theme — Compose applies MaterialTheme dynamically at runtime.
+        Must be Material3 so the Activity window chrome matches.
+    -->
+    <style name="Theme.EdgeLLMBench" parent="Theme.Material3.DayNight.NoActionBar" />
+</resources>
