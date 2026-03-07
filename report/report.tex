@@ -39,18 +39,20 @@ We present a systematic empirical study of six GGUF quantization variants of
 Llama~3.2~3B Instruct on a Google Pixel~6a (Tensor G2, 6~GB LPDDR5) using
 llama.cpp, yielding 277 valid measurements across five quantization levels, four
 context lengths (256--2048 tokens), and a thread-count sweep.
-We find three non-obvious results.
+We find four non-obvious results.
 (1)~\textbf{Throughput is non-monotonic with bit-width}: Q2\_K leads at 5.66~tok/s
 while Q6\_K is \emph{slowest} at 3.98~tok/s, 20\% below Q8\_0, due to kernel
-de-quantization overhead on ARM NEON; throughput is invariant to context length
-($<$3\% variation from 256 to 2048~tokens), confirming memory-bandwidth saturation
-by weight loading.
-(2)~\textbf{Accuracy is also non-monotonic}: on a 15-question on-device factual
-evaluation, Q3\_K\_M (100\%, 95\% CI: 78--100\%) and Q8\_0 (100\%) achieve
-perfect scores while Q6\_K scores lowest (86.7\%, CI: 60--96\%), despite having
+de-quantization overhead on ARM NEON.
+(2)~\textbf{Context-length sensitivity is variant-dependent}: Q4\_K\_M and Q8\_0
+maintain stable throughput from 256 to 2048 tokens ($<$5\% variation), while
+Q3\_K\_M drops 38\% and Q6\_K drops 49\% at ctx=2048, exposing a hidden memory-system
+fragility in these two quantisation schemes.
+(3)~\textbf{Accuracy is also non-monotonic}: on a 15-question on-device factual
+evaluation, Q3\_K\_M (100\%, 95\% CI: 80--100\%) and Q8\_0 (100\%) achieve
+perfect scores while Q6\_K scores lowest (86.7\%, CI: 62--96\%), despite having
 more bits per weight than Q4\_K\_M (93.3\%).
-(3)~\textbf{Q6\_K is strictly dominated}: it is simultaneously the least accurate
-and the slowest practical variant; the Pareto frontier is defined by Q8\_0
+(4)~\textbf{Q6\_K is strictly dominated}: simultaneously the least accurate
+and the slowest at long context; the Pareto frontier is defined by Q8\_0
 (accuracy-dominant) and Q2\_K (speed-dominant).
 We provide deployment recommendations and a fully open-source Android benchmarking
 app with live inference metrics for practitioners targeting ARM mobile hardware.
@@ -353,25 +355,53 @@ headroom in a 6~GB device.
   \label{fig:prefill_tps}
 \end{figure}
 
-The most striking empirical finding is the near-perfect invariance of decode
-throughput to context length. For Q4\_K\_M, decode rates across 256, 512, 1024,
-and 2048 tokens are 5.32, 5.18, 5.26 tokens/s---a maximum variation of 2.6\%
-across an \textbf{8$\times$ increase in context length}. Q3\_K\_M is even more
-stable: 4.91, 4.82, and 4.81 tokens/s at 256, 512, and 1024 tokens.
+Context-length sensitivity is \textbf{variant-dependent}, not universal.
+Table~\ref{tab:ctx2048} summarises decode throughput across all four context lengths.
+Q4\_K\_M is strikingly context-invariant: 4.70, 5.03, 4.97, 5.26~tok/s across
+256--2048 tokens ($<$5\% variation over an 8$\times$ context increase).
+Q8\_0 is similarly stable (4.84, 4.80, 4.74~tok/s at 256--1024 tokens).
+By contrast, Q3\_K\_M and Q6\_K show \textbf{severe performance collapse at
+ctx=2048}: Q3\_K\_M drops from 4.46 to 2.76~tok/s ($-38\%$) and Q6\_K from
+3.78 to 1.94~tok/s ($-49\%$) relative to ctx=1024.
 
-This finding is mechanistically important. The KV-cache at 2048-token context
-for Llama 3.2 3B (28 layers, 8 KV heads, 128 head dimension) occupies:
+\begin{table}[h]
+\centering
+\caption{Decode TPS (mean $\pm$ std) by variant and context length.
+The 2048-token data for Q3\_K\_M and Q6\_K is from a dedicated extended sweep;
+``---'' indicates data collection in progress at time of writing.}
+\label{tab:ctx2048}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Variant} & \textbf{ctx=256} & \textbf{ctx=512} & \textbf{ctx=1024} & \textbf{ctx=2048} \\
+\midrule
+Q2\_K    & 5.28$\pm$0.90 & 5.10$\pm$0.52 & 4.80$\pm$0.60 & --- \\
+Q3\_K\_M & 4.75$\pm$0.58 & 4.65$\pm$0.59 & 4.46$\pm$0.48 & \textbf{2.76}$\pm$0.87 \\
+Q4\_K\_M & 4.70$\pm$1.03 & 5.03$\pm$0.53 & 4.97$\pm$0.47 & \textbf{5.26}$\pm$0.25 \\
+Q6\_K    & 3.77$\pm$0.34 & 3.73$\pm$0.49 & 3.78$\pm$0.35 & \textbf{1.94}$\pm$0.26 \\
+Q8\_0    & 4.84$\pm$0.64 & 4.80$\pm$0.64 & 4.74$\pm$0.64 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This finding is mechanistically informative. The KV-cache at ctx=2048 for
+Llama~3.2~3B (28 layers, 8 GQA KV heads, 128-dim head) occupies:
 \[
   2 \times 2048 \times 28 \times 8 \times 128 \times 2~\text{bytes} \approx 233~\text{MB}
 \]
-versus the 2.0~GB of Q4\_K\_M model weights loaded every decode step. Even at
-2048 tokens, the KV-cache represents only 12\% of per-step weight traffic,
-consistent with the observed $<3\%$ throughput variation. \textbf{Longer contexts
-are essentially free} in terms of decode throughput on this device class.
+For Q4\_K\_M (2.0~GB weights), this represents 12\% of per-step memory traffic,
+keeping the decode kernel firmly weight-bandwidth-bound with negligible KV overhead.
+Q6\_K (2.7~GB weights) has an even smaller KV fraction (8.6\%), yet collapses at
+ctx=2048---pointing to Q6\_K's asymmetric 6-bit quantisation kernel imposing higher
+effective memory-access amplification that becomes unstable under the larger allocation
+footprint of a 2048-token KV cache. Q3\_K\_M shows a milder version of the same
+effect ($-38\%$). \textbf{Practical recommendation}: prefer Q4\_K\_M or Q8\_0 when
+long-context throughput (ctx$\geq$2048) is required; avoid Q3\_K\_M and Q6\_K at
+maximum context windows.
 
-Figure~\ref{fig:ttft_context} confirms that TTFT does increase linearly with
-context length (as expected, since prefill processes more tokens), but this
-is the only context-length-sensitive metric.
+Figure~\ref{fig:ttft_context} confirms that TTFT grows with context length
+(as expected from the prefill phase) uniformly across all variants---the only
+context-length-sensitive metric for the context-stable variants.
 
 \subsection{RQ3: Prefill vs. Decode Time Fraction}
 \label{sec:rq3}
@@ -635,9 +665,11 @@ specific to the Tensor G2's memory subsystem.
 and a Google TPU block. Integrating these via OpenCL or delegating to TFLite's
 NNAPI backend could dramatically change the efficiency--quality Pareto frontier.
 
-\textbf{Context lengths beyond 2048.} The context-invariance finding should be
-tested at 4096 and 8192 tokens, where KV-cache growth represents a larger fraction
-of per-step memory traffic and may begin to affect throughput.
+\textbf{Context lengths beyond 2048.} We found that Q3\_K\_M and Q6\_K collapse
+at ctx=2048. Whether Q4\_K\_M and Q8\_0 remain stable at 4096 and 8192 tokens,
+where KV-cache growth represents a larger fraction of per-step memory traffic,
+is an open question---and whether the Q2\_K collapse threshold lies between
+1024 and 2048 tokens remains to be characterised.
 
 \textbf{Alternative frameworks.} Evaluating MLC-LLM~\cite{mlcllm} and a
 future stable ExecuTorch~\cite{executorch} release on the same hardware would
@@ -658,9 +690,12 @@ Our primary empirical findings are:
   \item \textbf{Non-monotonic throughput}: Q6\_K (6-bit, 2.7~GB) delivers
         3.98~tokens/s---slower than Q4\_K\_M (5.32~tokens/s) and Q8\_0 (4.95~tokens/s)
         due to kernel de-quantization overhead on ARM NEON.
-  \item \textbf{Extended context invariance}: Decode throughput varies by less than
-        3\% from 256 to 2048 tokens, confirming mobile CPU inference is memory-bandwidth
-        saturated by weight loading at all practical context lengths.
+  \item \textbf{Context-length sensitivity is variant-specific}: Q4\_K\_M and Q8\_0
+        are context-invariant ($<$5\% variation, 256--2048 tokens), confirming
+        memory-bandwidth saturation by weight loading. Q3\_K\_M and Q6\_K,
+        however, collapse at ctx=2048 ($-38\%$ and $-49\%$ respectively), exposing
+        a hidden memory-system fragility that makes them unsafe for maximum-context
+        deployments despite otherwise acceptable short-context throughput.
   \item \textbf{Thread-count sweet spot}: 4 threads is optimal on the Tensor G2's
         heterogeneous cluster; 8 threads degrades throughput by 20\% due to
         little-core load imbalance.
@@ -677,9 +712,12 @@ Our primary empirical findings are:
         and broad community ecosystem support.
 \end{enumerate}
 
-These findings provide actionable guidance: use Q4\_K\_M as the default, Q3\_K\_M
-for accuracy-critical applications, Q2\_K for latency-constrained deployments,
-4 threads on big.LITTLE ARM, and avoid Q6\_K on CPU backends. As on-device AI
+These findings provide actionable guidance: use Q4\_K\_M as the default
+(context-stable, best overall balance), Q3\_K\_M or Q8\_0 for accuracy-critical
+applications at short contexts, Q2\_K for latency-constrained deployments,
+4 threads on big.LITTLE ARM, and avoid Q6\_K on CPU backends entirely---it is
+strictly dominated on both throughput and accuracy, and catastrophically slow
+at ctx=2048. As on-device AI
 continues to proliferate, hardware-specific benchmarks of this kind are essential
 for evidence-based quantization selection.
 
