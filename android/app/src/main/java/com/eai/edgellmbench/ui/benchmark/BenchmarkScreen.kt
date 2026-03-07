@@ -45,11 +45,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.eai.edgellmbench.ui.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BenchmarkScreen(viewModel: BenchmarkViewModel = viewModel()) {
+fun BenchmarkScreen(
+    viewModel: BenchmarkViewModel = viewModel(),
+    settingsVm: SettingsViewModel = viewModel(),
+) {
     val uiState by viewModel.uiState.collectAsState()
+    val settingsState by settingsVm.uiState.collectAsState()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -58,6 +63,16 @@ fun BenchmarkScreen(viewModel: BenchmarkViewModel = viewModel()) {
             snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
             viewModel.dismissError()
         }
+    }
+
+    // Build the config description string from live settings
+    val configText = buildString {
+        val warmup = settingsState.warmupRuns
+        val bench  = settingsState.benchRuns
+        append("$warmup warmup + $bench trial${if (bench != 1) "s" else ""}")
+        append(" · ${BENCH_PROMPT_COUNT} prompts")
+        append(" · ${settingsState.outputLength} tokens")
+        append(" · ctx=${settingsState.contextLength}")
     }
 
     Scaffold(
@@ -71,8 +86,8 @@ fun BenchmarkScreen(viewModel: BenchmarkViewModel = viewModel()) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Status card
-            BenchmarkStatusCard(uiState = uiState)
+            // Status card — shows live settings
+            BenchmarkStatusCard(uiState = uiState, configText = configText)
 
             // Control buttons
             Row(
@@ -146,8 +161,11 @@ fun BenchmarkScreen(viewModel: BenchmarkViewModel = viewModel()) {
     }
 }
 
+// Number of benchmark prompts (kept in sync with BenchmarkViewModel)
+private const val BENCH_PROMPT_COUNT = 3
+
 @Composable
-private fun BenchmarkStatusCard(uiState: BenchmarkUiState) {
+private fun BenchmarkStatusCard(uiState: BenchmarkUiState, configText: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -166,7 +184,7 @@ private fun BenchmarkStatusCard(uiState: BenchmarkUiState) {
             Text("Suite", style = MaterialTheme.typography.labelSmall,
                  color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
-                text = "1 warmup + 3 trials · 3 prompts · 128 tokens · ctx=512",
+                text = configText,
                 style = MaterialTheme.typography.bodySmall,
             )
             Spacer(Modifier.height(4.dp))

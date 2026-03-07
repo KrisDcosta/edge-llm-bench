@@ -89,6 +89,9 @@ internal class InferenceEngineImpl private constructor(
     private external fun prepare(): Int
 
     @FastNative
+    private external fun configureAndPrepare(nCtx: Int, nThreads: Int, temperature: Float, seed: Long): Int
+
+    @FastNative
     private external fun systemInfo(): String
 
     @FastNative
@@ -182,6 +185,28 @@ internal class InferenceEngineImpl private constructor(
                 throw e
             }
         }
+
+    /**
+     * Reconfigure context, thread-count, temperature and seed without reloading the model.
+     * Recreates the llama_context and sampler in-place; resets KV cache / chat positions.
+     */
+    override suspend fun configure(
+        contextLength: Int,
+        threadCount:   Int,
+        temperature:   Float,
+        seed:          Long,
+    ) = withContext(llamaDispatcher) {
+        check(_state.value is InferenceEngine.State.ModelReady) {
+            "Cannot configure in ${_state.value.javaClass.simpleName}!"
+        }
+        Log.i(TAG, "Configuring engine: ctx=$contextLength threads=$threadCount temp=$temperature seed=$seed")
+        val result = configureAndPrepare(contextLength, threadCount, temperature, seed)
+        if (result != 0) throw IOException("configureAndPrepare failed (code $result)")
+        // Fresh context — allow system prompt again if needed
+        _readyForSystemPrompt = true
+        Log.i(TAG, "Engine reconfigured successfully")
+        Unit
+    }
 
     /**
      * Process the plain text system prompt

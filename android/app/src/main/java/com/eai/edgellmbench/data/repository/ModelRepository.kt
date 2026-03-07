@@ -4,7 +4,11 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.arm.aichat.InferenceEngine
+import com.eai.edgellmbench.data.SettingsDefaults
+import com.eai.edgellmbench.data.SettingsKeys
+import com.eai.edgellmbench.data.settingsDataStore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -57,6 +61,7 @@ object ModelRepository {
         val engine = InferenceRepository.getEngine(context)
         resetEngineIfNeeded(engine)
         engine.loadModel(path)
+        applyCurrentSettings(context, engine)
         InferenceRepository.markLoaded(variant, path)
         File(path).name
     }
@@ -79,8 +84,27 @@ object ModelRepository {
         resetEngineIfNeeded(engine)
         val file = copyUriToLocal(context, uri)
         engine.loadModel(file.absolutePath)
+        applyCurrentSettings(context, engine)
         InferenceRepository.markLoaded(variant, file.absolutePath)
         file.name
+    }
+
+    /**
+     * Reads current inference settings from DataStore and applies them to the engine
+     * via configure(). Non-fatal — logs a warning and continues with default params if it fails.
+     */
+    private suspend fun applyCurrentSettings(context: Context, engine: InferenceEngine) {
+        try {
+            val prefs = context.settingsDataStore.data.first()
+            engine.configure(
+                contextLength = prefs[SettingsKeys.CONTEXT_LENGTH] ?: SettingsDefaults.CONTEXT_LENGTH,
+                threadCount   = prefs[SettingsKeys.THREAD_COUNT]   ?: SettingsDefaults.THREAD_COUNT,
+                temperature   = prefs[SettingsKeys.TEMPERATURE]    ?: SettingsDefaults.TEMPERATURE,
+                seed          = (prefs[SettingsKeys.SEED]          ?: SettingsDefaults.SEED).toLong(),
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "applyCurrentSettings: non-fatal failure — ${e.message}")
+        }
     }
 
     /**

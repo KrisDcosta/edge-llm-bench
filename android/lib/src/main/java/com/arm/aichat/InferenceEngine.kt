@@ -31,6 +31,24 @@ interface InferenceEngine {
     fun sendUserPrompt(message: String, predictLength: Int = DEFAULT_PREDICT_LENGTH): Flow<String>
 
     /**
+     * Reconfigures inference parameters without reloading model weights.
+     *
+     * Recreates the llama context and sampler in-place with the new settings.
+     * This resets the conversation KV cache — subsequent inference starts fresh.
+     *
+     * @param contextLength KV-cache window in tokens (default: 512)
+     * @param threadCount   CPU threads; -1 = auto-detect (big + mid cores minus headroom)
+     * @param temperature   Sampling temperature 0.0–1.0 (default: 0.3)
+     * @param seed          RNG seed for reproducibility; 42 = fixed, 0xFFFFFFFFL = random
+     */
+    suspend fun configure(
+        contextLength: Int   = 512,
+        threadCount:   Int   = -1,
+        temperature:   Float = 0.3f,
+        seed:          Long  = 42L,
+    )
+
+    /**
      * Runs a benchmark with the specified parameters.
      */
     suspend fun bench(pp: Int, tg: Int, pl: Int, nr: Int = 1): String

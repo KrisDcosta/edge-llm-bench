@@ -8,10 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -31,15 +35,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-// BuildConfig is generated when buildFeatures { buildConfig = true } is set
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
+    val localContext = LocalContext.current
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Settings") }) },
@@ -132,6 +137,83 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                         textStyle = MaterialTheme.typography.bodyMedium,
                     )
                 }
+
+                HorizontalDivider()
+
+                // Apply & Reconfigure — wires thread count, temperature, seed to the live engine
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Apply to live engine",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        uiState.applyResult?.let { result ->
+                            Text(
+                                text = result,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (result.startsWith("Error"))
+                                    MaterialTheme.colorScheme.error
+                                else
+                                    MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                        if (uiState.applyResult == null) {
+                            Text(
+                                "Resets KV cache — clears conversation",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    if (uiState.isApplying) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    Button(
+                        onClick = { viewModel.applySettings(localContext) },
+                        enabled = !uiState.isApplying,
+                    ) {
+                        Text("Apply")
+                    }
+                }
+            }
+
+            // ── Benchmark settings ────────────────────────────────────────────
+
+            SettingsSection(title = "Benchmark") {
+                // Warmup runs
+                DropdownSetting(
+                    label = "Warmup runs",
+                    options = listOf(0, 1, 2),
+                    selected = uiState.warmupRuns,
+                    onSelect = { viewModel.setWarmupRuns(it) },
+                    displayFn = { "$it run${if (it != 1) "s" else ""}" },
+                )
+                Text(
+                    text = "Warmup runs are excluded from metrics",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                HorizontalDivider()
+
+                // Benchmark trials
+                DropdownSetting(
+                    label = "Benchmark trials",
+                    options = listOf(3, 5, 10),
+                    selected = uiState.benchRuns,
+                    onSelect = { viewModel.setBenchRuns(it) },
+                    displayFn = { "$it trial${if (it != 1) "s" else ""}" },
+                )
+                Text(
+                    text = "More trials → lower variance, longer run time",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
             // ── Extensibility stubs ───────────────────────────────────────────

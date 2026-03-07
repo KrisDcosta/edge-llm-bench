@@ -8,6 +8,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.eai.edgellmbench.BenchmarkLogger
 import com.eai.edgellmbench.InferenceMetrics
+import com.eai.edgellmbench.data.SettingsDefaults
+import com.eai.edgellmbench.data.SettingsKeys
+import com.eai.edgellmbench.data.settingsDataStore
 import com.eai.edgellmbench.data.repository.InferenceRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -17,6 +20,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -62,10 +66,6 @@ class BenchmarkViewModel(application: Application) : AndroidViewModel(applicatio
     private val logger by lazy { BenchmarkLogger(application) }
 
     companion object {
-        private const val WARMUP_RUNS = 1
-        private const val BENCH_RUNS  = 3
-        private const val N_TOKENS    = 128
-        private const val CTX_LENGTH  = 512
         private const val COOLDOWN_MS = 2_000L
 
         private val BENCH_PROMPTS = listOf(
@@ -97,34 +97,42 @@ class BenchmarkViewModel(application: Application) : AndroidViewModel(applicatio
 
         benchJob = viewModelScope.launch(Dispatchers.Default) {
             engineReady.await()
+
+            // Read current settings from DataStore at run-time
+            val settings   = getApplication<Application>().settingsDataStore.data.first()
+            val nTokens    = settings[SettingsKeys.OUTPUT_LENGTH]  ?: SettingsDefaults.OUTPUT_LENGTH
+            val ctxLen     = settings[SettingsKeys.CONTEXT_LENGTH] ?: SettingsDefaults.CONTEXT_LENGTH
+            val warmupRuns = settings[SettingsKeys.WARMUP_RUNS]    ?: SettingsDefaults.WARMUP_RUNS
+            val benchRuns  = settings[SettingsKeys.BENCH_RUNS]     ?: SettingsDefaults.BENCH_RUNS
+
             val engine  = InferenceRepository.getEngine(getApplication())
             val variant = _uiState.value.activeVariant
-            val total   = WARMUP_RUNS + BENCH_RUNS
+            val total   = warmupRuns + benchRuns
 
             try {
                 var trialIdx = 0
 
                 // Warmup runs
-                repeat(WARMUP_RUNS) { w ->
+                repeat(warmupRuns) { w ->
                     val (promptId, promptText) = BENCH_PROMPTS[0]
-                    updateStatus("Warmup ${w + 1}/$WARMUP_RUNS", trialIdx, total)
-                    runTrial(engine, promptId, promptText, variant, trialIdx, isWarmup = true)
+                    updateStatus("Warmup ${w + 1}/$warmupRuns", trialIdx, total)
+                    runTrial(engine, promptId, promptText, variant, trialIdx, isWarmup = true, nTokens, ctxLen)
                     trialIdx++
                     delay(COOLDOWN_MS)
                 }
 
                 // Recorded runs
-                repeat(BENCH_RUNS) { b ->
+                repeat(benchRuns) { b ->
                     val (promptId, promptText) = BENCH_PROMPTS[b % BENCH_PROMPTS.size]
-                    updateStatus("Trial ${b + 1}/$BENCH_RUNS", trialIdx, total)
-                    val result = runTrial(engine, promptId, promptText, variant, trialIdx, isWarmup = false)
+                    updateStatus("Trial ${b + 1}/$benchRuns", trialIdx, total)
+                    val result = runTrial(engine, promptId, promptText, variant, trialIdx, isWarmup = false, nTokens, ctxLen)
                     result?.let { r ->
                         withContext(Dispatchers.Main) {
                             _uiState.update { it.copy(results = it.results + r) }
                         }
                     }
                     trialIdx++
-                    if (b < BENCH_RUNS - 1) delay(COOLDOWN_MS)
+                    if (b < benchRuns - 1) delay(COOLDOWN_MS)
                 }
 
                 withContext(Dispatchers.Main) {
@@ -173,13 +181,15 @@ class BenchmarkViewModel(application: Application) : AndroidViewModel(applicatio
         variant: String,
         trialIndex: Int,
         isWarmup: Boolean,
+        nTokens: Int,
+        ctxLen: Int,
     ): TrialResult? {
         val tStart = nowSeconds()
         var tFirstToken = -1.0
         var tokenCount  = 0
 
         return try {
-            engine.sendUserPrompt(promptText, N_TOKENS).collect { token ->
+            engine.sendUserPrompt(promptText, nTokens).collect { token ->
                 if (tFirstToken < 0 && token.isNotEmpty()) tFirstToken = nowSeconds()
                 tokenCount++
             }
@@ -189,7 +199,7 @@ class BenchmarkViewModel(application: Application) : AndroidViewModel(applicatio
                 val metrics = InferenceMetrics(
                     promptId      = promptId,
                     quantVariant  = variant,
-                    contextLength = CTX_LENGTH,
+                    contextLength = ctxLen,
                     outputLength  = tokenCount,
                     tRequestStart = tStart,
                     tFirstToken   = tFirstToken,
@@ -203,7 +213,7 @@ class BenchmarkViewModel(application: Application) : AndroidViewModel(applicatio
                     index         = trialIndex,
                     promptId      = promptId,
                     quantVariant  = variant,
-                    contextLength = CTX_LENGTH,
+                    contextLength = ctxLen,
                     decodeTps     = metrics.decodeTps,
                     ttftS         = metrics.ttftS,
                     outputTokens  = tokenCount,
@@ -212,7 +222,7 @@ class BenchmarkViewModel(application: Application) : AndroidViewModel(applicatio
             } else null
         } catch (e: Exception) {
             if (!isWarmup) {
-                logger.logFailure(variant, CTX_LENGTH, promptId, "compose-v2",
+                logger.logFailure(variant, ctxLen, promptId, "compose-v2",
                     trialIndex, isWarmup, "BENCH_ERROR", e.message ?: "unknown")
             }
             null

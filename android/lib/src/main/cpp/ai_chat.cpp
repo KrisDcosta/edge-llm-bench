@@ -38,6 +38,7 @@ static llama_context                    * g_context;
 static llama_batch                        g_batch;
 static common_chat_templates_ptr          g_chat_templates;
 static common_sampler                   * g_sampler;
+static int                                g_ctx_size = DEFAULT_CONTEXT_SIZE;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -73,17 +74,20 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_load(JNIEnv *env, jobject, jstr
     return 0;
 }
 
-static llama_context *init_context(llama_model *model, const int n_ctx = DEFAULT_CONTEXT_SIZE) {
+static llama_context *init_context(llama_model *model, const int n_ctx = DEFAULT_CONTEXT_SIZE, const int n_threads_override = -1) {
     if (!model) {
         LOGe("%s: model cannot be null", __func__);
         return nullptr;
     }
 
-    // Multi-threading setup
-    const int n_threads = std::max(N_THREADS_MIN, std::min(N_THREADS_MAX,
+    // Multi-threading setup: use override if > 0, else auto-detect
+    const int n_threads_auto = std::max(N_THREADS_MIN, std::min(N_THREADS_MAX,
                                                      (int) sysconf(_SC_NPROCESSORS_ONLN) -
                                                      N_THREADS_HEADROOM));
-    LOGi("%s: Using %d threads", __func__, n_threads);
+    const int n_threads = (n_threads_override > 0)
+        ? std::min(n_threads_override, (int) sysconf(_SC_NPROCESSORS_ONLN))
+        : n_threads_auto;
+    LOGi("%s: Using %d threads (override=%d)", __func__, n_threads, n_threads_override);
 
     // Context parameters setup
     llama_context_params ctx_params = llama_context_default_params();
@@ -104,9 +108,10 @@ static llama_context *init_context(llama_model *model, const int n_ctx = DEFAULT
     return context;
 }
 
-static common_sampler *new_sampler(float temp) {
+static common_sampler *new_sampler(float temp, uint32_t seed = LLAMA_DEFAULT_SEED) {
     common_params_sampling sparams;
     sparams.temp = temp;
+    sparams.seed = seed;
     return common_sampler_init(g_model, sparams);
 }
 
@@ -115,10 +120,11 @@ JNIEXPORT jint JNICALL
 Java_com_arm_aichat_internal_InferenceEngineImpl_prepare(JNIEnv * /*env*/, jobject /*unused*/) {
     auto *context = init_context(g_model);
     if (!context) { return 1; }
-    g_context = context;
-    g_batch = llama_batch_init(BATCH_SIZE, 0, 1);
+    g_context  = context;
+    g_ctx_size = DEFAULT_CONTEXT_SIZE;
+    g_batch    = llama_batch_init(BATCH_SIZE, 0, 1);
     g_chat_templates = common_chat_templates_init(g_model, "");
-    g_sampler = new_sampler(DEFAULT_SAMPLER_TEMP);
+    g_sampler  = new_sampler(DEFAULT_SAMPLER_TEMP);
     return 0;
 }
 
@@ -327,7 +333,7 @@ static int decode_tokens_in_batches(
         LOGv("%s: Preparing a batch size of %d starting at: %d", __func__, cur_batch_size, i);
 
         // Shift context if current batch cannot fit into the context
-        if (start_pos + i + cur_batch_size >= DEFAULT_CONTEXT_SIZE - OVERFLOW_HEADROOM) {
+        if (start_pos + i + cur_batch_size >= g_ctx_size - OVERFLOW_HEADROOM) {
             LOGw("%s: Current batch won't fit into context! Shifting...", __func__);
             shift_context();
         }
@@ -381,7 +387,7 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_processSystemPrompt(
     }
 
     // Handle context overflow
-    const int max_batch_size = DEFAULT_CONTEXT_SIZE - OVERFLOW_HEADROOM;
+    const int max_batch_size = g_ctx_size - OVERFLOW_HEADROOM;
     if ((int) system_tokens.size() > max_batch_size) {
         LOGe("%s: System prompt too long for context! %d tokens, max: %d",
              __func__, (int) system_tokens.size(), max_batch_size);
@@ -430,7 +436,7 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_processUserPrompt(
 
     // Ensure user prompt doesn't exceed the context size by truncating if necessary.
     const int user_prompt_size = (int) user_tokens.size();
-    const int max_batch_size = DEFAULT_CONTEXT_SIZE - OVERFLOW_HEADROOM;
+    const int max_batch_size = g_ctx_size - OVERFLOW_HEADROOM;
     if (user_prompt_size > max_batch_size) {
         const int skipped_tokens = user_prompt_size - max_batch_size;
         user_tokens.resize(max_batch_size);
@@ -490,7 +496,7 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_generateNextToken(
         jobject /*unused*/
 ) {
     // Infinite text generation via context shifting
-    if (current_position >= DEFAULT_CONTEXT_SIZE - OVERFLOW_HEADROOM) {
+    if (current_position >= g_ctx_size - OVERFLOW_HEADROOM) {
         LOGw("%s: Context full! Shifting...", __func__);
         shift_context();
     }
@@ -542,6 +548,47 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_generateNextToken(
     return result;
 }
 
+
+/**
+ * Reconfigures context size, thread count, temperature and seed without reloading model weights.
+ * Frees the existing context+sampler, then recreates them with the new parameters.
+ * Resets chat position state so the next inference starts from a clean context.
+ *
+ * Returns: 0 on success, 1 on context creation failure, 2 if no model loaded.
+ */
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_arm_aichat_internal_InferenceEngineImpl_configureAndPrepare(
+        JNIEnv* /*env*/, jobject /*unused*/,
+        jint n_ctx, jint n_threads, jfloat temperature, jlong seed
+) {
+    if (!g_model) {
+        LOGe("configureAndPrepare: no model loaded");
+        return 2;
+    }
+
+    // Reset chat state (new context discards old KV cache and positions)
+    reset_long_term_states(false);   // false = skip llama_memory_clear (freeing context anyway)
+    reset_short_term_states();
+
+    // Free existing context resources (order: sampler → templates → batch → context)
+    if (g_sampler)  { common_sampler_free(g_sampler);   g_sampler  = nullptr; }
+    g_chat_templates.reset();
+    if (g_context)  { llama_batch_free(g_batch);         llama_free(g_context); g_context = nullptr; }
+
+    // Recreate with caller-supplied parameters
+    const int ctx = (n_ctx > 0) ? (int)n_ctx : DEFAULT_CONTEXT_SIZE;
+    auto *context = init_context(g_model, ctx, (int)n_threads);
+    if (!context) return 1;
+    g_context  = context;
+    g_ctx_size = ctx;
+    g_batch    = llama_batch_init(BATCH_SIZE, 0, 1);
+    g_chat_templates = common_chat_templates_init(g_model, "");
+    g_sampler  = new_sampler((float)temperature, (uint32_t)seed);
+    LOGi("configureAndPrepare done: ctx=%d threads=%d temp=%.2f seed=%u",
+         ctx, (int)n_threads, (float)temperature, (uint32_t)seed);
+    return 0;
+}
 
 extern "C"
 JNIEXPORT void JNICALL

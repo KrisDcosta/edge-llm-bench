@@ -51,11 +51,16 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.eai.edgellmbench.ui.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
+fun ChatScreen(
+    viewModel: ChatViewModel = viewModel(),
+    settingsVm: SettingsViewModel = viewModel(),
+) {
     val uiState by viewModel.uiState.collectAsState()
+    val settingsState by settingsVm.uiState.collectAsState()
     val listState = rememberLazyListState()
     var inputText by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -112,7 +117,14 @@ fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
             ChatInputBar(
                 text = inputText,
                 onTextChange = { inputText = it },
-                onSend = { viewModel.sendMessage(inputText); inputText = "" },
+                onSend = {
+                    viewModel.sendMessage(
+                        inputText,
+                        outputLength  = settingsState.outputLength,
+                        contextLength = settingsState.contextLength,
+                    )
+                    inputText = ""
+                },
                 onStop = { viewModel.stopGeneration() },
                 isGenerating = uiState.isGenerating,
                 isEnabled = uiState.isModelLoaded && !uiState.isLoadingModel,
