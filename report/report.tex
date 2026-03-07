@@ -310,10 +310,11 @@ F16      & 6.4 & 0.15 & 0.00 & 1.86  & 14.53 & 134.92 & \multicolumn{2}{l}{N/A (
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{../figures/fig2_decode_tps_vs_context.png}
-  \caption{Decode throughput (tokens/s) for each quantization variant at 256-token context,
-  with standard deviation error bars over 15 trials (5 trials $\times$ 3 prompt types).
-  The non-monotonic ordering (Q2\_K $>$ Q4\_K\_M $>$ Q8\_0 $\approx$ Q3\_K\_M $>$ Q6\_K)
-  is the primary empirical finding of this work.}
+  \caption{Decode throughput (tokens/s) across context lengths for all quantization
+  variants (error bars = $\pm 1$ std). At 256--1024 tokens, ordering is non-monotonic
+  with bit-width: Q2\_K $>$ Q4\_K\_M $>$ Q8\_0 $\approx$ Q3\_K\_M $>$ Q6\_K. At
+  ctx=2048, Q3\_K\_M and Q6\_K collapse ($-38\%$ and $-49\%$ respectively) while
+  Q4\_K\_M remains stable, revealing a hidden memory-system fragility.}
   \label{fig:decode_tps}
 \end{figure}
 
@@ -567,14 +568,18 @@ treat Q6\_K with caution on ARM CPU backends.
 
 \subsection{Memory Bandwidth as the Decode Bottleneck}
 
-The context-length invariance result (Section~\ref{sec:rq2}) provides strong
-evidence that decode throughput on this device is \textbf{memory-bandwidth
-saturated} by weight loading. For Q4\_K\_M at 5.32~tokens/s, each decode step
-loads approximately 2.0~GB of weights, implying an effective DRAM bandwidth
-utilization of $2.0 \times 5.32 \approx 10.6$~GB/s for weight loading alone.
-The KV-cache at 2048-token context contributes at most 233~MB per step, less
-than 11\% of weight traffic. This explains why even an 8$\times$ increase in
-context length produces less than 3\% throughput variation.
+The context-length stability of Q4\_K\_M and Q8\_0 (Section~\ref{sec:rq2})
+provides strong evidence that decode throughput on this device is
+\textbf{memory-bandwidth saturated} by weight loading for these variants.
+For Q4\_K\_M at 5.32~tokens/s, each decode step loads approximately 2.0~GB
+of weights, implying an effective DRAM bandwidth utilization of
+$2.0 \times 5.32 \approx 10.6$~GB/s for weight loading alone.
+The KV-cache at 2048-token context contributes at most 233~MB per step,
+less than 11\% of weight traffic---explaining Q4\_K\_M's near-zero throughput
+variation across 256--2048 tokens. The Q3\_K\_M and Q6\_K collapses at ctx=2048
+(Table~\ref{tab:ctx2048}) suggest that their quantisation kernels incur higher
+effective memory-access amplification that makes them sensitive to the larger
+allocation footprint when the KV-cache grows to 233~MB alongside these models.
 
 \subsection{Deployment Recommendations}
 
@@ -604,10 +609,13 @@ to GPU-accelerated backends where the Q6\_K de-quantization overhead differs.
 big.LITTLE ARM SoCs), 4 threads matches the performance-core count and delivers
 peak throughput. Do not use all available threads.
 
-\textbf{Context length management.} Decode throughput is context-invariant
-through 2048 tokens; applications should not artificially truncate context
-for performance reasons. TTFT grows linearly with context, so responsiveness
-decisions should be driven by TTFT budgets, not throughput concerns.
+\textbf{Context length management (critical).} Context-length sensitivity is
+\emph{variant-specific}. Q4\_K\_M and Q8\_0 are context-invariant through 2048
+tokens and should be the default choice for long-context applications. Q3\_K\_M
+loses 38\% and Q6\_K loses 49\% of throughput at ctx=2048 relative to ctx=1024;
+practitioners using these variants should limit context length to $\leq$1024
+tokens or accept the throughput penalty. TTFT grows linearly with context across
+all variants, so responsiveness decisions should be driven by TTFT budgets.
 
 % ===========================================================================
 \section{Limitations and Future Work}
