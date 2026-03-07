@@ -397,24 +397,73 @@ def fig6_pareto_frontier(records: list[dict]):
         return
 
     fig, ax = plt.subplots(figsize=(7, 5))
+
+    # Collect valid (non-confounded) quality data points for Pareto line
+    valid_points = []  # (tps, q) for Pareto computation
+
     for v, tps in tps_by_variant.items():
-        q = quality_by_variant.get(v, None)
+        raw_q = quality_by_variant.get(v, None)
+        # quality_scores.json values may be nested dicts {accuracy_pct, per_question, ...}
+        # or plain scalars — normalise to a float or None
+        q = None
+        is_confounded = False
+        if isinstance(raw_q, dict):
+            # Check if evaluation was confounded by ADB timeouts
+            per_question = raw_q.get("per_question", [])
+            timeout_count = sum(1 for pq in per_question if pq.get("status") == "timeout")
+            total_count = len(per_question)
+            # Mark as confounded if majority of questions timed out (ADB dropout)
+            if total_count > 0 and timeout_count / total_count > 0.3:
+                is_confounded = True
+            else:
+                acc = raw_q.get("accuracy_pct")
+                if acc is not None:
+                    q = float(acc)
+        elif raw_q is not None:
+            try:
+                q = float(raw_q)
+            except (TypeError, ValueError):
+                q = None
+
         color = QUANT_COLORS.get(v, "#888")
         bits = QUANT_BITS.get(v, "?")
         size_gb = MODEL_SIZE_GB.get(v, 0)
-        if q is not None:
-            ax.scatter(tps, q, s=150, color=color, zorder=5, label=f"{v} ({bits}-bit, {size_gb}GB)")
-            ax.annotate(v, (tps, q), xytext=(6, 3), textcoords="offset points", fontsize=8)
-        else:
-            ax.axvline(tps, color=color, linestyle="--", alpha=0.5, linewidth=1.2)
-            ax.text(tps, ax.get_ylim()[0] if ax.get_ylim()[0] != 0 else 0.5,
-                    f"{v}\n({tps:.1f} t/s)", ha="center", va="bottom", fontsize=8, color=color)
 
-    ax.set_xlabel("Decode Throughput (tokens/sec)")
-    ax.set_ylabel("Quality Score (higher = better)")
-    ax.set_title("Efficiency–Accuracy Pareto Frontier\n(Llama 3.2 3B, Pixel 6a)")
+        if q is not None:
+            ax.scatter(tps, q, s=size_gb * 80, color=color, zorder=5,
+                       label=f"{v} ({bits}-bit, {size_gb:.1f} GB)")
+            ax.annotate(v, (tps, q), xytext=(6, 4), textcoords="offset points",
+                        fontsize=9, fontweight="bold")
+            valid_points.append((tps, q, v))
+        else:
+            # No valid quality data — show TPS-only dashed line
+            label_suffix = " (ADB timeout)" if is_confounded else " (quality N/A)"
+            ax.axvline(tps, color=color, linestyle="--", alpha=0.45, linewidth=1.0,
+                       label=f"{v} {label_suffix}")
+
+    # Draw Pareto frontier line through non-dominated points (maximize both axes)
+    if len(valid_points) >= 2:
+        # Sort by TPS ascending; find Pareto-optimal (no point dominates in both axes)
+        valid_points_sorted = sorted(valid_points, key=lambda x: x[0])
+        pareto = []
+        max_q_so_far = -1
+        for pt in reversed(valid_points_sorted):  # iterate high TPS → low TPS
+            if pt[1] > max_q_so_far:
+                pareto.append(pt)
+                max_q_so_far = pt[1]
+        pareto.sort(key=lambda x: x[0])
+        if len(pareto) >= 2:
+            px = [p[0] for p in pareto]
+            py = [p[1] for p in pareto]
+            ax.plot(px, py, "k--", linewidth=1.2, alpha=0.5, label="Pareto frontier", zorder=3)
+
+    ax.set_xlabel("Decode Throughput (tokens/sec)", fontsize=11)
+    ax.set_ylabel("Factual Accuracy (%, 15-question suite)", fontsize=11)
+    ax.set_title("Efficiency–Accuracy Trade-off\n(Llama 3.2 3B Instruct, Pixel 6a Tensor G2)", fontsize=11)
+    ax.set_ylim(70, 105)
+    ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.0f%%"))
     if quality_by_variant:
-        ax.legend(fontsize=8)
+        ax.legend(fontsize=8, loc="lower right")
     else:
         ax.text(0.5, 0.5, "(Quality scores pending — add results/quality_scores.json)",
                 transform=ax.transAxes, ha="center", va="center",
