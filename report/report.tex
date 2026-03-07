@@ -403,8 +403,10 @@ benefit compared to improvements in decode throughput.
   \includegraphics[width=\columnwidth]{../figures/fig6_pareto_efficiency_quality.png}
   \caption{Efficiency--accuracy Pareto frontier: on-device factual accuracy (\%)
   vs.\ decode throughput (tokens/s) for all five non-F16 variants.
-  Q8\_0 (100\%, 4.95 tok/s) and Q2\_K (93.3\%, 5.66 tok/s) are Pareto-optimal.
-  Q6\_K (86.7\%, 3.98 tok/s) is strictly dominated---worst on both dimensions.}
+  Dotted iso-efficiency contours show equal TPS$\times$accuracy product (E).
+  Q8\_0 (100\%, 4.95~tok/s) and Q2\_K (93.3\%, 5.66~tok/s) are Pareto-optimal;
+  the grey shaded region is dominated.
+  Q6\_K (86.7\%, 3.98~tok/s) is strictly dominated on \emph{both} axes.}
   \label{fig:pareto}
 \end{figure}
 
