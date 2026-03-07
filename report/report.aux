@@ -26,53 +26,50 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Model and Quantization Variants}{2}{subsection.3.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Experiment Design}{2}{subsection.3.3}\protected@file@percent }
 \citation{llamacpp}
-\citation{llamacpp}
+\citation{executorch}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Metrics}{3}{subsection.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Framework Selection and Build}{3}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Quality Evaluation}{3}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-F}}Framework Selection and Build}{3}{subsection.3.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {IV}Results}{3}{section.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}RQ1: Impact of Quantization on Inference Metrics}{3}{subsection.4.1}\protected@file@percent }
 \newlabel{sec:rq1}{{\mbox  {IV-A}}{3}{RQ1: Impact of Quantization on Inference Metrics}{subsection.4.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Decode throughput (tokens/s) for each quantization variant at 256-token context, with standard deviation error bars over 5 trials and 3 prompt types. The non-monotonic ordering (Q2\_K $>$ Q4\_K\_M $\approx $ Q8\_0 $>$ Q3\_K\_M $>$ Q6\_K) is the primary empirical finding of this work.}}{3}{figure.1}\protected@file@percent }
-\newlabel{fig:decode_tps}{{1}{3}{Decode throughput (tokens/s) for each quantization variant at 256-token context, with standard deviation error bars over 5 trials and 3 prompt types. The non-monotonic ordering (Q2\_K $>$ Q4\_K\_M $\approx $ Q8\_0 $>$ Q3\_K\_M $>$ Q6\_K) is the primary empirical finding of this work}{figure.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Decode throughput (tokens/s) for each quantization variant at 256-token context, with standard deviation error bars over 15 trials (5 trials $\times $ 3 prompt types). The non-monotonic ordering (Q2\_K $>$ Q4\_K\_M $>$ Q8\_0 $\approx $ Q3\_K\_M $>$ Q6\_K) is the primary empirical finding of this work.}}{3}{figure.1}\protected@file@percent }
+\newlabel{fig:decode_tps}{{1}{3}{Decode throughput (tokens/s) for each quantization variant at 256-token context, with standard deviation error bars over 15 trials (5 trials $\times $ 3 prompt types). The non-monotonic ordering (Q2\_K $>$ Q4\_K\_M $>$ Q8\_0 $\approx $ Q3\_K\_M $>$ Q6\_K) is the primary empirical finding of this work}{figure.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Time-to-first-token (seconds) as a function of context length for each variant. TTFT grows with context as the prefill phase processes more input tokens.}}{3}{figure.2}\protected@file@percent }
+\newlabel{fig:ttft_context}{{2}{3}{Time-to-first-token (seconds) as a function of context length for each variant. TTFT grows with context as the prefill phase processes more input tokens}{figure.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}RQ2: Context Length Scaling}{3}{subsection.4.2}\protected@file@percent }
 \newlabel{sec:rq2}{{\mbox  {IV-B}}{3}{RQ2: Context Length Scaling}{subsection.4.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Benchmark Results for Llama 3.2 3B Instruct GGUF Variants on Google Pixel 6a (Tensor G2). Decode TPS and prefill TPS are aggregated at 256-token context. TTFT and E2E latency are means across all contexts and trials. PPL values are reference estimates from GGML community benchmarks.}}{4}{table.1}\protected@file@percent }
-\newlabel{tab:main_results}{{I}{4}{Benchmark Results for Llama 3.2 3B Instruct GGUF Variants on Google Pixel 6a (Tensor G2). Decode TPS and prefill TPS are aggregated at 256-token context. TTFT and E2E latency are means across all contexts and trials. PPL values are reference estimates from GGML community benchmarks}{table.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Time-to-first-token (seconds) as a function of context length for each variant. TTFT grows with context as the prefill phase processes more tokens, with approximately linear scaling for most variants.}}{4}{figure.2}\protected@file@percent }
-\newlabel{fig:ttft_context}{{2}{4}{Time-to-first-token (seconds) as a function of context length for each variant. TTFT grows with context as the prefill phase processes more tokens, with approximately linear scaling for most variants}{figure.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Prefill throughput (tokens/s) as a function of context length. Prefill throughput is largely stable across context lengths for most variants, indicating that the prefill phase is also dominated by memory-bandwidth considerations at the sizes tested.}}{4}{figure.3}\protected@file@percent }
-\newlabel{fig:prefill_tps}{{3}{4}{Prefill throughput (tokens/s) as a function of context length. Prefill throughput is largely stable across context lengths for most variants, indicating that the prefill phase is also dominated by memory-bandwidth considerations at the sizes tested}{figure.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Fraction of total inference time consumed by prefill vs. decode phases for each quantization variant. Decode time dominates for all variants, but the prefill fraction increases for smaller quantizations due to higher relative decode speed.}}{4}{figure.4}\protected@file@percent }
-\newlabel{fig:prefill_decode_fraction}{{4}{4}{Fraction of total inference time consumed by prefill vs. decode phases for each quantization variant. Decode time dominates for all variants, but the prefill fraction increases for smaller quantizations due to higher relative decode speed}{figure.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Benchmark Results for Llama 3.2 3B Instruct GGUF Variants on Google Pixel 6a (Tensor G2). All throughput figures use 256-token context except Q4\_K\_M (512-token, as 256-token results include the thread-sweep experiments). Accuracy is on-device exact-match over 15 factual questions.}}{4}{table.1}\protected@file@percent }
+\newlabel{tab:main_results}{{I}{4}{Benchmark Results for Llama 3.2 3B Instruct GGUF Variants on Google Pixel 6a (Tensor G2). All throughput figures use 256-token context except Q4\_K\_M (512-token, as 256-token results include the thread-sweep experiments). Accuracy is on-device exact-match over 15 factual questions}{table.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Prefill throughput (tokens/s) across context lengths. Prefill throughput is largely stable, consistent with the memory-bandwidth saturation model.}}{4}{figure.3}\protected@file@percent }
+\newlabel{fig:prefill_tps}{{3}{4}{Prefill throughput (tokens/s) across context lengths. Prefill throughput is largely stable, consistent with the memory-bandwidth saturation model}{figure.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}RQ3: Prefill vs. Decode Time Fraction}{4}{subsection.4.3}\protected@file@percent }
 \newlabel{sec:rq3}{{\mbox  {IV-C}}{4}{RQ3: Prefill vs. Decode Time Fraction}{subsection.4.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Fraction of total inference time consumed by prefill vs. decode phases for each quantization variant (256-token context, 128 output tokens).}}{4}{figure.4}\protected@file@percent }
+\newlabel{fig:prefill_decode_fraction}{{4}{4}{Fraction of total inference time consumed by prefill vs. decode phases for each quantization variant (256-token context, 128 output tokens)}{figure.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}RQ4: Efficiency--Accuracy Trade-off}{4}{subsection.4.4}\protected@file@percent }
 \newlabel{sec:rq4}{{\mbox  {IV-D}}{4}{RQ4: Efficiency--Accuracy Trade-off}{subsection.4.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Pareto frontier of decode throughput (tokens/s) vs. estimated perplexity (PPL) for each quantization variant. Points closer to the top-left corner are preferable. Q4\_K\_M lies on the Pareto frontier, offering the best balance of speed and quality among practical variants.}}{5}{figure.5}\protected@file@percent }
-\newlabel{fig:pareto}{{5}{5}{Pareto frontier of decode throughput (tokens/s) vs. estimated perplexity (PPL) for each quantization variant. Points closer to the top-left corner are preferable. Q4\_K\_M lies on the Pareto frontier, offering the best balance of speed and quality among practical variants}{figure.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Model size (GB) vs. decode throughput (tokens/s). This view emphasizes the storage/RAM cost of each operating point. Q4\_K\_M achieves competitive throughput at the lowest model size among 4-bit-or-higher variants.}}{5}{figure.6}\protected@file@percent }
-\newlabel{fig:size_vs_tps}{{6}{5}{Model size (GB) vs. decode throughput (tokens/s). This view emphasizes the storage/RAM cost of each operating point. Q4\_K\_M achieves competitive throughput at the lowest model size among 4-bit-or-higher variants}{figure.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Peak memory footprint by quantization variant (placeholder figure; direct runtime memory measurement was not available in this benchmark run due to \texttt  {/proc/self/status} access restrictions under Android 14's SELinux policy). Values shown are estimates based on model file size plus typical KV-cache overhead.}}{5}{figure.7}\protected@file@percent }
-\newlabel{fig:memory}{{7}{5}{Peak memory footprint by quantization variant (placeholder figure; direct runtime memory measurement was not available in this benchmark run due to \texttt {/proc/self/status} access restrictions under Android 14's SELinux policy). Values shown are estimates based on model file size plus typical KV-cache overhead}{figure.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Distribution of end-to-end latency across all trials for each quantization variant, shown as box-and-whisker plots. Q3\_K\_M and Q6\_K exhibit notably tighter distributions, while Q2\_K and Q8\_0 show higher variance.}}{5}{figure.8}\protected@file@percent }
-\newlabel{fig:latency_dist}{{8}{5}{Distribution of end-to-end latency across all trials for each quantization variant, shown as box-and-whisker plots. Q3\_K\_M and Q6\_K exhibit notably tighter distributions, while Q2\_K and Q8\_0 show higher variance}{figure.8}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}RQ5: Deployment Limits}{5}{subsection.4.5}\protected@file@percent }
-\newlabel{sec:rq5}{{\mbox  {IV-E}}{5}{RQ5: Deployment Limits}{subsection.4.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Efficiency--accuracy Pareto frontier: on-device factual accuracy (\%) vs.\ decode throughput (tokens/s) for all five non-F16 variants. Q8\_0 (100\%, 4.95 tok/s) and Q2\_K (93.3\%, 5.66 tok/s) are Pareto-optimal. Q6\_K (86.7\%, 3.98 tok/s) is strictly dominated---worst on both dimensions.}}{5}{figure.5}\protected@file@percent }
+\newlabel{fig:pareto}{{5}{5}{Efficiency--accuracy Pareto frontier: on-device factual accuracy (\%) vs.\ decode throughput (tokens/s) for all five non-F16 variants. Q8\_0 (100\%, 4.95 tok/s) and Q2\_K (93.3\%, 5.66 tok/s) are Pareto-optimal. Q6\_K (86.7\%, 3.98 tok/s) is strictly dominated---worst on both dimensions}{figure.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Model size (GB) vs. decode throughput (tokens/s). Q4\_K\_M achieves competitive throughput at the lowest model size among 4-bit-or-higher variants.}}{5}{figure.6}\protected@file@percent }
+\newlabel{fig:size_vs_tps}{{6}{5}{Model size (GB) vs. decode throughput (tokens/s). Q4\_K\_M achieves competitive throughput at the lowest model size among 4-bit-or-higher variants}{figure.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Peak working memory footprint by quantization variant, measured as the MemAvailable delta in \texttt  {/proc/meminfo} before and after inference. Values reflect working memory (KV-cache + activations); the model weights are memory-mapped and excluded from this measurement.}}{5}{figure.7}\protected@file@percent }
+\newlabel{fig:memory}{{7}{5}{Peak working memory footprint by quantization variant, measured as the MemAvailable delta in \texttt {/proc/meminfo} before and after inference. Values reflect working memory (KV-cache + activations); the model weights are memory-mapped and excluded from this measurement}{figure.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Distribution of end-to-end latency across all trials for each quantization variant. Q3\_K\_M and Q6\_K exhibit notably tighter distributions than Q2\_K and Q8\_0.}}{5}{figure.8}\protected@file@percent }
+\newlabel{fig:latency_dist}{{8}{5}{Distribution of end-to-end latency across all trials for each quantization variant. Q3\_K\_M and Q6\_K exhibit notably tighter distributions than Q2\_K and Q8\_0}{figure.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}RQ5: Deployment Limits and Thread Scaling}{5}{subsection.4.5}\protected@file@percent }
+\newlabel{sec:rq5}{{\mbox  {IV-E}}{5}{RQ5: Deployment Limits and Thread Scaling}{subsection.4.5}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {V}Discussion}{6}{section.5}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}The Non-Monotonic Throughput Anomaly}{6}{subsection.5.1}\protected@file@percent }
 \newlabel{sec:nonmonotonic}{{\mbox  {V-A}}{6}{The Non-Monotonic Throughput Anomaly}{subsection.5.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Memory Bandwidth as the Decode Bottleneck}{6}{subsection.5.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Deployment Recommendations}{6}{subsection.5.3}\protected@file@percent }
-\citation{executorch}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Limitations and Future Work}{6}{section.6}\protected@file@percent }
+\newlabel{sec:limitations}{{VI}{6}{Limitations and Future Work}{section.6}{}}
+\newlabel{sec:future}{{VI}{6}{Limitations and Future Work}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Current Limitations}{6}{subsection.6.1}\protected@file@percent }
 \citation{mlcllm}
-\@writefile{toc}{\contentsline {section}{\numberline {VI}Limitations and Future Work}{7}{section.6}\protected@file@percent }
-\newlabel{sec:limitations}{{VI}{7}{Limitations and Future Work}{section.6}{}}
-\newlabel{sec:future}{{VI}{7}{Limitations and Future Work}{section.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Current Limitations}{7}{subsection.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Future Work}{7}{subsection.6.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Energy consumption per 1000 output tokens (placeholder). Direct battery energy measurements were unavailable in this run due to Android \texttt  {dumpsys batterystats} access limitations in the automated test harness.}}{7}{figure.9}\protected@file@percent }
-\newlabel{fig:battery}{{9}{7}{Energy consumption per 1000 output tokens (placeholder). Direct battery energy measurements were unavailable in this run due to Android \texttt {dumpsys batterystats} access limitations in the automated test harness}{figure.9}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusion}{7}{section.7}\protected@file@percent }
+\citation{executorch}
 \bibcite{llama32}{1}
 \bibcite{llamacpp}{2}
 \bibcite{gguf}{3}
@@ -86,10 +83,11 @@
 \bibcite{executorch}{11}
 \bibcite{llama3}{12}
 \bibcite{ggml}{13}
-\@writefile{toc}{\contentsline {section}{References}{8}{section*.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{Appendix}{8}{section*.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A}Build Configuration}{8}{subsection.Appendix.A.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Future Work}{7}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusion}{7}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{7}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{Appendix}{7}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A}Build Configuration}{7}{subsection.Appendix.A.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {B}Invocation Template}{8}{subsection.Appendix.A.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {C}Metric Extraction}{8}{subsection.Appendix.A.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {D}Statistical Methodology}{8}{subsection.Appendix.A.4}\protected@file@percent }
-\gdef \@abspage@last{9}
+\@writefile{toc}{\contentsline {subsection}{\numberline {C}Statistical Methodology}{8}{subsection.Appendix.A.3}\protected@file@percent }
+\gdef \@abspage@last{8}

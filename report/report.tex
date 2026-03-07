@@ -49,12 +49,15 @@ length: less than 1\% variation from 256 to 2048 tokens, indicating memory-bandw
 saturation from weight loading dominates KV-cache growth even at extended contexts.
 Third, a thread-count sweep reveals that 4 threads is optimal on the
 Tensor G2's heterogeneous ARM CPU (5.0 tokens/s), with 8 threads degrading to
-4.0 tokens/s due to little-core contention. Fourth, on-device factual accuracy evaluation for the three successfully-evaluated
-variants shows Q3\_K\_M achieves 100\% accuracy (15/15) while Q2\_K and Q4\_K\_M
-score 93.3\% (14/15) each; quality evaluation for Q6\_K and Q8\_0 was disrupted
-by a WiFi ADB session timeout. We identify Q4\_K\_M as the recommended deployment
-target at 2.0~GB, 5.32~tokens/s, and provide deployment guidelines for practitioners
-targeting ARM-class mobile hardware.
+4.0 tokens/s due to little-core contention. Fourth, a complete on-device factual accuracy evaluation across all five variants
+reveals a striking non-monotonic pattern: Q3\_K\_M (3-bit) and Q8\_0 (8-bit)
+achieve perfect 100\% (15/15), Q2\_K and Q4\_K\_M score 93.3\% (14/15) each,
+and Q6\_K scores lowest at 86.7\% (13/15) despite its higher bit-width.
+With all five variants measured, the Pareto frontier is defined by Q8\_0
+(100\%, 4.95~tokens/s) and Q2\_K (93.3\%, 5.66~tokens/s); Q6\_K is strictly
+dominated on both accuracy and throughput. We identify Q4\_K\_M as the recommended
+deployment target at 2.0~GB, 5.32~tokens/s, and provide deployment guidelines for
+practitioners targeting ARM-class mobile hardware.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -121,9 +124,11 @@ memory bandwidth consumption makes empirical measurement essential.
         2048 tokens.
   \item A thread-count scaling study on the Tensor G2's heterogeneous ARM cluster
         showing a 5.0~tokens/s peak at 4 threads with degradation at 8.
-  \item On-device factual accuracy evaluation for three variants (Q2\_K, Q3\_K\_M,
-        Q4\_K\_M) revealing 93--100\% exact-match accuracy, with Q3\_K\_M achieving
-        perfect 100\%---a finding that does not monotonically track bit-width.
+  \item Complete on-device factual accuracy evaluation across all five non-F16
+        variants, revealing a non-monotonic pattern spanning 86.7--100\%:
+        Q3\_K\_M and Q8\_0 achieve perfect 100\%, Q2\_K and Q4\_K\_M score 93.3\%,
+        and Q6\_K scores lowest at 86.7\% despite its higher bit-width; Q6\_K
+        is further shown to be strictly dominated on both accuracy and throughput.
 \end{enumerate}
 
 % ===========================================================================
@@ -282,12 +287,11 @@ the thread-sweep experiments). Accuracy is on-device exact-match over 15 factual
 Q2\_K    & 1.3 & 5.66 & 0.72 & 7.59  & 3.81  & 26.62  & 93.3 \\
 Q3\_K\_M & 1.6 & 4.91 & 0.40 & 6.29  & 4.50  & 30.57  & 100.0 \\
 Q4\_K\_M & 2.0 & 5.32 & 0.52 & 7.09  & 3.98  & 28.11  & 93.3 \\
-Q6\_K    & 2.7 & 3.98 & 0.32 & 4.90  & 5.71  & 29.33  & N/A$^\dagger$ \\
-Q8\_0    & 3.4 & 4.95 & 0.59 & 7.14  & 3.95  & 23.21  & N/A$^\dagger$ \\
+Q6\_K    & 2.7 & 3.98 & 0.32 & 4.90  & 5.71  & 29.33  & 86.7 \\
+Q8\_0    & 3.4 & 4.95 & 0.59 & 7.14  & 3.95  & 23.21  & 100.0 \\
 F16      & 6.4 & 0.15 & 0.00 & 1.86  & 14.53 & 134.92 & N/A (timeout) \\
 \midrule
 \multicolumn{8}{l}{\small F16: 1 trial only (2/3 timed out at 600\,s). Q8\_0 achieves best TTFT at 3.95\,s.}\\
-\multicolumn{8}{l}{\small $^\dagger$WiFi ADB session dropped after $\sim$30\,min of sequential quality eval; Q6\_K/Q8\_0 re-run required.}\\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -310,9 +314,10 @@ and notably faster than Q2\_K (3.81~s). Despite Q8\_0's larger model size,
 its kernel requires no de-quantization of scale factors during prefill, reducing
 kernel dispatch overhead during the attention-intensive prefill phase.
 
-\textbf{Q3\_K\_M achieves perfect accuracy} (100\%) on the factual evaluation
-suite while delivering 4.91~tokens/s decode throughput---making it the most
-accuracy-efficient variant despite its lower throughput rank.
+\textbf{Q3\_K\_M and Q8\_0 achieve perfect accuracy} (100\%) on the factual
+evaluation suite. Q3\_K\_M (4.91~tokens/s) is remarkable for achieving this
+at 3-bit precision; Q8\_0 (4.95~tokens/s) pairs perfect accuracy with the best
+TTFT, making it Pareto-optimal for accuracy-first deployments on 6~GB devices.
 
 \textbf{F16 is effectively unusable} in this deployment scenario. At 0.15~tokens/s
 with TTFT of 14.53~s, the variant produced only one complete trial result within the
@@ -388,9 +393,9 @@ benefit compared to improvements in decode throughput.
   \centering
   \includegraphics[width=\columnwidth]{../figures/fig6_pareto_efficiency_quality.png}
   \caption{Efficiency--accuracy Pareto frontier: on-device factual accuracy (\%)
-  vs.\ decode throughput (tokens/s) for variants with valid quality measurements.
-  Q3\_K\_M (100\%, 4.91 tok/s) is accuracy-dominant; Q2\_K (93.3\%, 5.66 tok/s)
-  is speed-dominant. Q6\_K and Q8\_0 omitted (quality eval confounded by ADB dropout).}
+  vs.\ decode throughput (tokens/s) for all five non-F16 variants.
+  Q8\_0 (100\%, 4.95 tok/s) and Q2\_K (93.3\%, 5.66 tok/s) are Pareto-optimal.
+  Q6\_K (86.7\%, 3.98 tok/s) is strictly dominated---worst on both dimensions.}
   \label{fig:pareto}
 \end{figure}
 
@@ -402,29 +407,32 @@ benefit compared to improvements in decode throughput.
   \label{fig:size_vs_tps}
 \end{figure}
 
-On-device factual accuracy was successfully measured for the three variants
-that completed before the WiFi ADB session dropped (after $\sim$30 minutes
-of continuous sequential evaluation): Q2\_K scores 93.3\% (14/15), Q3\_K\_M
-achieves a perfect 100\% (15/15), and Q4\_K\_M scores 93.3\% (14/15). The sole
-Q2\_K miss was the capital of Australia (``Canberra,'' answered as ``Sydney'');
-the Q4\_K\_M miss was a two-digit multiplication (17~$\times$~8~=~136, answered
-as 112). Quality evaluation for Q6\_K and Q8\_0 was confounded by the ADB
-session dropout and requires a re-run with per-variant cooldown; these are
-marked N/A in Table~\ref{tab:main_results}.
+On-device factual accuracy was measured for all five non-F16 variants via USB
+ADB. Results: Q2\_K scores 93.3\% (14/15), Q3\_K\_M achieves a perfect 100\%
+(15/15), Q4\_K\_M scores 93.3\% (14/15), Q6\_K scores 86.7\% (13/15), and
+Q8\_0 achieves a perfect 100\% (15/15). The sole Q2\_K miss was the capital of
+Australia (``Canberra,'' answered as ``Sydney''); the Q4\_K\_M miss was a
+two-digit multiplication (17~$\times$~8~=~136, answered as 112); Q6\_K produced
+two errors---the Australia capital and a basic arithmetic question.
 
-Figure~\ref{fig:pareto} plots the Pareto frontier for the three evaluated variants.
-\textbf{Two variants are Pareto-optimal}: Q3\_K\_M (100\% accuracy, 4.91~tokens/s)
-is the accuracy-dominant point, while Q2\_K (93.3\% accuracy, 5.66~tokens/s) is
-the speed-dominant point. Q4\_K\_M (93.3\% accuracy, 5.32~tokens/s) is strictly
-dominated by Q2\_K in this two-objective space (same accuracy, lower speed);
-however, Q4\_K\_M's lower variance (std 0.52 vs.\ Q2\_K's 0.72) and community
-adoption make it the pragmatic recommended default.
+Figure~\ref{fig:pareto} plots the Pareto frontier for all five variants.
+\textbf{Two variants are Pareto-optimal}: Q8\_0 (100\% accuracy, 4.95~tokens/s)
+is the accuracy-dominant point (tied with Q3\_K\_M on accuracy but faster),
+while Q2\_K (93.3\% accuracy, 5.66~tokens/s) is the speed-dominant point.
+Q3\_K\_M (100\% accuracy, 4.91~tokens/s) is dominated by Q8\_0 (same accuracy,
+slightly faster). Q4\_K\_M (93.3\%, 5.32~tokens/s) is dominated by Q2\_K
+(same accuracy, higher speed); however, Q4\_K\_M's lower variance (std 0.52
+vs.\ Q2\_K's 0.72) and community adoption make it the pragmatic recommended
+default. \textbf{Q6\_K (86.7\%, 3.98~tokens/s) is strictly dominated on both
+dimensions}---it is simultaneously the least accurate and the slowest practical
+variant, making it the weakest operating point among all tested quantizations.
 
-A key finding is that accuracy does not decrease monotonically with bit-width:
-Q3\_K\_M (3-bit, 100\%) outperforms Q4\_K\_M (4-bit, 93.3\%) on this evaluation.
-This non-monotonicity in accuracy mirrors the non-monotonic throughput ordering
-and reflects the complex interaction between K-quant block structure and the
-specific weight distributions of Llama 3.2.
+A key finding is that accuracy does not decrease monotonically with bit-width.
+Q3\_K\_M (3-bit, 100\%) outperforms Q4\_K\_M (4-bit, 93.3\%) and even Q6\_K
+(6-bit, 86.7\%), while Q8\_0 (8-bit, 100\%) and Q3\_K\_M share the top accuracy
+position despite a large gap in bit-width. This non-monotonicity in accuracy
+mirrors the non-monotonic throughput ordering and reflects the complex interaction
+between K-quant block structure and the specific weight distributions of Llama 3.2.
 
 \subsection{RQ5: Deployment Limits and Thread Scaling}
 \label{sec:rq5}
@@ -470,8 +478,11 @@ accuracy makes it the best option for accuracy-sensitive, memory-constrained
 deployments.
 Q4\_K\_M (2.0~GB) comfortably fits any device $\geq$ 4~GB and is the recommended
 default for general-purpose deployment.
-Q6\_K (2.7~GB) and Q8\_0 (3.4~GB) require $\geq$ 6~GB. Given Q6\_K's inferior
-throughput and accuracy relative to Q8\_0, Q6\_K is the weakest operating point.
+Q6\_K (2.7~GB) and Q8\_0 (3.4~GB) require $\geq$ 6~GB. Q8\_0 achieves 100\%
+accuracy and 4.95~tokens/s, making it Pareto-optimal for high-accuracy deployments
+on 6~GB devices. Q6\_K is the weakest operating point: at 86.7\% accuracy and
+only 3.98~tokens/s it is strictly dominated by every other variant on at least
+one dimension---prefer Q8\_0 or Q4\_K\_M on 6~GB devices instead.
 F16 (6.4~GB) is not viable on any consumer device $\leq$ 8~GB.
 
 Figure~\ref{fig:latency_dist} shows latency distributions. Q3\_K\_M and Q6\_K
@@ -528,17 +539,21 @@ point for 6~GB devices. Though Q2\_K is slightly faster and equally accurate,
 Q4\_K\_M's lower performance variance and broad community ecosystem support
 make it the pragmatic default.
 
-\textbf{Accuracy-critical deployments: Q3\_K\_M.} Achieving 100\% accuracy on
-our evaluation suite at 4.91~tokens/s and 1.6~GB, Q3\_K\_M is the best choice
-when accuracy is paramount. Its smaller footprint also benefits 4~GB devices.
+\textbf{Accuracy-critical deployments: Q3\_K\_M or Q8\_0.} Both variants achieve
+100\% on our factual evaluation suite. Q3\_K\_M (4.91~tokens/s, 1.6~GB) is the
+best choice for 4~GB devices and memory-constrained deployments. Q8\_0
+(4.95~tokens/s, 3.4~GB) is Pareto-optimal for 6~GB devices seeking perfect
+accuracy with competitive throughput.
 
 \textbf{Speed-critical deployments: Q2\_K.} At 5.66~tokens/s and only 1.3~GB,
 Q2\_K is the fastest practical option. The 93.3\% accuracy is acceptable for
 many latency-sensitive applications.
 
-\textbf{Avoid Q6\_K on CPU backends.} Q6\_K is strictly dominated by Q4\_K\_M
-(faster, smaller, equally accurate) and Q3\_K\_M (faster, smaller, more accurate).
-This recommendation may not apply to GPU-accelerated backends.
+\textbf{Avoid Q6\_K on CPU backends.} Q6\_K is strictly dominated in both
+accuracy (86.7\% vs.\ 93.3--100\% for all others) and throughput (3.98~tokens/s,
+the slowest practical variant). Q4\_K\_M is faster, smaller, and more accurate;
+Q8\_0 is more accurate and nearly 25\% faster. This recommendation may not apply
+to GPU-accelerated backends where the Q6\_K de-quantization overhead differs.
 
 \textbf{Use 4 threads on heterogeneous ARM.} On the Tensor G2 (and similar
 big.LITTLE ARM SoCs), 4 threads matches the performance-core count and delivers
@@ -582,14 +597,6 @@ hardware power monitor (e.g., Monsoon Solutions).
 between experiments, cumulative thermal state over the 3-hour benchmark session
 may have affected later results. We report results in run order but do not
 model thermal drift explicitly.
-
-\textbf{Partial quality evaluation coverage.} The 15-question factual accuracy
-evaluation ran sequentially across all five quantization variants without per-variant
-cooldown. After $\sim$30~minutes of continuous evaluation (Q2\_K, Q3\_K\_M, Q4\_K\_M),
-the WiFi ADB session dropped, causing all inference calls for Q6\_K and Q8\_0 to
-time out at the host-side ADB layer rather than on-device. Reported accuracy for
-these two variants is therefore confounded and marked N/A; a re-run with 120-second
-per-variant cooldown and USB ADB is recommended.
 
 \subsection{Future Work}
 
@@ -637,11 +644,16 @@ Our primary empirical findings are:
         heterogeneous cluster; 8 threads degrades throughput by 20\% due to
         little-core load imbalance.
   \item \textbf{Accuracy non-monotonicity}: On-device factual accuracy does not
-        monotonically improve with bit-width---Q3\_K\_M (3-bit) achieves 100\%,
-        outperforming Q4\_K\_M (4-bit, 93.3\%) and Q2\_K (2-bit, 93.3\%) alike
-        (Q6\_K and Q8\_0 quality eval pending re-run).
-  \item \textbf{Q4\_K\_M is Pareto-optimal}: At 2.0~GB, 5.32~tokens/s, and 93.3\%
-        accuracy, Q4\_K\_M offers the best overall balance for 6~GB mobile deployment.
+        monotonically improve with bit-width across all five variants (86.7--100\%):
+        Q3\_K\_M (3-bit) and Q8\_0 (8-bit) achieve perfect 100\%, Q2\_K and
+        Q4\_K\_M score 93.3\%, and Q6\_K scores lowest at 86.7\% despite having
+        more bits per weight than Q4\_K\_M. Q6\_K is strictly dominated on both
+        accuracy and throughput, confirming it as the weakest deployment choice.
+  \item \textbf{Q4\_K\_M recommended; Q8\_0 Pareto-optimal on accuracy}: The
+        Pareto frontier is defined by Q8\_0 (100\%, 4.95~tokens/s) and Q2\_K
+        (93.3\%, 5.66~tokens/s). Q4\_K\_M (2.0~GB, 5.32~tokens/s, 93.3\%) offers
+        the best overall balance for 6~GB deployment due to its lower variance
+        and broad community ecosystem support.
 \end{enumerate}
 
 These findings provide actionable guidance: use Q4\_K\_M as the default, Q3\_K\_M
