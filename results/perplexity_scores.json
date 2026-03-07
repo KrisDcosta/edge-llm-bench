@@ -1,0 +1,32 @@
+{
+  "Q2_K": {
+    "perplexity": 11.714,
+    "perplexity_status": "success",
+    "corpus": "wikitext2_sample",
+    "corpus_bytes": 12014
+  },
+  "Q3_K_M": {
+    "perplexity": 10.1477,
+    "perplexity_status": "success",
+    "corpus": "wikitext2_sample",
+    "corpus_bytes": 12014
+  },
+  "Q4_K_M": {
+    "perplexity": 9.7553,
+    "perplexity_status": "success",
+    "corpus": "wikitext2_sample",
+    "corpus_bytes": 12014
+  },
+  "Q6_K": {
+    "perplexity": 9.752,
+    "perplexity_status": "success",
+    "corpus": "wikitext2_sample",
+    "corpus_bytes": 12014
+  },
+  "Q8_0": {
+    "perplexity": 9.7044,
+    "perplexity_status": "success",
+    "corpus": "wikitext2_sample",
+    "corpus_bytes": 12014
+  }
+}
