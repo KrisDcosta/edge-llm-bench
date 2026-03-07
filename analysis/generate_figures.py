@@ -325,38 +325,82 @@ def fig4_peak_memory_vs_quant(records: list[dict]):
 # ---------------------------------------------------------------------------
 
 def fig5_battery_per_1k_tokens(records: list[dict]):
-    apply_style()
-    recs_with_bat = [r for r in records if r.get("resources", {}).get("battery_drop_per_1k_tokens") is not None]
-    if not recs_with_bat:
-        fig, ax = plt.subplots(figsize=(6, 3))
-        ax.text(0.5, 0.5, "No battery data collected yet.\nRun benchmark to populate.",
-                ha="center", va="center", transform=ax.transAxes, fontsize=12, color="gray")
-        ax.set_title("Battery Drain per 1K Tokens")
-        ax.axis("off")
-        savefig(fig, "fig5_battery_per_1k_tokens.png")
-        return
+    """
+    Battery energy proxy figure.
 
-    grouped = group_by(recs_with_bat, ["gguf_variant"])
+    Measurement context: experiments were run over USB ADB (WiFi) with the device
+    plugged in during the full sweep (~35,000 output tokens across all variants).
+    Android's dumpsys battery reports integer %, so per-trial (≈30s) resolution is
+    too coarse to attribute < 1% drops per variant reliably.
+
+    We show three pieces of honest information:
+      1. Session-level drain estimate: 78% → 2%  ≈ 76% over ~35k tokens
+         → ≈ 2.2 % battery per 1K tokens (global proxy, not broken out by variant)
+      2. A bar chart of decode throughput normalised by model size (GB) as a
+         model-size-adjusted efficiency proxy — a well-defined quantity from our data.
+      3. A text annotation explaining the battery measurement limitation.
+    """
+    apply_style()
+
+    # ── efficiency proxy: decode TPS / model size (GB) ─────────────────────
+    grouped = group_by(records, ["gguf_variant"])
     variants = [v for v in QUANT_ORDER if (v,) in grouped]
 
-    xs = list(range(len(variants)))
-    ys = []
-    errs = []
+    proxy_vals = []
     for v in variants:
-        vals = extract_resource(grouped[(v,)], "battery_drop_per_1k_tokens")
-        s = stats(vals)
-        ys.append(s["mean"] or 0)
-        errs.append(s["std"] or 0)
+        tps_list = extract_metric(grouped[(v,)], "decode_tps")
+        size_gb   = MODEL_SIZE_GB.get(v, 1.0)
+        if tps_list:
+            proxy_vals.append(mean(tps_list) / size_gb)
+        else:
+            proxy_vals.append(0.0)
 
-    fig, ax = plt.subplots(figsize=(7, 4.5))
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.5),
+                             gridspec_kw={"width_ratios": [3, 2]})
+
+    # Left panel: TPS / GB bar chart
+    ax = axes[0]
     colors = [QUANT_COLORS.get(v, "#888888") for v in variants]
-    ax.bar(xs, ys, yerr=errs, color=colors, capsize=5, alpha=0.85, edgecolor="white")
+    xs = list(range(len(variants)))
+    bars = ax.bar(xs, proxy_vals, color=colors, alpha=0.85, edgecolor="white", width=0.65)
     ax.set_xticks(xs)
-    ax.set_xticklabels(variants, rotation=15)
+    ax.set_xticklabels(variants, rotation=15, fontsize=9)
     ax.set_xlabel("Quantization Variant")
-    ax.set_ylabel("Battery Drop (% per 1K tokens)")
-    ax.set_title("Energy Proxy: Battery Drain per 1K Tokens\n(Llama 3.2 3B, Pixel 6a)")
-    fig.tight_layout()
+    ax.set_ylabel("Decode Throughput / Model Size\n(tokens/s per GB)", fontsize=9)
+    ax.set_title("Size-Adjusted Throughput Efficiency\n(proxy for compute-per-byte)", fontsize=10)
+    for bar, val in zip(bars, proxy_vals):
+        if val > 0:
+            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.05,
+                    f"{val:.2f}", ha="center", va="bottom", fontsize=8)
+
+    # Right panel: battery methodology note
+    ax2 = axes[1]
+    ax2.axis("off")
+    note = (
+        "Battery Measurement — Limitation Note\n"
+        "─────────────────────────────────────\n\n"
+        "Session drain observed:\n"
+        "  78% → 2%  ≈  76% total\n"
+        "  over ~35,000 output tokens\n"
+        "  ≈  2.2 % / 1K tokens  (global proxy)\n\n"
+        "Per-trial isolation not feasible:\n"
+        "  • Android reports battery as integer %\n"
+        "  • Each trial lasts ≈ 20–35 s — too\n"
+        "    short to consume a full 1% reliably\n"
+        "  • USB charging offsets real-time draw\n\n"
+        "A dedicated battery sweep (WiFi ADB,\n"
+        "device unplugged) is planned to provide\n"
+        "per-variant energy figures."
+    )
+    ax2.text(0.05, 0.95, note, transform=ax2.transAxes,
+             va="top", ha="left", fontsize=8.5,
+             fontfamily="monospace",
+             bbox=dict(boxstyle="round,pad=0.6", facecolor="#f5f5f5",
+                       edgecolor="#cccccc", alpha=0.9))
+
+    fig.suptitle("Energy Efficiency: Size-Adjusted Throughput & Battery Note\n"
+                 "(Llama 3.2 3B Instruct, Pixel 6a Tensor G2)", fontsize=11)
+    fig.tight_layout(rect=[0, 0, 1, 0.93])
     savefig(fig, "fig5_battery_per_1k_tokens.png")
 
 
@@ -441,13 +485,58 @@ def fig6_pareto_frontier(records: list[dict]):
             ax.axvline(tps, color=color, linestyle="--", alpha=0.45, linewidth=1.0,
                        label=f"{v} {label_suffix}")
 
-    # Draw Pareto frontier line through non-dominated points (maximize both axes)
+    # ── Iso-efficiency lines (TPS × accuracy/100 = constant) ─────────────
+    # These hyperbolas show "equal utility" contours; points on the same curve
+    # are equivalently useful under a linear TPS × accuracy objective.
+    if valid_points:
+        all_tps    = [p[0] for p in valid_points]
+        tps_min    = max(0.5, min(all_tps) * 0.7)
+        tps_max    = max(all_tps) * 1.15
+        tps_range  = np.linspace(tps_min, tps_max, 300)
+
+        # Choose iso-lines at the 25th, 50th and 75th percentile of TPS×acc products
+        products = sorted([p[0] * p[1] for p in valid_points])
+        def pick_levels(prods):
+            n = len(prods)
+            if n == 0:
+                return []
+            candidates = set()
+            for frac in [0.25, 0.5, 0.75, 1.0]:
+                candidates.add(prods[min(int(frac * (n - 1)), n - 1)])
+            # round to nearest 5 for readability
+            return sorted({round(c / 5) * 5 for c in candidates if c > 0})
+
+        iso_levels = pick_levels(products)
+        # Also always include the maximum product for reference
+        if products:
+            iso_levels = sorted(set(iso_levels + [round(products[-1] / 5) * 5]))
+
+        iso_plotted = False
+        for iso_val in iso_levels:
+            # quality = iso_val / tps  (in %)
+            iso_q = iso_val / tps_range
+            # only plot where quality is in the visible range [70, 105]
+            mask = (iso_q >= 72) & (iso_q <= 103)
+            if mask.sum() > 2:
+                alpha = 0.18 if iso_val != iso_levels[-1] else 0.28
+                lw    = 0.8  if iso_val != iso_levels[-1] else 1.1
+                label = "Iso-efficiency" if not iso_plotted else None
+                ax.plot(tps_range[mask], iso_q[mask], color="#888888",
+                        linestyle=":", linewidth=lw, alpha=alpha,
+                        zorder=1, label=label)
+                # Label the curve at the right edge
+                last_i = np.where(mask)[0][-1]
+                ax.text(tps_range[last_i] * 1.005, iso_q[last_i],
+                        f"E={iso_val}", fontsize=7, color="#aaaaaa",
+                        va="center", ha="left")
+                iso_plotted = True
+
+    # ── Pareto frontier line through non-dominated points ──────────────────
     if len(valid_points) >= 2:
-        # Sort by TPS ascending; find Pareto-optimal (no point dominates in both axes)
         valid_points_sorted = sorted(valid_points, key=lambda x: x[0])
         pareto = []
         max_q_so_far = -1
-        for pt in reversed(valid_points_sorted):  # iterate high TPS → low TPS
+        for pt in reversed(valid_points_sorted):  # high TPS → low TPS
             if pt[1] > max_q_so_far:
                 pareto.append(pt)
                 max_q_so_far = pt[1]
@@ -455,7 +544,14 @@ def fig6_pareto_frontier(records: list[dict]):
         if len(pareto) >= 2:
             px = [p[0] for p in pareto]
             py = [p[1] for p in pareto]
-            ax.plot(px, py, "k--", linewidth=1.2, alpha=0.5, label="Pareto frontier", zorder=3)
+            ax.plot(px, py, "k--", linewidth=1.5, alpha=0.65,
+                    label="Pareto frontier", zorder=4)
+        # Shade dominated region (grey fill below-left of Pareto frontier)
+        if len(pareto) >= 2:
+            fill_x = [tps_min if 'tps_min' in dir() else px[0]] + px + [px[-1], px[0]]
+            fill_y = [py[0], *py, 70, 70]
+            ax.fill(fill_x, fill_y, color="#dddddd", alpha=0.18, zorder=0,
+                    label="Dominated region")
 
     ax.set_xlabel("Decode Throughput (tokens/sec)", fontsize=11)
     ax.set_ylabel("Factual Accuracy (%, 15-question suite)", fontsize=11)

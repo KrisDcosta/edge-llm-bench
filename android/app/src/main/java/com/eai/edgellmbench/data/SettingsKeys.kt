@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 
 // ---------------------------------------------------------------------------
@@ -20,13 +21,16 @@ val Context.settingsDataStore: DataStore<Preferences>
 // ---------------------------------------------------------------------------
 
 object SettingsKeys {
-    val THREAD_COUNT    = intPreferencesKey("thread_count")
-    val CONTEXT_LENGTH  = intPreferencesKey("context_length")
-    val OUTPUT_LENGTH   = intPreferencesKey("output_length")
-    val TEMPERATURE     = floatPreferencesKey("temperature")
-    val SEED            = intPreferencesKey("seed")
-    val WARMUP_RUNS     = intPreferencesKey("warmup_runs")
-    val BENCH_RUNS      = intPreferencesKey("bench_runs")
+    val THREAD_COUNT      = intPreferencesKey("thread_count")
+    val CONTEXT_LENGTH    = intPreferencesKey("context_length")
+    val OUTPUT_LENGTH     = intPreferencesKey("output_length")
+    val TEMPERATURE       = floatPreferencesKey("temperature")
+    val SEED              = intPreferencesKey("seed")
+    val WARMUP_RUNS       = intPreferencesKey("warmup_runs")
+    val BENCH_RUNS        = intPreferencesKey("bench_runs")
+    // Persisted last-used model for cold-start auto-load
+    val LAST_MODEL_PATH    = stringPreferencesKey("last_model_path")
+    val LAST_MODEL_VARIANT = stringPreferencesKey("last_model_variant")
 }
 
 // ---------------------------------------------------------------------------

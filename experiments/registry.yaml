@@ -210,7 +210,7 @@ experiments:
     status: planned
     notes: "Thread sweep: 8 threads (all cores including LITTLE cores)"
 
-  # --- Extended Context to 2048 (Q2_K + Q4_K_M) ---
+  # --- Extended Context to 2048 (all 5 practical variants) ---
   # Tests whether context-invariant throughput finding holds at longer sequences
   - id: q2k-ctx2048
     quant_bits: 2
@@ -222,9 +222,39 @@ experiments:
     prompt_set_id: prompt-suite-v1
     status: planned
     notes: "Extended context: validate context-invariance at 2048 tokens"
+  - id: q3km-ctx2048
+    quant_bits: 3
+    gguf_variant: Q3_K_M
+    context_length: 2048
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Extended context: validate context-invariance at 2048 tokens"
   - id: q4km-ctx2048
     quant_bits: 4
     gguf_variant: Q4_K_M
+    context_length: 2048
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Extended context: validate context-invariance at 2048 tokens"
+  - id: q6k-ctx2048
+    quant_bits: 6
+    gguf_variant: Q6_K
+    context_length: 2048
+    output_length: 128
+    warmups: 2
+    trials: 5
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Extended context: validate context-invariance at 2048 tokens"
+  - id: q8-ctx2048
+    quant_bits: 8
+    gguf_variant: Q8_0
     context_length: 2048
     output_length: 128
     warmups: 2

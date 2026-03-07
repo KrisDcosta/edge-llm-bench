@@ -8,6 +8,7 @@ import com.eai.edgellmbench.BenchmarkLogger
 import com.eai.edgellmbench.InferenceMetrics
 import com.eai.edgellmbench.data.repository.InferenceRepository
 import com.eai.edgellmbench.data.repository.ModelRepository
+import android.util.Log
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -68,10 +69,19 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val logger by lazy { BenchmarkLogger(application) }
 
     init {
-        // Initialise the engine singleton on a background thread
+        // Initialise the engine singleton on a background thread, then attempt
+        // to restore the last-used model automatically (cold-start auto-load).
         viewModelScope.launch(Dispatchers.Default) {
             InferenceRepository.getEngine(application)
             engineReady.complete(Unit)
+            // Try to restore the previously loaded model silently
+            val restored = ModelRepository.tryAutoLoad(application)
+            if (restored != null) {
+                Log.i("ChatViewModel", "Auto-loaded previous model: $restored")
+                withContext(Dispatchers.Main) {
+                    appendSystemMessage("Auto-loaded: $restored")
+                }
+            }
         }
         // Keep UI in sync with shared model state
         viewModelScope.launch {

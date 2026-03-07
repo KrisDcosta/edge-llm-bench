@@ -3,6 +3,7 @@ package com.eai.edgellmbench.data.repository
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.datastore.preferences.core.edit
 import com.arm.aichat.InferenceEngine
 import com.eai.edgellmbench.data.SettingsDefaults
 import com.eai.edgellmbench.data.SettingsKeys
@@ -62,8 +63,33 @@ object ModelRepository {
         resetEngineIfNeeded(engine)
         engine.loadModel(path)
         applyCurrentSettings(context, engine)
+        persistLastModel(context, variant, path)
         InferenceRepository.markLoaded(variant, path)
         File(path).name
+    }
+
+    /**
+     * Attempts to restore the previously loaded model on cold start.
+     * Silently no-ops if no prior model is recorded, the file no longer
+     * exists, or any error occurs during load.
+     *
+     * @return the model filename if auto-load succeeded, null otherwise
+     */
+    suspend fun tryAutoLoad(context: Context): String? = withContext(Dispatchers.IO) {
+        try {
+            val prefs   = context.settingsDataStore.data.first()
+            val path    = prefs[SettingsKeys.LAST_MODEL_PATH]    ?: return@withContext null
+            val variant = prefs[SettingsKeys.LAST_MODEL_VARIANT] ?: return@withContext null
+            if (!File(path).canRead()) {
+                Log.i(TAG, "tryAutoLoad: previous model not readable at $path — skipping")
+                return@withContext null
+            }
+            Log.i(TAG, "tryAutoLoad: restoring $variant from $path")
+            loadFromPath(context, path, variant)
+        } catch (e: Exception) {
+            Log.w(TAG, "tryAutoLoad: failed — ${e.message}")
+            null
+        }
     }
 
     /**
@@ -85,8 +111,24 @@ object ModelRepository {
         val file = copyUriToLocal(context, uri)
         engine.loadModel(file.absolutePath)
         applyCurrentSettings(context, engine)
+        persistLastModel(context, variant, file.absolutePath)
         InferenceRepository.markLoaded(variant, file.absolutePath)
         file.name
+    }
+
+    /**
+     * Persists the variant + path of the most recently loaded model to DataStore
+     * so it can be restored automatically on the next cold start.
+     */
+    private suspend fun persistLastModel(context: Context, variant: String, path: String) {
+        try {
+            context.settingsDataStore.edit { prefs ->
+                prefs[SettingsKeys.LAST_MODEL_PATH]    = path
+                prefs[SettingsKeys.LAST_MODEL_VARIANT] = variant
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "persistLastModel: failed — ${e.message}")
+        }
     }
 
     /**

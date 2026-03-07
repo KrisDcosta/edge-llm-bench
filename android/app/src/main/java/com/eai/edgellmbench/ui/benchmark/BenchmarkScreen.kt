@@ -21,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -151,10 +152,15 @@ fun BenchmarkScreen(
                 )
             }
 
+            // Post-benchmark summary card (only shown when complete)
+            if (uiState.status == BenchmarkStatus.Complete && uiState.results.isNotEmpty()) {
+                BenchmarkSummaryCard(results = uiState.results.filter { !it.isWarmup })
+            }
+
             // Results table
             if (uiState.results.isNotEmpty()) {
                 HorizontalDivider()
-                Text("Results", style = MaterialTheme.typography.titleSmall)
+                Text("Trial Results", style = MaterialTheme.typography.titleSmall)
                 ResultsTable(results = uiState.results)
             }
         }
@@ -173,13 +179,24 @@ private fun BenchmarkStatusCard(uiState: BenchmarkUiState, configText: String) {
         ),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Model", style = MaterialTheme.typography.labelSmall,
+            Text("MODEL", style = MaterialTheme.typography.labelSmall,
                  color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
-                text = if (uiState.isModelLoaded) "${uiState.activeVariant} — loaded" else "No model loaded",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
+                text = if (uiState.isModelLoaded) uiState.activeVariant else "No model loaded",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = if (uiState.isModelLoaded)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (uiState.isModelLoaded) {
+                Text(
+                    text = "Llama 3.2 3B Instruct · GGUF",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Spacer(Modifier.height(8.dp))
             Text("Suite", style = MaterialTheme.typography.labelSmall,
                  color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -192,6 +209,79 @@ private fun BenchmarkStatusCard(uiState: BenchmarkUiState, configText: String) {
                  style = MaterialTheme.typography.bodySmall,
                  color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+    }
+}
+
+// ── Post-benchmark summary card ───────────────────────────────────────────────
+
+@Composable
+private fun BenchmarkSummaryCard(results: List<TrialResult>) {
+    if (results.isEmpty()) return
+
+    val tpsList  = results.map { it.decodeTps }
+    val ttftList = results.map { it.ttftS }
+
+    fun List<Double>.safeMean() = if (isEmpty()) 0.0 else sum() / size
+    fun List<Double>.safeStd(): Double {
+        if (size < 2) return 0.0
+        val m = safeMean()
+        return Math.sqrt(sumOf { (it - m) * (it - m) } / (size - 1))
+    }
+
+    val meanTps  = tpsList.safeMean()
+    val stdTps   = tpsList.safeStd()
+    val meanTtft = ttftList.safeMean()
+    val stdTtft  = ttftList.safeStd()
+    val n        = results.size
+
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Benchmark Summary",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                SummaryMetric(
+                    label = "Decode TPS",
+                    value = "%.2f".format(meanTps),
+                    sub   = "±%.2f  (n=$n)".format(stdTps),
+                )
+                SummaryMetric(
+                    label = "TTFT",
+                    value = "%.2fs".format(meanTtft),
+                    sub   = "±%.2fs".format(stdTtft),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SummaryMetric(label: String, value: String, sub: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Monospace,
+        )
+        Text(
+            text = sub,
+            style = MaterialTheme.typography.bodySmall,
+            fontFamily = FontFamily.Monospace,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
