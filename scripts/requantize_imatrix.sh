@@ -73,43 +73,36 @@ fi
 echo "  Using: $LLAMA_QUANTIZE"
 
 # ---------------------------------------------------------------------------
-# Quantization type map (llama-quantize type names)
+# Config — bash 3.2 compatible (quant type name = variant name for all 5)
 # ---------------------------------------------------------------------------
-ALL_VARIANTS=("Q2_K" "Q3_K_M" "Q4_K_M" "Q6_K" "Q8_0")
-
-declare -A QUANT_TYPES
-QUANT_TYPES["Q2_K"]="Q2_K"
-QUANT_TYPES["Q3_K_M"]="Q3_K_M"
-QUANT_TYPES["Q4_K_M"]="Q4_K_M"
-QUANT_TYPES["Q6_K"]="Q6_K"
-QUANT_TYPES["Q8_0"]="Q8_0"
-
+ALL_VARIANTS="Q2_K Q3_K_M Q4_K_M Q6_K Q8_0"
 N_THREADS=$(sysctl -n hw.logicalcpu 2>/dev/null || nproc 2>/dev/null || echo 4)
 
 # ---------------------------------------------------------------------------
 # Parse arguments
 # ---------------------------------------------------------------------------
-VARIANTS=()
+VARIANTS=""
 FORCE=0
 
 for arg in "$@"; do
     case "$arg" in
         --force) FORCE=1 ;;
-        Q2_K|Q3_K_M|Q4_K_M|Q6_K|Q8_0) VARIANTS+=("$arg") ;;
+        Q2_K|Q3_K_M|Q4_K_M|Q6_K|Q8_0) VARIANTS="$VARIANTS $arg" ;;
         *) echo "Unknown argument: $arg" >&2; exit 1 ;;
     esac
 done
 
-if [ ${#VARIANTS[@]} -eq 0 ]; then
-    VARIANTS=("${ALL_VARIANTS[@]}")
+if [ -z "$VARIANTS" ]; then
+    VARIANTS="$ALL_VARIANTS"
 fi
+VARIANTS="${VARIANTS# }"
 
 # ---------------------------------------------------------------------------
 # Pre-flight checks
 # ---------------------------------------------------------------------------
 echo "=== imatrix Re-quantization ==="
 echo "  Source:   $F16_MODEL"
-echo "  Variants: ${VARIANTS[*]}"
+echo "  Variants: $VARIANTS"
 echo "  Threads:  $N_THREADS"
 echo ""
 
@@ -117,23 +110,22 @@ if [ ! -f "$F16_MODEL" ]; then
     echo "ERROR: F16 base model not found: $F16_MODEL" >&2
     echo "  Download from HuggingFace:" >&2
     echo "    huggingface-cli download bartowski/Llama-3.2-3B-Instruct-GGUF \\" >&2
-    echo "      --include '*F16*' \\" >&2
-    echo "      --local-dir ${MODELS_DIR}" >&2
+    echo "      --include '*F16*' --local-dir ${MODELS_DIR}" >&2
     exit 1
 fi
 echo "  ✓ F16 model found ($(du -sh "$F16_MODEL" | cut -f1))"
 
 # Check imatrix files exist
-MISSING_IMATRIX=()
-for VARIANT in "${VARIANTS[@]}"; do
+MISSING=""
+for VARIANT in $VARIANTS; do
     if [ ! -f "${DATA_DIR}/imatrix_${VARIANT}.dat" ]; then
-        MISSING_IMATRIX+=("$VARIANT")
+        MISSING="$MISSING $VARIANT"
     fi
 done
 
-if [ ${#MISSING_IMATRIX[@]} -gt 0 ]; then
-    echo "ERROR: Missing imatrix files for: ${MISSING_IMATRIX[*]}" >&2
-    echo "  Run: bash scripts/run_imatrix.sh ${MISSING_IMATRIX[*]}" >&2
+if [ -n "$MISSING" ]; then
+    echo "ERROR: Missing imatrix files for:$MISSING" >&2
+    echo "  Run: bash scripts/run_imatrix.sh${MISSING}" >&2
     exit 1
 fi
 echo "  ✓ All imatrix .dat files found"
@@ -142,16 +134,17 @@ echo ""
 # ---------------------------------------------------------------------------
 # Re-quantize each variant
 # ---------------------------------------------------------------------------
-TOTAL=${#VARIANTS[@]}
+TOTAL=$(echo "$VARIANTS" | wc -w | tr -d ' ')
 IDX=0
 
-for VARIANT in "${VARIANTS[@]}"; do
+for VARIANT in $VARIANTS; do
     IDX=$((IDX + 1))
     echo "=== [${IDX}/${TOTAL}] Re-quantizing: ${VARIANT} with imatrix ==="
 
     IMATRIX_FILE="${DATA_DIR}/imatrix_${VARIANT}.dat"
     OUTPUT_MODEL="${MODELS_DIR}/${VARIANT}-imatrix.gguf"
-    QUANT_TYPE="${QUANT_TYPES[$VARIANT]}"
+    # Quantization type name = variant name (Q4_K_M, Q2_K, etc.)
+    QUANT_TYPE="$VARIANT"
 
     if [ -f "$OUTPUT_MODEL" ] && [ "$FORCE" -eq 0 ]; then
         echo "  Already exists: $OUTPUT_MODEL (use --force to overwrite)"

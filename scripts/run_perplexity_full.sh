@@ -38,40 +38,28 @@ LLAMA_PPL="${DEVICE_DIR}/llama-perplexity"
 CTX_SIZE=512
 N_THREADS=4
 
-# Model name map
-declare -A MODEL_FILES
-MODEL_FILES["Q2_K"]="Llama-3.2-3B-Instruct-Q2_K.gguf"
-MODEL_FILES["Q3_K_M"]="Llama-3.2-3B-Instruct-Q3_K_M.gguf"
-MODEL_FILES["Q4_K_M"]="Llama-3.2-3B-Instruct-Q4_K_M.gguf"
-MODEL_FILES["Q6_K"]="Llama-3.2-3B-Instruct-Q6_K.gguf"
-MODEL_FILES["Q8_0"]="Llama-3.2-3B-Instruct-Q8_0.gguf"
-
-declare -A IMATRIX_MODEL_FILES
-IMATRIX_MODEL_FILES["Q2_K"]="Llama-3.2-3B-Instruct-Q2_K-imatrix.gguf"
-IMATRIX_MODEL_FILES["Q3_K_M"]="Llama-3.2-3B-Instruct-Q3_K_M-imatrix.gguf"
-IMATRIX_MODEL_FILES["Q4_K_M"]="Llama-3.2-3B-Instruct-Q4_K_M-imatrix.gguf"
-IMATRIX_MODEL_FILES["Q6_K"]="Llama-3.2-3B-Instruct-Q6_K-imatrix.gguf"
-IMATRIX_MODEL_FILES["Q8_0"]="Llama-3.2-3B-Instruct-Q8_0-imatrix.gguf"
-
-ALL_VARIANTS=("Q2_K" "Q3_K_M" "Q4_K_M" "Q6_K" "Q8_0")
+# Model filename prefix (consistent across all variants)
+MODEL_PREFIX="Llama-3.2-3B-Instruct"
+ALL_VARIANTS="Q2_K Q3_K_M Q4_K_M Q6_K Q8_0"
 
 # ---------------------------------------------------------------------------
-# Parse arguments
+# Parse arguments — bash 3.2 compatible (no declare -A)
 # ---------------------------------------------------------------------------
 USE_IMATRIX=0
-VARIANTS=()
+VARIANTS=""
 
 for arg in "$@"; do
     case "$arg" in
         --imatrix) USE_IMATRIX=1 ;;
-        Q2_K|Q3_K_M|Q4_K_M|Q6_K|Q8_0) VARIANTS+=("$arg") ;;
+        Q2_K|Q3_K_M|Q4_K_M|Q6_K|Q8_0) VARIANTS="$VARIANTS $arg" ;;
         *) echo "Unknown argument: $arg" >&2; exit 1 ;;
     esac
 done
 
-if [ ${#VARIANTS[@]} -eq 0 ]; then
-    VARIANTS=("${ALL_VARIANTS[@]}")
+if [ -z "$VARIANTS" ]; then
+    VARIANTS="$ALL_VARIANTS"
 fi
+VARIANTS="${VARIANTS# }"
 
 SUFFIX=""
 if [ "$USE_IMATRIX" -eq 1 ]; then
@@ -125,18 +113,19 @@ echo "  ✓ Corpus pushed to ${CORPUS_DEVICE}"
 # ---------------------------------------------------------------------------
 # Run perplexity for each variant
 # ---------------------------------------------------------------------------
-TOTAL=${#VARIANTS[@]}
+TOTAL=$(echo "$VARIANTS" | wc -w | tr -d ' ')
 IDX=0
 
-for VARIANT in "${VARIANTS[@]}"; do
+for VARIANT in $VARIANTS; do
     IDX=$((IDX + 1))
     echo ""
     echo "=== [${IDX}/${TOTAL}] Running perplexity: ${VARIANT}${SUFFIX} ==="
 
+    # Build model filename: Llama-3.2-3B-Instruct-{VARIANT}[-imatrix].gguf
     if [ "$USE_IMATRIX" -eq 1 ]; then
-        MODEL_FILE="${IMATRIX_MODEL_FILES[$VARIANT]}"
+        MODEL_FILE="${MODEL_PREFIX}-${VARIANT}-imatrix.gguf"
     else
-        MODEL_FILE="${MODEL_FILES[$VARIANT]}"
+        MODEL_FILE="${MODEL_PREFIX}-${VARIANT}.gguf"
     fi
 
     MODEL_PATH="${DEVICE_DIR}/${MODEL_FILE}"
@@ -184,6 +173,6 @@ echo "To extract results:"
 echo "  bash scripts/parse_perplexity_results.sh"
 echo ""
 echo "Or manually:"
-for VARIANT in "${VARIANTS[@]}"; do
+for VARIANT in $VARIANTS; do
     echo "  adb shell \"grep -E 'Final estimate' ${DEVICE_DIR}/ppl_full_${VARIANT}${SUFFIX}.txt\""
 done
