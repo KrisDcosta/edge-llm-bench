@@ -156,12 +156,14 @@ for VARIANT in $VARIANTS; do
     echo "  output:  $OUTPUT_MODEL"
     echo "  Started: $(date '+%H:%M:%S')"
 
+    # llama-quantize usage: [--imatrix file] model-f32.gguf [model-quant.gguf] type [nthreads]
+    # Note: nthreads is a positional arg at the end, not a flag
     "$LLAMA_QUANTIZE" \
         --imatrix "$IMATRIX_FILE" \
-        --nthreads "$N_THREADS" \
         "$F16_MODEL" \
         "$OUTPUT_MODEL" \
         "$QUANT_TYPE" \
+        "$N_THREADS" \
         2>&1 | tee "${DATA_DIR}/requantize_${VARIANT}.log"
 
     echo "  Finished: $(date '+%H:%M:%S')"
