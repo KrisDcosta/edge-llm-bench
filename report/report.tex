@@ -305,7 +305,7 @@ Q8\_0    & 3.4 & $4.95 \pm 0.59$ & 7.14  & 3.95  & 23.21  & 100.0 & [80--100] & 
 F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & \multicolumn{3}{l}{N/A (timeout; 1 trial)} \\
 \midrule
 \multicolumn{9}{l}{\small Accuracy: exact-match over 15 factual questions; 95\% CI via Wilson score interval ($n{=}15$).}\\
-\multicolumn{9}{l}{\small Q8\_0 achieves best TTFT at 3.95\,s. PPL via \texttt{llama-perplexity} on WikiText-2 (seed=42).}\\
+\multicolumn{9}{l}{\small Q8\_0 achieves best TTFT at 3.95\,s. PPL via \texttt{llama-perplexity} on WikiText-2 sample (12\,KB ${\approx}3{,}000$ tokens; seed=42).}\\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -482,12 +482,12 @@ specific weight sensitivity of Llama 3.2's layers to reduced precision.
 
 \textbf{Perplexity vs.\ factual accuracy.}
 WikiText-2 perplexity (Table~\ref{tab:main_results}) is nearly monotonic with
-bit-width: Q8\_0 (9.70) $\approx$ Q6\_K (9.75) $\approx$ Q4\_K\_M (9.76)
-$<$ Q3\_K\_M (10.15) $<$ Q2\_K (11.71). Yet Q6\_K and Q4\_K\_M have
-\emph{identical} PPL within 0.01 while their factual accuracy differs by 6.6\%
-(86.7\% vs.\ 93.3\%) and throughput by 34\%. Perplexity is thus an \emph{insufficient}
-quality proxy: task-specific on-device evaluation is essential to surface
-quantisation-specific failure modes.
+bit-width: Q8\_0 (9.70)~$\approx$~Q6\_K (9.75)~$\approx$~Q4\_K\_M (9.76)
+$<$~Q3\_K\_M (10.15)~$<$~Q2\_K (11.71) (12\,KB sample, ${\approx}3{,}000$ tokens).
+Yet Q6\_K and Q4\_K\_M have \emph{identical} PPL within 0.01 while their factual
+accuracy differs by 6.6\% (86.7\% vs.\ 93.3\%) and throughput by 34\%.
+Perplexity is thus an \emph{insufficient} quality proxy: task-specific on-device
+evaluation is essential to surface quantisation-specific failure modes.
 
 \subsection{RQ5: Deployment Limits and Thread Scaling}
 \label{sec:rq5}
@@ -651,17 +651,14 @@ activation working memory---not the full RSS including memory-mapped model weigh
 The model weights themselves contribute an additional 1.3--3.4~GB depending on
 variant, loaded via mmap.
 
-\textbf{Battery measurement granularity.} The main benchmark sweep was conducted
-over WiFi ADB with the device unplugged. The session drained the battery from
-78\% to approximately 2\% ($\sim$76\% total), corresponding to a rough session-level
-estimate of $\sim$2.1\%/1k~tokens across $\sim$35{,}000 output tokens. However,
-Android's \texttt{dumpsys battery} API reports integer-percentage values only;
-each individual 30-second trial consumes far less than 1\% of charge, so
-per-trial battery tracking is noise-dominated (63 of 277 trials show a 1\%
-drop, the rest 0\%). Per-variant energy comparison therefore cannot be reliably
-extracted from this dataset. Accurate per-variant measurements require either
-a hardware power monitor (e.g., Monsoon Solutions) or longer-duration trials
-($\geq$256 output tokens) to amplify the per-trial signal above the 1\% threshold.
+\textbf{Battery measurement granularity.} The benchmark was conducted over WiFi ADB
+with the device unplugged, draining from 78\% to ${\sim}$2\%
+(${\sim}$2.1\%/1k~tokens across ${\sim}$35{,}000 output tokens).
+Android's \texttt{dumpsys battery} reports only integer-percentage values; each
+30-second trial consumes $<$1\%, making per-trial tracking noise-dominated
+(63 of 277 trials show a 1\% drop, the rest 0\%). Per-variant energy comparison
+requires a hardware power monitor (e.g., Monsoon Solutions) or
+longer-duration trials ($\geq$256 output tokens).
 
 \textbf{Thermal trajectory not characterized.} Despite a 120-second cooldown
 between experiments, cumulative thermal state over the 3-hour benchmark session
@@ -670,10 +667,11 @@ model thermal drift explicitly.
 
 \subsection{Future Work}
 
-\textbf{WikiText-2 perplexity evaluation.} While on-device factual accuracy provides
-a practical measure of downstream quality, perplexity on a held-out corpus
-(WikiText-2 or C4) would enable comparison against published quantization papers
-and validate our accuracy-ordering results.
+\textbf{Full-corpus perplexity and imatrix calibration.}
+Re-evaluating PPL on the full WikiText-2 test set (285\,K tokens) will validate
+fine-grained comparisons. On-device benchmarking of importance-matrix-calibrated
+re-quantizations (\texttt{Q2\_K}--\texttt{Q8\_0}) will assess whether calibration
+narrows the accuracy gap at lower bit-widths.
 
 \textbf{Cross-platform comparison.} Repeating this benchmark on Snapdragon 8 Gen 3,
 Apple A-series, and MediaTek Dimensity platforms would establish whether the
