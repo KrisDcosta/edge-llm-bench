@@ -1,15 +1,15 @@
 {
   "Q2_K": {
-    "perplexity": 11.714,
+    "perplexity": 13.2885,
     "perplexity_status": "success",
-    "corpus": "wikitext2_sample",
-    "corpus_bytes": 12014
+    "corpus": "wikitext2_full",
+    "tokens_approx": 285000
   },
   "Q3_K_M": {
-    "perplexity": 10.1477,
+    "perplexity": 11.0832,
     "perplexity_status": "success",
-    "corpus": "wikitext2_sample",
-    "corpus_bytes": 12014
+    "corpus": "wikitext2_full",
+    "tokens_approx": 285000
   },
   "Q4_K_M": {
     "perplexity": 9.7553,

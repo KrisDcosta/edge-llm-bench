@@ -41,6 +41,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -52,8 +53,9 @@ SCRIPT_DIR   = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 DEFAULT_PROMPTS_FILE = PROJECT_ROOT / "prompts" / "quality-eval-v1.yaml"
 OUTPUT_FILE  = PROJECT_ROOT / "results" / "quality_scores.json"
-DEVICE_DIR   = "/data/local/tmp"
-LLAMA_CLI    = f"{DEVICE_DIR}/llama-completion"
+DEVICE_DIR        = "/data/local/tmp"
+LLAMA_CLI         = f"{DEVICE_DIR}/llama-completion"
+PROMPT_DEVICE_PATH = f"{DEVICE_DIR}/eval_prompt.txt"   # temp file for per-question prompts
 
 GGUF_DEVICE_PATHS = {
     "Q2_K":   f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q2_K.gguf",
@@ -101,6 +103,45 @@ def _find_adb() -> str:
 
 
 ADB_BIN = _find_adb()
+
+
+# ---------------------------------------------------------------------------
+# Prompt formatting
+# ---------------------------------------------------------------------------
+
+def format_llama3_instruct(user_message: str) -> str:
+    """Wrap a user message in the Llama-3.2-3B-Instruct chat template.
+
+    The model was fine-tuned with this exact format; without it raw
+    completion mode won't follow yes/no or letter-only instructions.
+    """
+    return (
+        "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n"
+        f"{user_message}"
+        "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+    )
+
+
+def push_prompt_to_device(text: str) -> None:
+    """Write *text* to PROMPT_DEVICE_PATH on the connected device.
+
+    Using adb push avoids all shell-quoting issues (dollar signs, backticks,
+    angle brackets, newlines) that arise when passing long BoolQ passages
+    through adb shell -p "...".
+    """
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".txt", delete=False, encoding="utf-8"
+    ) as fh:
+        fh.write(text)
+        host_path = fh.name
+
+    result = subprocess.run(
+        [ADB_BIN, "push", host_path, PROMPT_DEVICE_PATH],
+        capture_output=True, text=True, timeout=20,
+    )
+    Path(host_path).unlink(missing_ok=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"adb push failed: {result.stderr.strip()}")
 
 
 def adb_shell(cmd: str, timeout: int = 120) -> str:
@@ -261,15 +302,41 @@ def score_answer(model_output: str, expected: str, answer_type: str) -> bool:
         return score_substring(model_output, expected)
 
 
+_LOG_KEYWORDS = (
+    "llama_", "ggml_", "common_perf", "load time", "eval time",
+    "prompt eval", "total time", "main: ", "[New Thread",
+    "warning:", "error:",
+)
+
+_ASSISTANT_MARKER = "<|start_header_id|>assistant<|end_header_id|>"
+
+
 def extract_model_answer(raw_output: str) -> str:
-    """Extract the generated text from llama-completion output, stripping log lines."""
+    """Extract the generated text from llama-completion output.
+
+    When using the Llama-3.2 instruct template (-f prompt_file), the binary
+    echoes the full prompt back before the generated tokens.  We locate the
+    last assistant header marker and take only the text after it, stripping
+    debug log lines throughout.
+    """
+    # Instruct-format path: slice everything after the last assistant header
+    if _ASSISTANT_MARKER in raw_output:
+        idx = raw_output.rfind(_ASSISTANT_MARKER)
+        response = raw_output[idx + len(_ASSISTANT_MARKER):]
+        # Drop the two leading newlines that follow the header token
+        response = response.lstrip("\n")
+        # Remove EOS/EOT tokens that may appear in the text stream
+        response = response.replace("<|eot_id|>", "").replace("<|end_of_text|>", "")
+        lines = [
+            l for l in response.splitlines()
+            if not any(kw in l for kw in _LOG_KEYWORDS)
+        ]
+        return " ".join(lines).strip()
+
+    # Fallback: original behaviour for raw-completion / custom-eval prompts
     lines = []
     for line in raw_output.splitlines():
-        if any(kw in line for kw in [
-            "llama_", "ggml_", "common_perf", "load time", "eval time",
-            "prompt eval", "total time", "main: ", "[New Thread",
-            "warning:", "error:",
-        ]):
+        if any(kw in line for kw in _LOG_KEYWORDS):
             continue
         lines.append(line)
     return " ".join(lines).strip()
@@ -279,33 +346,56 @@ def extract_model_answer(raw_output: str) -> str:
 # Inference
 # ---------------------------------------------------------------------------
 
+class DeviceDisconnectedError(RuntimeError):
+    """Raised when adb loses contact with the device mid-evaluation."""
+
+
 def run_inference(
     prompt: str,
     model_path: str,
     n_tokens: int = 32,
     dry_run: bool = False,
 ) -> str | None:
-    """Run one inference on device. Returns model output text or None on failure."""
-    # For choice/yesno questions, we only need 1-4 tokens but use 16 to be safe
+    """Run one inference on device. Returns model output text or None on failure.
+
+    Applies the Llama-3.2-3B-Instruct chat template and pushes the formatted
+    prompt to a temp file on device (avoids all shell-quoting problems with
+    long BoolQ/ARC passages containing $, `, <, >, etc.).
+
+    Context window is 2048 tokens to accommodate the longest BoolQ passages
+    without silent truncation.
+    """
+    formatted_prompt = format_llama3_instruct(prompt)
+
     cmd = (
         f"LD_LIBRARY_PATH={DEVICE_DIR} {LLAMA_CLI} "
         f"-m {model_path} "
-        f"-c 512 "
+        f"-c 2048 "
         f"-n {n_tokens} "
         f"--temp 0.0 "
         f"--seed 42 "
         f"-t 4 "
         f"-no-cnv "
-        f'-p "{prompt}"'
+        f"-f {PROMPT_DEVICE_PATH}"
     )
 
     if dry_run:
-        print(f"    [DRY RUN] adb shell {cmd[:80]}...")
+        print(f"    [DRY RUN] push prompt + adb shell {cmd[:70]}...")
         return "DRY_RUN_OUTPUT"
 
     try:
-        raw = adb_shell(cmd, timeout=120)
+        push_prompt_to_device(formatted_prompt)
+    except RuntimeError as e:
+        raise DeviceDisconnectedError(f"adb push failed: {e}") from e
+
+    try:
+        raw = adb_shell(cmd, timeout=180)
+        # Detect USB disconnection mid-run
+        if "no devices/emulators found" in raw or "error: device" in raw:
+            raise DeviceDisconnectedError("ADB device disconnected")
         return extract_model_answer(raw)
+    except DeviceDisconnectedError:
+        raise
     except subprocess.TimeoutExpired:
         return None
     except Exception as e:
@@ -359,7 +449,21 @@ def evaluate_variant(
         n_tokens = 8 if answer_type in ("choice", "yesno") else 32
 
         print(f"    [{i:3d}/{len(prompts)}] {prompt_id} ({answer_type}) ... ", end="", flush=True)
-        model_output = run_inference(prompt_text, model_path, n_tokens=n_tokens, dry_run=dry_run)
+        try:
+            model_output = run_inference(prompt_text, model_path, n_tokens=n_tokens, dry_run=dry_run)
+        except DeviceDisconnectedError:
+            print("DEVICE DISCONNECTED — aborting variant")
+            # Return partial results so the caller can save what we have
+            total_so_far = len(per_question)
+            accuracy_partial = round(100.0 * correct_count / total_so_far, 1) if total_so_far > 0 else None
+            return {
+                "variant": variant, "tag": tag,
+                "status": "aborted_disconnected",
+                "accuracy_pct": accuracy_partial,
+                "correct": correct_count,
+                "total": total_so_far,
+                "per_question": per_question,
+            }
 
         if model_output is None:
             print("TIMEOUT")
