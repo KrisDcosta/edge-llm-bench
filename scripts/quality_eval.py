@@ -319,47 +319,53 @@ def extract_model_answer(raw_output: str) -> str:
       "Answer with only yes or no:assistant"  (text appears together)
       <newline>
       "Yes" or "No"                           (response on next line/word)
+
+    Larger quantization variants (Q8_0, F16) sometimes produce verbose
+    responses like "The answer is: No." or "## Step 1: ..." instead of
+    a bare "Yes"/"No". We handle this by scanning for the first yes/no
+    token anywhere in the first 400 chars after the answer marker.
     """
     import re
 
-    # Primary strategy: Find the exact pattern "Answer with only yes or no:" + "assistant"
-    # Then extract the first non-log word after that
+    # Primary strategy: Find "Answer with only yes or no:assistant" and
+    # then search for the first yes/no within the next 400 chars.
+    # This handles:
+    #   - "Yes"  / "No"               (small models, direct answer)
+    #   - "Yes." / "No."              (with trailing punctuation)
+    #   - "The answer is: No."        (Q8_0 preamble style)
+    #   - "## Step 1: ..."            (chain-of-thought — scan past it)
     match = re.search(r"Answer with only yes or no:\s*assistant", raw_output, re.IGNORECASE)
     if match:
-        # Get text after the match
         after_match = raw_output[match.end():]
-        # Split into tokens and get first meaningful one
-        for token in after_match.split():
-            token = token.strip()
-            # Skip log keywords and empty tokens
-            if token and not any(kw in token for kw in _LOG_KEYWORDS):
-                # Remove trailing punctuation except for the answer itself
-                if "[end" in token.lower():
-                    continue
-                return token
+        yn = re.search(r'\b(yes|no)\b', after_match[:400], re.IGNORECASE)
+        if yn:
+            return yn.group(1).capitalize()
 
-    # Fallback 1: Look for "Answer with" (more general) + first response after
-    match = re.search(r"Answer with.*?:\s*(\w+)", raw_output, re.IGNORECASE | re.DOTALL)
+    # Fallback 1: broader "Answer with...:" anchor, same yes/no scan
+    match = re.search(r"Answer with.*?:", raw_output, re.IGNORECASE | re.DOTALL)
     if match:
-        candidate = match.group(1).strip()
-        if candidate.lower() not in ("assistant",):
-            return candidate
+        after_match = raw_output[match.end():]
+        yn = re.search(r'\b(yes|no)\b', after_match[:400], re.IGNORECASE)
+        if yn:
+            return yn.group(1).capitalize()
 
-    # Fallback 2: filter out log lines from entire output and return first non-log word
-    response_lines = []
+    # Fallback 2: scan entire (non-log) output for first yes/no
+    filtered = "\n".join(
+        line for line in raw_output.splitlines()
+        if not any(kw in line for kw in _LOG_KEYWORDS)
+    )
+    yn = re.search(r'\b(yes|no)\b', filtered, re.IGNORECASE)
+    if yn:
+        return yn.group(1).capitalize()
+
+    # Fallback 3: return first non-log, non-empty word (legacy behaviour)
     for line in raw_output.splitlines():
         if not any(kw in line for kw in _LOG_KEYWORDS):
             stripped = line.strip()
-            if stripped and "[end of text]" not in stripped and "user" not in stripped.lower():
-                response_lines.append(stripped)
-
-    if response_lines:
-        # Return the first real word from the collected lines
-        for line in response_lines:
-            first_word = line.split()[0] if line.split() else ""
-            if first_word and len(first_word) > 1:
-                return first_word
-        return " ".join(response_lines).strip()
+            if stripped and "[end of text]" not in stripped:
+                first_word = stripped.split()[0] if stripped.split() else ""
+                if first_word and len(first_word) > 1:
+                    return first_word
 
     return ""
 
