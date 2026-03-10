@@ -16,30 +16,32 @@ from pathlib import Path
 def extract_boolq_accuracy():
     """Extract BoolQ accuracy for all variants from quality_scores.json"""
     results_file = Path("results/quality_scores.json")
-    
+
     if not results_file.exists():
         print("ERROR: results/quality_scores.json not found")
         return None
-    
+
     with open(results_file) as f:
-        results = json.load(f)
-    
+        data = json.load(f)
+
     accuracy_by_variant = {}
-    for result in results:
-        if result.get('tag') == 'boolq':
-            variant = result.get('variant')
-            acc = result.get('accuracy_pct')
+    # data is a dict with keys like "boolq:Q2_K", "boolq:Q4_K_M", etc.
+    for key in data:
+        if key.startswith('boolq:'):
+            entry = data[key]
+            variant = entry.get('variant')
+            acc = entry.get('accuracy_pct')
             if variant and acc is not None:
                 accuracy_by_variant[variant] = acc
-    
+
     if not accuracy_by_variant:
         print("ERROR: No BoolQ results found in quality_scores.json")
         return None
-    
+
     print(f"✓ Found BoolQ accuracy for {len(accuracy_by_variant)} variants:")
     for variant, acc in sorted(accuracy_by_variant.items()):
         print(f"  {variant}: {acc:.1f}%")
-    
+
     return accuracy_by_variant
 
 def get_decode_tps():
