@@ -308,38 +308,60 @@ _LOG_KEYWORDS = (
     "warning:", "error:",
 )
 
-_ASSISTANT_MARKER = "<|start_header_id|>assistant<|end_header_id|>"
-
 
 def extract_model_answer(raw_output: str) -> str:
     """Extract the generated text from llama-completion output.
 
-    When using the Llama-3.2 instruct template (-f prompt_file), the binary
-    echoes the full prompt back before the generated tokens.  We locate the
-    last assistant header marker and take only the text after it, stripping
-    debug log lines throughout.
+    When using the Llama-3.2 instruct template with -f prompt_file,
+    llama-completion echoes the full prompt (with special tokens
+    detokenized to plain text like "user" and "assistant") followed by
+    the model's response. The pattern is always:
+      "Answer with only yes or no:assistant"  (text appears together)
+      <newline>
+      "Yes" or "No"                           (response on next line/word)
     """
-    # Instruct-format path: slice everything after the last assistant header
-    if _ASSISTANT_MARKER in raw_output:
-        idx = raw_output.rfind(_ASSISTANT_MARKER)
-        response = raw_output[idx + len(_ASSISTANT_MARKER):]
-        # Drop the two leading newlines that follow the header token
-        response = response.lstrip("\n")
-        # Remove EOS/EOT tokens that may appear in the text stream
-        response = response.replace("<|eot_id|>", "").replace("<|end_of_text|>", "")
-        lines = [
-            l for l in response.splitlines()
-            if not any(kw in l for kw in _LOG_KEYWORDS)
-        ]
-        return " ".join(lines).strip()
+    import re
 
-    # Fallback: original behaviour for raw-completion / custom-eval prompts
-    lines = []
+    # Primary strategy: Find the exact pattern "Answer with only yes or no:" + "assistant"
+    # Then extract the first non-log word after that
+    match = re.search(r"Answer with only yes or no:\s*assistant", raw_output, re.IGNORECASE)
+    if match:
+        # Get text after the match
+        after_match = raw_output[match.end():]
+        # Split into tokens and get first meaningful one
+        for token in after_match.split():
+            token = token.strip()
+            # Skip log keywords and empty tokens
+            if token and not any(kw in token for kw in _LOG_KEYWORDS):
+                # Remove trailing punctuation except for the answer itself
+                if "[end" in token.lower():
+                    continue
+                return token
+
+    # Fallback 1: Look for "Answer with" (more general) + first response after
+    match = re.search(r"Answer with.*?:\s*(\w+)", raw_output, re.IGNORECASE | re.DOTALL)
+    if match:
+        candidate = match.group(1).strip()
+        if candidate.lower() not in ("assistant",):
+            return candidate
+
+    # Fallback 2: filter out log lines from entire output and return first non-log word
+    response_lines = []
     for line in raw_output.splitlines():
-        if any(kw in line for kw in _LOG_KEYWORDS):
-            continue
-        lines.append(line)
-    return " ".join(lines).strip()
+        if not any(kw in line for kw in _LOG_KEYWORDS):
+            stripped = line.strip()
+            if stripped and "[end of text]" not in stripped and "user" not in stripped.lower():
+                response_lines.append(stripped)
+
+    if response_lines:
+        # Return the first real word from the collected lines
+        for line in response_lines:
+            first_word = line.split()[0] if line.split() else ""
+            if first_word and len(first_word) > 1:
+                return first_word
+        return " ".join(response_lines).strip()
+
+    return ""
 
 
 # ---------------------------------------------------------------------------
