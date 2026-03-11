@@ -32,13 +32,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -46,7 +50,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.eai.edgellmbench.data.db.BenchmarkRunEntity
 import com.eai.edgellmbench.ui.settings.SettingsViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,8 +64,10 @@ fun BenchmarkScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val settingsState by settingsVm.uiState.collectAsState()
+    val historyRuns by viewModel.historyRuns.collectAsState()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    var selectedTab by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let {
@@ -66,7 +76,11 @@ fun BenchmarkScreen(
         }
     }
 
-    // Build the config description string from live settings
+    // Switch to Run tab when a benchmark starts
+    LaunchedEffect(uiState.status) {
+        if (uiState.status is BenchmarkStatus.Running) selectedTab = 0
+    }
+
     val configText = buildString {
         val warmup = settingsState.warmupRuns
         val bench  = settingsState.benchRuns
@@ -83,85 +97,106 @@ fun BenchmarkScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(paddingValues),
         ) {
-            // Status card — shows live settings
-            BenchmarkStatusCard(uiState = uiState, configText = configText)
-
-            // Control buttons
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                when (val status = uiState.status) {
-                    is BenchmarkStatus.Running -> {
-                        Column(modifier = Modifier.weight(1f)) {
-                            LinearProgressIndicator(
-                                progress = { status.current.toFloat() / status.total.toFloat() },
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = "${status.phase} (${status.current}/${status.total})",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        OutlinedButton(
-                            onClick = { viewModel.stopBenchmark() },
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error,
-                            ),
-                        ) {
-                            Icon(Icons.Default.Stop, contentDescription = null)
-                            Spacer(Modifier.width(4.dp))
-                            Text("Stop")
-                        }
-                    }
-
-                    else -> {
-                        Button(
-                            onClick = { viewModel.runBenchmark() },
-                            modifier = Modifier.weight(1f),
-                            enabled = uiState.isModelLoaded,
-                        ) {
-                            Icon(Icons.Default.PlayArrow, contentDescription = null)
-                            Spacer(Modifier.width(4.dp))
-                            Text("Run Benchmark")
-                        }
-                        if (uiState.status == BenchmarkStatus.Complete) {
-                            ElevatedButton(onClick = {
-                                viewModel.shareLog()?.let { context.startActivity(it) }
-                            }) {
-                                Icon(Icons.Default.Share, contentDescription = null)
-                                Spacer(Modifier.width(4.dp))
-                                Text("Export")
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (!uiState.isModelLoaded) {
-                Text(
-                    text = "Go to Models tab to load a GGUF model before benchmarking.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+            // ── Tab row ───────────────────────────────────────────────────────
+            TabRow(selectedTabIndex = selectedTab) {
+                Tab(
+                    selected = selectedTab == 0,
+                    onClick  = { selectedTab = 0 },
+                    text     = { Text("Run") },
+                )
+                Tab(
+                    selected = selectedTab == 1,
+                    onClick  = { selectedTab = 1 },
+                    text     = { Text("History (${historyRuns.size})") },
                 )
             }
 
-            // Post-benchmark summary card (only shown when complete)
-            if (uiState.status == BenchmarkStatus.Complete && uiState.results.isNotEmpty()) {
-                BenchmarkSummaryCard(results = uiState.results.filter { !it.isWarmup })
-            }
+            when (selectedTab) {
+                // ── Run tab ───────────────────────────────────────────────────
+                0 -> Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    BenchmarkStatusCard(uiState = uiState, configText = configText)
 
-            // Results table
-            if (uiState.results.isNotEmpty()) {
-                HorizontalDivider()
-                Text("Trial Results", style = MaterialTheme.typography.titleSmall)
-                ResultsTable(results = uiState.results)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        when (val status = uiState.status) {
+                            is BenchmarkStatus.Running -> {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    LinearProgressIndicator(
+                                        progress = { status.current.toFloat() / status.total.toFloat() },
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = "${status.phase} (${status.current}/${status.total})",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                OutlinedButton(
+                                    onClick = { viewModel.stopBenchmark() },
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = MaterialTheme.colorScheme.error,
+                                    ),
+                                ) {
+                                    Icon(Icons.Default.Stop, contentDescription = null)
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("Stop")
+                                }
+                            }
+
+                            else -> {
+                                Button(
+                                    onClick = { viewModel.runBenchmark() },
+                                    modifier = Modifier.weight(1f),
+                                    enabled = uiState.isModelLoaded,
+                                ) {
+                                    Icon(Icons.Default.PlayArrow, contentDescription = null)
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("Run Benchmark")
+                                }
+                                if (uiState.status == BenchmarkStatus.Complete) {
+                                    ElevatedButton(onClick = {
+                                        viewModel.shareLog()?.let { context.startActivity(it) }
+                                    }) {
+                                        Icon(Icons.Default.Share, contentDescription = null)
+                                        Spacer(Modifier.width(4.dp))
+                                        Text("Export")
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!uiState.isModelLoaded) {
+                        Text(
+                            text = "Go to Models tab to load a GGUF model before benchmarking.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+
+                    if (uiState.status == BenchmarkStatus.Complete && uiState.results.isNotEmpty()) {
+                        BenchmarkSummaryCard(results = uiState.results.filter { !it.isWarmup })
+                    }
+
+                    if (uiState.results.isNotEmpty()) {
+                        HorizontalDivider()
+                        Text("Trial Results", style = MaterialTheme.typography.titleSmall)
+                        ResultsTable(results = uiState.results)
+                    }
+                }
+
+                // ── History tab ───────────────────────────────────────────────
+                1 -> HistoryList(runs = historyRuns)
             }
         }
     }
@@ -282,6 +317,120 @@ private fun SummaryMetric(label: String, value: String, sub: String) {
             fontFamily = FontFamily.Monospace,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+// ── History list ──────────────────────────────────────────────────────────────
+
+@Composable
+private fun HistoryList(runs: List<BenchmarkRunEntity>) {
+    if (runs.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = "No benchmark runs yet",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Run a benchmark on the Run tab to see results here.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        return
+    }
+
+    val dateFmt = remember { SimpleDateFormat("MMM d, HH:mm", Locale.getDefault()) }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(vertical = 12.dp),
+    ) {
+        items(runs) { run ->
+            HistoryRunCard(run = run, dateFmt = dateFmt)
+        }
+    }
+}
+
+@Composable
+private fun HistoryRunCard(run: BenchmarkRunEntity, dateFmt: SimpleDateFormat) {
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Header row: variant + date
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = run.modelVariant,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Text(
+                    text = dateFmt.format(Date(run.timestamp)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.height(4.dp))
+            // Config row
+            Text(
+                text = "ctx=${run.contextLength} · ${run.outputLength} tokens · ${run.numTrials} trials",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            // Stats row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Decode TPS",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = "%.2f".format(run.meanDecodeTps),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                    )
+                    Text(
+                        text = "±%.2f  [%.1f–%.1f]".format(run.stdDecodeTps, run.minDecodeTps, run.maxDecodeTps),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontFamily = FontFamily.Monospace,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "TTFT",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = "%.2fs".format(run.meanTtftS),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                    )
+                }
+            }
+        }
     }
 }
 

@@ -3,6 +3,7 @@ package com.eai.edgellmbench
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -17,9 +18,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -29,6 +32,7 @@ import com.eai.edgellmbench.ui.benchmark.BenchmarkScreen
 import com.eai.edgellmbench.ui.chat.ChatScreen
 import com.eai.edgellmbench.ui.models.ModelManagerScreen
 import com.eai.edgellmbench.ui.settings.SettingsScreen
+import com.eai.edgellmbench.ui.settings.SettingsViewModel
 import com.eai.edgellmbench.ui.theme.EdgeLLMTheme
 
 // ── Navigation destinations ─────────────────────────────────────────────────
@@ -53,7 +57,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            EdgeLLMTheme {
+            // Resolve dark theme: respect user override if "follow system" is off
+            val settingsVm: SettingsViewModel = viewModel()
+            val settingsState by settingsVm.uiState.collectAsState()
+            val systemDark = isSystemInDarkTheme()
+            val isDark = if (settingsState.darkModeUseSystem) systemDark else settingsState.darkModeIsDark
+
+            EdgeLLMTheme(darkTheme = isDark) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     EdgeLLMApp()
                 }

@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -216,6 +217,53 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                 )
             }
 
+            // ── Appearance ────────────────────────────────────────────────────
+
+            SettingsSection(title = "Appearance") {
+                // Follow system toggle
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Follow system theme", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            "Use device light / dark setting",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Switch(
+                        checked = uiState.darkModeUseSystem,
+                        onCheckedChange = { viewModel.setDarkModeUseSystem(it) },
+                    )
+                }
+
+                // Manual dark mode toggle — only shown when "Follow system" is off
+                if (!uiState.darkModeUseSystem) {
+                    HorizontalDivider()
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Dark mode", style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                if (uiState.darkModeIsDark) "Dark theme active" else "Light theme active",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Switch(
+                            checked = uiState.darkModeIsDark,
+                            onCheckedChange = { viewModel.setDarkModeIsDark(it) },
+                        )
+                    }
+                }
+            }
+
             // ── Extensibility stubs ───────────────────────────────────────────
 
             SettingsSection(title = "Coming Soon") {
@@ -231,7 +279,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                 HorizontalDivider()
                 ComingSoonItem(
                     "Conversation History",
-                    "Room DB persistence — browse past sessions",
+                    "Browse past chat sessions (benchmark history available in Benchmark tab)",
                 )
                 HorizontalDivider()
                 ComingSoonItem(

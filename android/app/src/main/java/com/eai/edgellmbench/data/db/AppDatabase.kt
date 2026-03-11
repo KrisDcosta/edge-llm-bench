@@ -6,24 +6,25 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 /**
- * Room database for conversation history persistence.
+ * Room database for conversation and benchmark history persistence.
  *
- * Currently scaffolded — conversations are shown in the current session only.
- * Future: wire [ConversationDao] / [MessageDao] to the UI for history browser.
+ * Version history:
+ *   v1 — ConversationEntity, MessageEntity (chat history scaffold)
+ *   v2 — Added BenchmarkRunEntity (benchmark history tab)
  *
- * Migration strategy:
- *   - On schema change, increment [version] and add a [androidx.room.migration.Migration]
- *     via [Room.databaseBuilder.addMigrations(MIGRATION_1_2)].
+ * Migration strategy: fallbackToDestructiveMigration on dev builds.
+ * Production would use explicit Migration objects.
  */
 @Database(
-    entities = [ConversationEntity::class, MessageEntity::class],
-    version  = 1,
+    entities = [ConversationEntity::class, MessageEntity::class, BenchmarkRunEntity::class],
+    version  = 2,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun conversationDao(): ConversationDao
     abstract fun messageDao(): MessageDao
+    abstract fun benchmarkRunDao(): BenchmarkRunDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null

@@ -3,6 +3,7 @@ package com.eai.edgellmbench.data
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -31,6 +32,9 @@ object SettingsKeys {
     // Persisted last-used model for cold-start auto-load
     val LAST_MODEL_PATH    = stringPreferencesKey("last_model_path")
     val LAST_MODEL_VARIANT = stringPreferencesKey("last_model_variant")
+    // Dark / light mode override
+    val DARK_MODE_USE_SYSTEM = booleanPreferencesKey("dark_mode_use_system") // true = follow system
+    val DARK_MODE_IS_DARK    = booleanPreferencesKey("dark_mode_is_dark")    // only used when use_system=false
 }
 
 // ---------------------------------------------------------------------------
@@ -38,11 +42,13 @@ object SettingsKeys {
 // ---------------------------------------------------------------------------
 
 object SettingsDefaults {
-    const val THREAD_COUNT   = 4
-    const val CONTEXT_LENGTH = 512
-    const val OUTPUT_LENGTH  = 128
-    const val TEMPERATURE    = 0.7f
-    const val SEED           = 42
-    const val WARMUP_RUNS    = 1
-    const val BENCH_RUNS     = 3
+    const val THREAD_COUNT        = 4
+    const val CONTEXT_LENGTH      = 512
+    const val OUTPUT_LENGTH       = 128
+    const val TEMPERATURE         = 0.7f
+    const val SEED                = 42
+    const val WARMUP_RUNS         = 1
+    const val BENCH_RUNS          = 3
+    const val DARK_MODE_USE_SYSTEM = true
+    const val DARK_MODE_IS_DARK    = true
 }

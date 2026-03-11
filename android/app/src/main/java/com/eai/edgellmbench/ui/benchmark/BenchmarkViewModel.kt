@@ -10,6 +10,8 @@ import com.eai.edgellmbench.BenchmarkLogger
 import com.eai.edgellmbench.InferenceMetrics
 import com.eai.edgellmbench.data.SettingsDefaults
 import com.eai.edgellmbench.data.SettingsKeys
+import com.eai.edgellmbench.data.db.AppDatabase
+import com.eai.edgellmbench.data.db.BenchmarkRunEntity
 import com.eai.edgellmbench.data.settingsDataStore
 import com.eai.edgellmbench.data.repository.InferenceRepository
 import kotlinx.coroutines.CancellationException
@@ -18,9 +20,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,6 +68,12 @@ class BenchmarkViewModel(application: Application) : AndroidViewModel(applicatio
     private val engineReady = CompletableDeferred<Unit>()
     private var benchJob: Job? = null
     private val logger by lazy { BenchmarkLogger(application) }
+    private val db by lazy { AppDatabase.getDatabase(application) }
+
+    /** Benchmark run history from Room DB — newest first, updates reactively. */
+    val historyRuns: StateFlow<List<BenchmarkRunEntity>> =
+        db.benchmarkRunDao().getAllRuns()
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     companion object {
         private const val COOLDOWN_MS = 2_000L
@@ -140,6 +150,31 @@ class BenchmarkViewModel(application: Application) : AndroidViewModel(applicatio
                         status  = BenchmarkStatus.Complete,
                         logPath = logger.getOutputPath(),
                     ) }
+                }
+
+                // Persist summary to Room DB for history tab
+                val nonWarmup = _uiState.value.results.filter { !it.isWarmup }
+                if (nonWarmup.isNotEmpty()) {
+                    val tpsList  = nonWarmup.map { it.decodeTps }
+                    val mean     = tpsList.average()
+                    val std      = if (tpsList.size > 1)
+                        Math.sqrt(tpsList.sumOf { (it - mean) * (it - mean) } / (tpsList.size - 1))
+                    else 0.0
+                    db.benchmarkRunDao().insert(
+                        BenchmarkRunEntity(
+                            runId         = "run-${System.currentTimeMillis()}",
+                            timestamp     = System.currentTimeMillis(),
+                            modelVariant  = variant,
+                            contextLength = ctxLen,
+                            outputLength  = nTokens,
+                            numTrials     = nonWarmup.size,
+                            meanDecodeTps = mean,
+                            stdDecodeTps  = std,
+                            minDecodeTps  = tpsList.min(),
+                            maxDecodeTps  = tpsList.max(),
+                            meanTtftS     = nonWarmup.map { it.ttftS }.average(),
+                        )
+                    )
                 }
             } catch (e: CancellationException) {
                 withContext(Dispatchers.Main) { _uiState.update { it.copy(status = BenchmarkStatus.Idle) } }
