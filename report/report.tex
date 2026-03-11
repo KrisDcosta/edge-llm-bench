@@ -312,13 +312,13 @@ All throughput figures use 256-token context except Q4\_K\_M (512-token). PPL = 
 \midrule
 Q2\_K    & 1.3 & $5.66 \pm 0.72$ & 7.59  & 3.81  & 26.62  & 69.0  & [59--77] & 11.71 \\
 Q3\_K\_M & 1.6 & $4.91 \pm 0.40$ & 6.29  & 4.50  & 30.57  & 66.0  & [56--75] & 10.15 \\
-Q4\_K\_M & 2.0 & $5.32 \pm 0.52$ & 7.09  & 3.98  & 28.11  & 72.0  & [63--80] & 9.76 \\
-Q6\_K    & 2.7 & $3.98 \pm 0.32$ & 4.90  & 5.71  & 29.33  & 65.0  & [55--74] & 9.75 \\
-Q8\_0    & 3.4 & $4.95 \pm 0.59$ & 7.14  & 3.95  & 23.21  & 68.0  & [58--76] & 9.70 \\
+Q4\_K\_M & 2.0 & $5.32 \pm 0.52$ & 7.09  & 3.98  & 28.11  & 72.0  & [63--80] & 11.36 \\
+Q6\_K    & 2.7 & $3.98 \pm 0.32$ & 4.90  & 5.71  & 29.33  & 65.0  & [55--74] & 11.22 \\
+Q8\_0    & 3.4 & $4.95 \pm 0.59$ & 7.14  & 3.95  & 23.21  & 68.0  & [58--76] & TBD \\
 F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & 68.0  & [58--76] & \multicolumn{1}{l}{---} \\
 \midrule
 \multicolumn{9}{l}{\small BoolQ: yes/no reading comprehension accuracy on 100-question SuperGLUE validation subset; 95\% Wilson CI ($n{=}100$).}\\
-\multicolumn{9}{l}{\small ARC-Easy accuracy (not shown): 100\% for all quantized variants; F16: 95\%. PPL via \texttt{llama-perplexity} on WikiText-2 sample (12\,KB).}\\
+\multicolumn{9}{l}{\small ARC-Easy accuracy (not shown): 100\% for all quantized variants; F16: 95\%. PPL via \texttt{llama-perplexity} on WikiText-2 (50K tokens, ${\approx}$250KB).}\\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -499,13 +499,13 @@ reflects the complex interaction between K-quant block structure and
 Llama 3.2's layer-specific weight sensitivity.
 
 \textbf{Perplexity vs.\ BoolQ accuracy.}
-WikiText-2 perplexity (Table~\ref{tab:main_results}) is nearly monotonic with
-bit-width: Q8\_0 (9.70)~$\approx$~Q6\_K (9.75)~$\approx$~Q4\_K\_M (9.76)
-$<$~Q3\_K\_M (10.15)~$<$~Q2\_K (11.71) (12\,KB sample, ${\approx}3{,}000$ tokens).
-Yet Q6\_K and Q4\_K\_M have \emph{identical} PPL within 0.01 while their BoolQ
-accuracy differs by 7\% (65\% vs.\ 72\%) and throughput by 34\%.
-Perplexity is thus an \emph{insufficient} quality proxy: task-specific on-device
-evaluation is essential to surface quantisation-specific failure modes.
+WikiText-2 perplexity (Table~\ref{tab:main_results}), measured on 50K-token corpus
+(${\approx}250$\,KB), shows Q6\_K (11.22) and Q4\_K\_M (11.36) have \emph{nearly identical}
+PPL ($\Delta{\approx}0.14$) while their BoolQ accuracy differs by 7\% (65\% vs.\ 72\%)
+and throughput by 34\%. Q2\_K (11.71) has measurably higher PPL despite moderate
+BoolQ performance (69\%), indicating PPL is an \emph{insufficient} quality proxy.
+Task-specific on-device evaluation is essential to surface quantisation-specific
+failure modes and identify the practical best model for deployment.
 
 \subsection{RQ5: Deployment Limits and Thread Scaling}
 \label{sec:rq5}
