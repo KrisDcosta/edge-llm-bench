@@ -446,7 +446,8 @@ def fig6_pareto_frontier(records: list[dict]):
     valid_points = []  # (tps, q) for Pareto computation
 
     for v, tps in tps_by_variant.items():
-        raw_q = quality_by_variant.get(v, None)
+        # Prefer BoolQ scores (standard 100-question benchmark) over legacy custom QA
+        raw_q = quality_by_variant.get(f"boolq:{v}", quality_by_variant.get(v, None))
         # quality_scores.json values may be nested dicts {accuracy_pct, per_question, ...}
         # or plain scalars — normalise to a float or None
         q = None

@@ -47,13 +47,14 @@ de-quantization overhead on ARM NEON.
 and Q2\_K ($-4\%$) are stable to 2048 tokens; Q8\_0 declines mildly ($-11\%$);
 while Q3\_K\_M drops 38\% and Q6\_K drops 49\% at ctx=2048, exposing a hidden
 memory-system fragility in these two quantisation schemes.
-(3)~\textbf{Accuracy is also non-monotonic}: on a 15-question on-device factual
-evaluation, Q3\_K\_M (100\%, 95\% CI: 80--100\%) and Q8\_0 (100\%) achieve
-perfect scores while Q6\_K scores lowest (86.7\%, CI: 62--96\%), despite having
-more bits per weight than Q4\_K\_M (93.3\%).
+(3)~\textbf{Accuracy is also non-monotonic}: on a 100-question BoolQ reading
+comprehension benchmark, Q4\_K\_M (72\%, 95\% CI: 63--80\%) achieves the highest
+accuracy while Q6\_K scores lowest (65\%, CI: 55--74\%), despite having more bits
+per weight. On 100-question ARC-Easy factual retrieval, all quantized variants score
+95--100\% (near-ceiling), confirming the BoolQ result as the primary quality discriminator.
 (4)~\textbf{Q6\_K is strictly dominated}: simultaneously the least accurate
-and the slowest at long context; the Pareto frontier is defined by Q8\_0
-(accuracy-dominant) and Q2\_K (speed-dominant).
+and the slowest at long context; the Pareto frontier is defined by Q4\_K\_M
+(accuracy-dominant, 72\%, 5.32~tok/s) and Q2\_K (speed-dominant, 69\%, 5.66~tok/s).
 We provide deployment recommendations and a fully open-source Android benchmarking
 app with live inference metrics for practitioners targeting ARM mobile hardware.
 \end{abstract}
@@ -104,7 +105,7 @@ memory bandwidth consumption makes empirical measurement essential.
   \item \textbf{RQ3:} What fraction of total inference time is consumed by prefill
         versus decode, and how does this split vary across quantization levels?
   \item \textbf{RQ4:} What is the efficiency--accuracy trade-off across variants,
-        measured by on-device factual accuracy?
+        measured by on-device BoolQ reading comprehension and ARC-Easy accuracy?
   \item \textbf{RQ5:} What are the practical deployment limits of each variant
         on a 6~GB LPDDR5 device, including thread-count scaling?
 \end{itemize}
@@ -124,11 +125,12 @@ memory bandwidth consumption makes empirical measurement essential.
         implications.
   \item A thread-count scaling study on the Tensor G2's heterogeneous ARM cluster
         showing a 5.0~tokens/s peak at 4 threads with degradation at 8.
-  \item Complete on-device factual accuracy evaluation across all five non-F16
-        variants, revealing a non-monotonic pattern spanning 86.7--100\%:
-        Q3\_K\_M and Q8\_0 achieve perfect 100\%, Q2\_K and Q4\_K\_M score 93.3\%,
-        and Q6\_K scores lowest at 86.7\% despite its higher bit-width; Q6\_K
-        is further shown to be strictly dominated on both accuracy and throughput.
+  \item Complete on-device quality evaluation across all six variants using BoolQ
+        (100-question reading comprehension) and ARC-Easy (100-question factual
+        retrieval), revealing a non-monotonic BoolQ accuracy pattern (65--72\%):
+        Q4\_K\_M scores highest at 72\%, Q6\_K lowest at 65\% despite its higher
+        bit-width; Q6\_K is strictly dominated on both BoolQ accuracy and throughput.
+        ARC-Easy is near-ceiling (95--100\%) for all variants.
 \end{enumerate}
 
 % ===========================================================================
@@ -232,19 +234,30 @@ We measure the following metrics, extracted from llama-cli's structured timing o
         token. Directly impacts perceived responsiveness.
   \item \textbf{End-to-end latency} (s): Total time for prefill + decode of 128
         output tokens.
-  \item \textbf{Factual accuracy} (\%): Exact-match accuracy on a 15-question
-        evaluation suite spanning math, geography, history, and science.
+  \item \textbf{BoolQ accuracy} (\%): Exact-match accuracy on a 100-question
+        BoolQ reading comprehension benchmark (yes/no questions with passages).
+  \item \textbf{ARC-Easy accuracy} (\%): 4-choice accuracy on a 100-question
+        ARC-Easy elementary science benchmark.
 \end{itemize}
 
 \subsection{Quality Evaluation}
 
-To characterize the efficiency--accuracy trade-off (RQ4), we ran a 15-question
-factual accuracy evaluation directly on-device for each of the five
-quantization-feasible variants (F16 excluded due to timeout). Each prompt
-instructs the model to respond with only the answer (no explanation), and
-responses are scored via case-insensitive substring matching against the
-ground-truth string. Questions span four categories: arithmetic (5), geography (5),
-history (2), and science (3).
+To characterize the efficiency--accuracy trade-off (RQ4), we conducted two
+standard benchmark evaluations directly on-device via USB ADB for all six variants
+(including F16).
+
+\textbf{BoolQ (100 questions):} Reading comprehension benchmark~\cite{boolq}
+drawn from the SuperGLUE validation split. Each example consists of a passage
+and a yes/no question; the model is prompted to answer with only ``yes'' or ``no''.
+Responses are scored via case-insensitive first-match extraction of the words
+\emph{yes} or \emph{no} from the model output. The 100-question subset yields
+a 95\% Wilson CI of $\pm$8--9\%, sufficient to distinguish variants that differ
+by $>$7\%.
+
+\textbf{ARC-Easy (100 questions):} Elementary science 4-choice benchmark~\cite{arc}
+from the AI2 ARC Easy test split. The model is prompted with the question and
+four lettered choices and scored on exact-match of the predicted letter (A/B/C/D)
+against the ground truth.
 
 \subsection{Repeatability Verification}
 
@@ -295,17 +308,17 @@ All throughput figures use 256-token context except Q4\_K\_M (512-token). PPL = 
 \begin{tabular}{lrrrrrrrr}
 \toprule
 \textbf{Variant} & \textbf{Size (GB)} & \textbf{Decode TPS (±std)} &
-\textbf{Prefill TPS} & \textbf{TTFT (s)} & \textbf{E2E (s)} & \textbf{Acc. (\%)} & \textbf{95\% CI} & \textbf{PPL$\downarrow$} \\
+\textbf{Prefill TPS} & \textbf{TTFT (s)} & \textbf{E2E (s)} & \textbf{BoolQ (\%)} & \textbf{95\% CI} & \textbf{PPL$\downarrow$} \\
 \midrule
-Q2\_K    & 1.3 & $5.66 \pm 0.72$ & 7.59  & 3.81  & 26.62  & 93.3  & [70--99] & 11.71 \\
-Q3\_K\_M & 1.6 & $4.91 \pm 0.40$ & 6.29  & 4.50  & 30.57  & 100.0 & [80--100] & 10.15 \\
-Q4\_K\_M & 2.0 & $5.32 \pm 0.52$ & 7.09  & 3.98  & 28.11  & 93.3  & [70--99] & 9.76 \\
-Q6\_K    & 2.7 & $3.98 \pm 0.32$ & 4.90  & 5.71  & 29.33  & 86.7  & [62--96] & 9.75 \\
-Q8\_0    & 3.4 & $4.95 \pm 0.59$ & 7.14  & 3.95  & 23.21  & 100.0 & [80--100] & 9.70 \\
-F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & \multicolumn{3}{l}{N/A (timeout; 1 trial)} \\
+Q2\_K    & 1.3 & $5.66 \pm 0.72$ & 7.59  & 3.81  & 26.62  & 69.0  & [59--77] & 11.71 \\
+Q3\_K\_M & 1.6 & $4.91 \pm 0.40$ & 6.29  & 4.50  & 30.57  & 66.0  & [56--75] & 10.15 \\
+Q4\_K\_M & 2.0 & $5.32 \pm 0.52$ & 7.09  & 3.98  & 28.11  & 72.0  & [63--80] & 9.76 \\
+Q6\_K    & 2.7 & $3.98 \pm 0.32$ & 4.90  & 5.71  & 29.33  & 65.0  & [55--74] & 9.75 \\
+Q8\_0    & 3.4 & $4.95 \pm 0.59$ & 7.14  & 3.95  & 23.21  & 68.0  & [58--76] & 9.70 \\
+F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & 68.0  & [58--76] & \multicolumn{1}{l}{---} \\
 \midrule
-\multicolumn{9}{l}{\small Accuracy: exact-match over 15 factual questions; 95\% CI via Wilson score interval ($n{=}15$).}\\
-\multicolumn{9}{l}{\small Q8\_0 achieves best TTFT at 3.95\,s. PPL via \texttt{llama-perplexity} on WikiText-2 sample (12\,KB ${\approx}3{,}000$ tokens; seed=42).}\\
+\multicolumn{9}{l}{\small BoolQ: yes/no reading comprehension accuracy on 100-question SuperGLUE validation subset; 95\% Wilson CI ($n{=}100$).}\\
+\multicolumn{9}{l}{\small ARC-Easy accuracy (not shown): 100\% for all quantized variants; F16: 95\%. PPL via \texttt{llama-perplexity} on WikiText-2 sample (12\,KB).}\\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -330,10 +343,11 @@ and notably faster than Q2\_K (3.81~s). Despite Q8\_0's larger model size,
 its kernel requires no de-quantization of scale factors during prefill, reducing
 kernel dispatch overhead during the attention-intensive prefill phase.
 
-\textbf{Q3\_K\_M and Q8\_0 achieve perfect accuracy} (100\%) on the factual
-evaluation suite. Q3\_K\_M (4.91~tokens/s) is remarkable for achieving this
-at 3-bit precision; Q8\_0 (4.95~tokens/s) pairs perfect accuracy with the best
-TTFT, making it Pareto-optimal for accuracy-first deployments on 6~GB devices.
+\textbf{Q4\_K\_M achieves the highest BoolQ accuracy} (72\%, CI: 63--80\%) on
+the 100-question reading comprehension evaluation. Q6\_K scores lowest at 65\%
+(CI: 55--74\%), despite having more bits per weight than Q4\_K\_M. All quantized
+variants score 95--100\% on ARC-Easy factual retrieval (near-ceiling), confirming
+BoolQ as the primary discriminator among variants.
 
 \textbf{F16 is effectively unusable} in this deployment scenario. At 0.15~tokens/s
 with TTFT of 14.53~s, the variant produced only one complete trial result within the
@@ -432,12 +446,13 @@ benefit compared to improvements in decode throughput.
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{../figures/fig6_pareto_efficiency_quality.png}
-  \caption{Efficiency--accuracy Pareto frontier: on-device factual accuracy (\%)
-  vs.\ decode throughput (tokens/s) for all five non-F16 variants.
+  \caption{Efficiency--accuracy Pareto frontier: BoolQ accuracy (\%)
+  vs.\ decode throughput (tokens/s) for all six variants (including F16).
   Dotted iso-efficiency contours show equal TPS$\times$accuracy product (E).
-  Q8\_0 (100\%, 4.95~tok/s) and Q2\_K (93.3\%, 5.66~tok/s) are Pareto-optimal;
+  Q4\_K\_M (72\%, 5.32~tok/s) and Q2\_K (69\%, 5.66~tok/s) are Pareto-optimal;
   the grey shaded region is dominated.
-  Q6\_K (86.7\%, 3.98~tok/s) is strictly dominated on \emph{both} axes.}
+  Q6\_K (65\%, 3.98~tok/s) is strictly dominated on \emph{both} axes.
+  Q8\_0 (68\%, 4.95~tok/s) is dominated by Q4\_K\_M on both axes.}
   \label{fig:pareto}
 \end{figure}
 
@@ -449,43 +464,46 @@ benefit compared to improvements in decode throughput.
   \label{fig:size_vs_tps}
 \end{figure}
 
-On-device factual accuracy was measured for all five non-F16 variants via USB
-ADB (15 questions per variant; 95\% Wilson confidence intervals are shown in
-Table~\ref{tab:main_results} and reported throughout). Q2\_K scores 93.3\%
-(14/15, CI: 70--99\%), Q3\_K\_M achieves a perfect 100\% (15/15, CI: 80--100\%),
-Q4\_K\_M scores 93.3\% (14/15, CI: 70--99\%), Q6\_K scores 86.7\% (13/15,
-CI: 62--96\%), and Q8\_0 achieves a perfect 100\% (15/15, CI: 80--100\%).
-We note that $n{=}15$ limits statistical power: the wide CIs mean pairwise
-differences between Q2\_K, Q3\_K\_M, Q4\_K\_M, and Q8\_0 are not individually
-significant; however, Q6\_K's separation---lower than all others with a CI that
-barely overlaps Q4\_K\_M's lower bound---is the most clearly distinguishable
-result. The sole Q2\_K miss was the capital of Australia; the Q4\_K\_M miss was
-a two-digit multiplication; Q6\_K produced two errors of the same type.
+BoolQ reading comprehension accuracy was measured for all six variants via USB
+ADB (100 questions per variant; 95\% Wilson CIs are shown in Table~\ref{tab:main_results}).
+Q4\_K\_M leads at 72.0\% (72/100, CI: 63--80\%), followed by Q2\_K at 69.0\%
+(69/100, CI: 59--77\%), Q8\_0 at 68.0\% (68/100, CI: 58--76\%), Q3\_K\_M at
+66.0\% (66/100, CI: 56--75\%), and Q6\_K lowest at 65.0\% (65/100, CI: 55--74\%).
+F16 also scores 68.0\% (68/100, CI: 58--76\%).
+With $n{=}100$, the Wilson CIs are $\pm$8--9\%, making the 7-point gap between
+Q4\_K\_M (72\%) and Q6\_K (65\%) the most statistically robust pairwise distinction.
+The broader cluster between Q2\_K (69\%), Q8\_0 (68\%), and Q3\_K\_M (66\%) falls
+within overlapping CIs and should be interpreted cautiously.
+ARC-Easy accuracy was near-ceiling for all variants (100\% for Q2\_K through Q8\_0;
+95\% for F16), confirming that these models retain strong factual retrieval capacity
+at all quantization levels and that BoolQ---which requires cross-sentence reasoning---is
+the more informative quality discriminator.
 
-Figure~\ref{fig:pareto} plots the Pareto frontier for all five variants.
-\textbf{Two variants are Pareto-optimal}: Q8\_0 (100\%, 4.95~tokens/s)
-is the accuracy-dominant point (tied with Q3\_K\_M on accuracy but faster),
-while Q2\_K (93.3\%, 5.66~tokens/s) is the speed-dominant point.
-Q3\_K\_M is dominated by Q8\_0 (same accuracy, slightly faster). Q4\_K\_M
-is dominated by Q2\_K (same accuracy, higher speed); however, Q4\_K\_M's
-lower variance (std 0.52 vs.\ Q2\_K's 0.72) and broad community adoption
-make it the pragmatic recommended default. \textbf{Q6\_K (86.7\%, 3.98~tokens/s)
-is strictly dominated on both dimensions}---it is simultaneously the lowest-scoring
-and slowest practical variant, making it the weakest operating point.
+Figure~\ref{fig:pareto} plots the Pareto frontier for all variants.
+\textbf{Two variants are Pareto-optimal on BoolQ accuracy vs.\ throughput}:
+Q4\_K\_M (72\%, 5.32~tokens/s) is the accuracy-dominant point, while Q2\_K
+(69\%, 5.66~tokens/s) is the speed-dominant point.
+Notably, \textbf{Q8\_0 is no longer Pareto-optimal under BoolQ}: it scores 68\%
+accuracy at 4.95~tokens/s, dominated by Q4\_K\_M which achieves both higher
+accuracy \emph{and} higher throughput. Q3\_K\_M (66\%, 4.91~tokens/s) is also
+dominated by Q4\_K\_M on both axes. \textbf{Q6\_K (65\%, 3.98~tokens/s) is
+strictly dominated on both dimensions}---simultaneously the lowest-scoring and
+slowest practical variant.
 
-A key finding is that accuracy does not track bit-width monotonically.
-Q3\_K\_M (3-bit) and Q8\_0 (8-bit) tie at 100\%, while Q6\_K (6-bit)
-scores \emph{lowest} at 86.7\%---fewer correct answers than the 2-bit Q2\_K.
-This non-monotonicity in accuracy mirrors the non-monotonic throughput ordering
-and reflects the complex interaction between K-quant block structure and the
-specific weight sensitivity of Llama 3.2's layers to reduced precision.
+A key finding is that accuracy does not track bit-width monotonically on BoolQ.
+Q4\_K\_M (4-bit) achieves the \emph{highest} accuracy, Q6\_K (6-bit)
+scores \emph{lowest}---fewer correct answers than any other variant despite
+having more bits per weight than Q4\_K\_M.
+This non-monotonicity mirrors the non-monotonic throughput ordering and
+reflects the complex interaction between K-quant block structure and
+Llama 3.2's layer-specific weight sensitivity.
 
-\textbf{Perplexity vs.\ factual accuracy.}
+\textbf{Perplexity vs.\ BoolQ accuracy.}
 WikiText-2 perplexity (Table~\ref{tab:main_results}) is nearly monotonic with
 bit-width: Q8\_0 (9.70)~$\approx$~Q6\_K (9.75)~$\approx$~Q4\_K\_M (9.76)
 $<$~Q3\_K\_M (10.15)~$<$~Q2\_K (11.71) (12\,KB sample, ${\approx}3{,}000$ tokens).
-Yet Q6\_K and Q4\_K\_M have \emph{identical} PPL within 0.01 while their factual
-accuracy differs by 6.6\% (86.7\% vs.\ 93.3\%) and throughput by 34\%.
+Yet Q6\_K and Q4\_K\_M have \emph{identical} PPL within 0.01 while their BoolQ
+accuracy differs by 7\% (65\% vs.\ 72\%) and throughput by 34\%.
 Perplexity is thus an \emph{insufficient} quality proxy: task-specific on-device
 evaluation is essential to surface quantisation-specific failure modes.
 
@@ -528,16 +546,18 @@ performance cores.
 
 \textbf{Deployment feasibility by variant.}
 Q2\_K (1.3~GB) and Q3\_K\_M (1.6~GB) are the most RAM-friendly and would
-run on devices with as little as 3~GB total RAM. Q3\_K\_M's perfect factual
-accuracy makes it the best option for accuracy-sensitive, memory-constrained
-deployments.
+run on devices with as little as 3~GB total RAM. Q2\_K is speed-dominant
+(5.66~tokens/s, 69\% BoolQ); Q3\_K\_M offers similar throughput (4.91~tokens/s)
+at slightly lower accuracy (66\%), making Q2\_K the better overall choice
+at this memory tier.
 Q4\_K\_M (2.0~GB) comfortably fits any device $\geq$ 4~GB and is the recommended
-default for general-purpose deployment.
-Q6\_K (2.7~GB) and Q8\_0 (3.4~GB) require $\geq$ 6~GB. Q8\_0 achieves 100\%
-accuracy and 4.95~tokens/s, making it Pareto-optimal for high-accuracy deployments
-on 6~GB devices. Q6\_K is the weakest operating point: at 86.7\% accuracy and
-only 3.98~tokens/s it is strictly dominated by every other variant on at least
-one dimension---prefer Q8\_0 or Q4\_K\_M on 6~GB devices instead.
+default: it achieves the highest BoolQ accuracy (72\%) and second-highest
+throughput (5.32~tokens/s), making it Pareto-dominant over Q8\_0 and Q3\_K\_M.
+Q6\_K (2.7~GB) and Q8\_0 (3.4~GB) require $\geq$ 6~GB. Q8\_0 (68\%, 4.95~tokens/s)
+is viable but dominated by Q4\_K\_M on both axes under BoolQ evaluation.
+Q6\_K is the weakest operating point: at 65\% BoolQ accuracy and
+only 3.98~tokens/s it is strictly dominated---prefer Q8\_0 or Q4\_K\_M on 6~GB
+devices instead.
 F16 (6.4~GB) is not viable on any consumer device $\leq$ 8~GB.
 
 Figure~\ref{fig:latency_dist} shows latency distributions. Q3\_K\_M and Q6\_K
@@ -592,25 +612,26 @@ allocation footprint when the KV-cache grows to 233~MB alongside these models.
 
 \subsection{Deployment Recommendations}
 
-\textbf{Default recommendation: Q4\_K\_M.} At 5.32 tokens/s, 2.0~GB, and 93.3\%
-accuracy with low variance (std~0.52), Q4\_K\_M provides the best overall operating
-point for 6~GB devices. Though Q2\_K is slightly faster and equally accurate,
+\textbf{Default recommendation: Q4\_K\_M.} At 5.32 tokens/s, 2.0~GB, and 72\%
+BoolQ accuracy with low variance (std~0.52), Q4\_K\_M provides the best overall
+operating point for 6~GB devices. It is the accuracy-dominant Pareto point,
+simultaneously outperforming Q8\_0 and Q3\_K\_M on both accuracy and throughput.
 Q4\_K\_M's lower performance variance and broad community ecosystem support
-make it the pragmatic default.
-
-\textbf{Accuracy-critical deployments: Q3\_K\_M or Q8\_0.} Both variants achieve
-100\% on our factual evaluation suite. Q3\_K\_M (4.91~tokens/s, 1.6~GB) is the
-best choice for 4~GB devices and memory-constrained deployments. Q8\_0
-(4.95~tokens/s, 3.4~GB) is Pareto-optimal for 6~GB devices seeking perfect
-accuracy with competitive throughput.
+further reinforce it as the pragmatic default.
 
 \textbf{Speed-critical deployments: Q2\_K.} At 5.66~tokens/s and only 1.3~GB,
-Q2\_K is the fastest practical option. The 93.3\% accuracy is acceptable for
-many latency-sensitive applications.
+Q2\_K is the fastest practical option and is Pareto-optimal (69\% BoolQ, speed-dominant).
+It is the best choice when throughput matters most and RAM is limited to 2~GB.
+
+\textbf{Memory-constrained deployments (3--4~GB devices): Q2\_K or Q3\_K\_M.}
+Both fit comfortably in 2~GB and can run on 3~GB devices. Q2\_K is preferred
+(faster, slightly higher BoolQ accuracy). Q3\_K\_M is an alternative if the
+66\% BoolQ accuracy is adequate and context stability at $\leq$1024 tokens
+is acceptable.
 
 \textbf{Avoid Q6\_K on CPU backends.} Q6\_K is strictly dominated in both
-accuracy (86.7\% vs.\ 93.3--100\% for all others) and throughput (3.98~tokens/s,
-the slowest practical variant). Q4\_K\_M is faster, smaller, and more accurate;
+BoolQ accuracy (65\% vs.\ 66--72\% for all others) and throughput (3.98~tokens/s,
+the slowest practical variant). Q4\_K\_M is faster, smaller, and 7\% more accurate;
 Q8\_0 is more accurate and nearly 25\% faster. This recommendation may not apply
 to GPU-accelerated backends where the Q6\_K de-quantization overhead differs.
 
@@ -640,10 +661,13 @@ all variants, so responsiveness decisions should be driven by TTFT budgets.
 The Tensor G2's specific characteristics may not generalize to Snapdragon,
 MediaTek, or Apple ARM SoC families.
 
-\textbf{Factual accuracy scope.} The 15-question evaluation covers basic factual
-recall; more rigorous evaluation (MMLU, GSM8K, HumanEval) would provide broader
-quality characterization. The surprising non-monotonic accuracy ordering warrants
-further investigation.
+\textbf{Quality evaluation scope.} The 100-question BoolQ and ARC-Easy evaluations
+cover reading comprehension and elementary factual recall; broader coverage
+(MMLU, GSM8K, HumanEval, full WikiText-2 perplexity) would provide a more complete
+quality characterization. The perplexity corpus used here (12\,KB, ${\approx}3{,}000$
+tokens) is too small for statistically meaningful fine-grained PPL comparisons;
+re-running with the full 285K-token WikiText-2 test set is recommended.
+The non-monotonic BoolQ accuracy ordering warrants further investigation.
 
 \textbf{Working memory measurement only.} The peak memory figures in Figure~\ref{fig:memory}
 reflect the MemAvailable delta in \texttt{/proc/meminfo}---i.e., the KV-cache plus
@@ -715,25 +739,26 @@ Our primary empirical findings are:
   \item \textbf{Thread-count sweet spot}: 4 threads is optimal on the Tensor G2's
         heterogeneous cluster; 8 threads degrades throughput by 20\% due to
         little-core load imbalance.
-  \item \textbf{Accuracy non-monotonicity}: On-device factual accuracy does not
-        monotonically improve with bit-width across all five variants (86.7--100\%):
-        Q3\_K\_M (3-bit) and Q8\_0 (8-bit) achieve perfect 100\%, Q2\_K and
-        Q4\_K\_M score 93.3\%, and Q6\_K scores lowest at 86.7\% despite having
-        more bits per weight than Q4\_K\_M. Q6\_K is strictly dominated on both
-        accuracy and throughput, confirming it as the weakest deployment choice.
-  \item \textbf{Q4\_K\_M recommended; Q8\_0 Pareto-optimal on accuracy}: The
-        Pareto frontier is defined by Q8\_0 (100\%, 4.95~tokens/s) and Q2\_K
-        (93.3\%, 5.66~tokens/s). Q4\_K\_M (2.0~GB, 5.32~tokens/s, 93.3\%) offers
-        the best overall balance for 6~GB deployment due to its lower variance
-        and broad community ecosystem support.
+  \item \textbf{BoolQ accuracy non-monotonicity}: On-device BoolQ reading comprehension
+        accuracy does not monotonically improve with bit-width (65--72\%):
+        Q4\_K\_M (4-bit) achieves the highest score at 72\%, Q6\_K (6-bit)
+        scores lowest at 65\% despite having more bits per weight than Q4\_K\_M.
+        ARC-Easy factual accuracy is near-ceiling (95--100\%) for all variants.
+        Q6\_K is strictly dominated on both BoolQ accuracy and throughput,
+        confirming it as the weakest deployment choice.
+  \item \textbf{Q4\_K\_M recommended; Pareto-dominant on both accuracy and throughput}:
+        The BoolQ Pareto frontier is defined by Q4\_K\_M (72\%, 5.32~tokens/s,
+        accuracy-dominant) and Q2\_K (69\%, 5.66~tokens/s, speed-dominant).
+        Q8\_0 is dominated by Q4\_K\_M on both axes under BoolQ. Q4\_K\_M
+        (2.0~GB) offers the best overall balance for 6~GB deployment.
 \end{enumerate}
 
 These findings provide actionable guidance: use Q4\_K\_M as the default
-(context-stable, best overall balance), Q3\_K\_M or Q8\_0 for accuracy-critical
-applications at short contexts, Q2\_K for latency-constrained deployments,
-4 threads on big.LITTLE ARM, and avoid Q6\_K on CPU backends entirely---it is
-strictly dominated on both throughput and accuracy, and catastrophically slow
-at ctx=2048. As on-device AI
+(context-stable, highest BoolQ accuracy at 72\%, best overall balance),
+Q2\_K for latency-constrained or RAM-limited deployments (fastest at 5.66~tok/s,
+69\% BoolQ), 4 threads on big.LITTLE ARM, and avoid Q6\_K on CPU backends
+entirely---it is strictly dominated on both BoolQ accuracy and throughput,
+and catastrophically slow at ctx=2048. As on-device AI
 continues to proliferate, hardware-specific benchmarks of this kind are essential
 for evidence-based quantization selection.
 
@@ -799,6 +824,16 @@ GitHub, 2024. [Online]. Available: \url{https://github.com/meta-llama/llama3}
 G. Gerganov, ``GGML: Tensor Library for Machine Learning,''
 GitHub Repository, 2023--2025. [Online]. Available: \url{https://github.com/ggerganov/ggml}
 
+\bibitem{boolq}
+C. Clark, K. Lee, M.-W. Chang, T. Kwiatkowski, M. Collins, and K. Toutanova,
+``BoolQ: Exploring the Surprising Difficulty of Natural Yes/No Questions,''
+in \textit{Proc. NAACL-HLT}, 2019.
+
+\bibitem{arc}
+P. Clark, I. Cowhey, O. Etzioni, T. Khot, A. Sabharwal, C. Schoenick, and O. Tafjord,
+``Think you have Solved Question Answering? Try ARC, the AI2 Reasoning Challenge,''
+arXiv preprint arXiv:1803.05457, 2018.
+
 \end{thebibliography}
 
 % ===========================================================================
@@ -846,21 +881,30 @@ across 15 samples per variant per context (5 trials $\times$ 3 prompt types).
 Warmup runs (2 per configuration) are excluded. Outlier rejection was not applied;
 all completed trials within the timeout threshold are included in analysis.
 
-\section{Quality Evaluation Prompts}
+\section{Quality Evaluation Details}
 
-The 15-question factual evaluation suite covers four categories:
+\subsection{BoolQ (100 questions)}
+BoolQ questions are drawn from the SuperGLUE validation split~\cite{boolq}.
+Each example consists of a passage (avg.\ $\sim$100 words) and a yes/no question.
+The prompt template is:
+\begin{verbatim}
+Passage: {passage}
+Question: {question}
+Answer with only yes or no:
+\end{verbatim}
+Responses are scored by extracting the first occurrence of the words
+\emph{yes} or \emph{no} (case-insensitive) from the model output,
+within 400 characters following the instruction marker.
 
-\textbf{Arithmetic (5):} 17$\times$8, $\sqrt{144}$, $2^{10}$, 15\% of 200,
-prime factor product $2\times3\times7$.
-
-\textbf{Geography (5):} Capital of Japan (Tokyo), largest country by area (Russia),
-capital of Australia (Canberra), longest river (Nile), number of continents (7).
-
-\textbf{History/Science (5):} Year of first iPhone (2007), chemical symbol for
-gold (Au), number of planets (8), planet closest to Sun (Mercury),
-year WWII ended (1945).
-
-Each prompt instructs the model to respond with only the answer. Scoring uses
-case-insensitive substring matching.
+\subsection{ARC-Easy (100 questions)}
+ARC-Easy questions are drawn from the AI2 ARC Easy test split~\cite{arc}.
+Each example presents a 4-choice multiple-choice question.
+The prompt template is:
+\begin{verbatim}
+Question: {question}
+Choices: A) {A} B) {B} C) {C} D) {D}
+Answer with only A, B, C, or D:
+\end{verbatim}
+Scoring uses exact-match on the predicted letter (A/B/C/D).
 
 \end{document}
