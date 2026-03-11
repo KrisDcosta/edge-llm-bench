@@ -650,6 +650,59 @@ practitioners using these variants should limit context length to $\leq$1024
 tokens or accept the throughput penalty. TTFT grows linearly with context across
 all variants, so responsiveness decisions should be driven by TTFT budgets.
 
+\subsection{GPU Reference Baselines}
+\label{sec:gpu_baseline}
+
+Table~\ref{tab:gpu_baseline} contextualizes the Pixel~6a results against cloud GPU
+and TPU inference of the \emph{unquantized} Llama~3.2~3B Instruct model. All GPU
+runs use BF16 (TPU: FP16) via Hugging Face \texttt{transformers} with
+\texttt{device\_map="auto"}, greedy decoding, 128 output tokens, and 10 trials
+per context length.
+
+\begin{table}[h]
+\centering
+\caption{GPU/TPU reference baselines vs.\ Pixel~6a best variant (Q4\_K\_M).
+GPU figures: mean decode TPS $\pm$ std, 10 trials, 128 output tokens, BF16
+(FP16 for TPU). Device figure: Q4\_K\_M INT4 GGUF, CPU-only, ctx=256.
+Speedup is relative to the Pixel~6a Q4\_K\_M result.}
+\label{tab:gpu_baseline}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llrr}
+\toprule
+\textbf{Platform} & \textbf{Prec.} &
+\textbf{Decode TPS ($\pm$std)} & \textbf{Speedup} \\
+\midrule
+Pixel 6a Q4\_K\_M (CPU) & INT4  & $5.32 \pm 0.52$ & $1.0\times$ \\
+\midrule
+Google TPU v6e-1        & FP16  & $9.79  \pm 2.13$ & $1.8\times$ \\
+Colab T4 (15\,GB)       & BF16  & $19.17 \pm 5.58$ & $3.6\times$ \\
+Colab A100 (40\,GB)     & BF16  & $30.50 \pm 1.74$ & $5.7\times$ \\
+Colab H100 (80\,GB)     & BF16  & $62.84 \pm 2.73$ & $11.8\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three observations emerge.
+\textbf{First}, the Pixel~6a with Q4\_K\_M INT4 quantization achieves
+29\% of a T4's throughput while operating entirely offline at zero marginal
+cloud cost---a compelling operating point for privacy-sensitive or
+latency-constrained edge deployments that cannot tolerate cloud round-trips.
+\textbf{Second}, the high variance on shared Colab GPUs (T4: std~5.58~tok/s,
+29\%; TPU: std~2.13~tok/s, 22\%) contrasts with the device's lower variance
+(std~0.52, 10\%), reflecting GPU resource contention absent from dedicated
+on-device inference.
+\textbf{Third}, the single-chip v6e-1 TPU result is surprisingly modest
+($9.79$~tok/s; $1.8\times$ speedup over the mobile CPU)---only marginally
+faster than a shared T4 and only $1.84\times$ the mobile INT4 baseline.
+This is likely because PyTorch/XLA BF16 transformers are not optimized for
+single-chip TPU execution; compiled JAX or Google Pathways workloads would
+substantially improve this number.
+
+Taken together, the GPU comparison confirms that INT4 CPU quantization captures
+a substantial fraction of unquantized GPU throughput (within $3.6\times$ of a T4)
+while eliminating cloud dependency and model size entirely, making it the
+practical choice for battery-constrained, privacy-preserving mobile deployment.
+
 % ===========================================================================
 \section{Limitations and Future Work}
 \label{sec:limitations}

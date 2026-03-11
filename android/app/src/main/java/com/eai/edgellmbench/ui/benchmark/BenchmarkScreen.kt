@@ -436,31 +436,34 @@ private fun HistoryRunCard(run: BenchmarkRunEntity, dateFmt: SimpleDateFormat) {
 
 @Composable
 private fun ResultsTable(results: List<TrialResult>) {
-    LazyColumn(
+    // Use a regular Column (not LazyColumn) to avoid unbounded-height crash when
+    // this composable is nested inside a Column with Arrangement.spacedBy().
+    // Trial count is bounded (warmup + bench runs ≤ ~20 rows), so no scrolling needed.
+    Column(
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(6.dp),
-        contentPadding = PaddingValues(vertical = 4.dp),
     ) {
         // Header row
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                listOf("Trial", "Prompt", "Decode TPS", "TTFT").forEach { header ->
-                    Text(
-                        text = header,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            listOf("Trial", "Prompt", "Decode TPS", "TTFT").forEach { header ->
+                Text(
+                    text = header,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
             }
-            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
         }
+        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
         // Data rows
-        items(results.filter { !it.isWarmup }) { r ->
+        results.filter { !it.isWarmup }.forEach { r ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,

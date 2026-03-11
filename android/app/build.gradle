@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    // ksp not applied — Room DB is scaffolded but not code-gen'd at this stage
 }
 
 android {
@@ -75,7 +74,7 @@ dependencies {
     // DataStore (settings persistence)
     implementation libs.androidx.datastore.preferences
 
-    // Room (conversation history — annotations only; code-gen via KSP to be wired in future)
+    // Room (entity data classes — no code-gen needed; ViewModel uses in-memory storage)
     implementation libs.room.runtime
     implementation libs.room.ktx
 
