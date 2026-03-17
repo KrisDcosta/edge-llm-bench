@@ -1,0 +1,201 @@
+{
+  "buildFiles": [
+    "/Users/krisdcosta/291_EAI/android/lib/src/main/cpp/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/common/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/src/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/src/ggml-cpu/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/src/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/vendor/cpp-httplib/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/opt/homebrew/bin/ninja",
+      "-v",
+      "-C",
+      "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/opt/homebrew/bin/ninja",
+    "-v",
+    "-C",
+    "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "ai-chat::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ai-chat",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/build/intermediates/cxx/Release/315e2b1x/obj/arm64-v8a/libai-chat.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libllama.so",
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml.so",
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-base.so"
+      ]
+    },
+    "build_info::@8bf2afb4d8037c7b7d92": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "build_info"
+    },
+    "common::@8bf2afb4d8037c7b7d92": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "common",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/build-llama/common/libcommon.a"
+    },
+    "cpp-httplib::@e1f36686b082eccf6cbc": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "cpp-httplib",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/build-llama/vendor/cpp-httplib/libcpp-httplib.a"
+    },
+    "ggml::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-base.so"
+      ]
+    },
+    "ggml-base::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-base",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-base.so",
+      "runtimeFiles": []
+    },
+    "ggml-cpu-android_armv8.0_1::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv8.0_1",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-cpu-android_armv8.0_1.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-base.so",
+        "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/darwin-x86_64/lib/clang/21/lib/linux/aarch64/libomp.so"
+      ]
+    },
+    "ggml-cpu-android_armv8.0_1-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv8.0_1-feats"
+    },
+    "ggml-cpu-android_armv8.2_1::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv8.2_1",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-cpu-android_armv8.2_1.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-base.so",
+        "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/darwin-x86_64/lib/clang/21/lib/linux/aarch64/libomp.so"
+      ]
+    },
+    "ggml-cpu-android_armv8.2_1-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv8.2_1-feats"
+    },
+    "ggml-cpu-android_armv8.2_2::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv8.2_2",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-cpu-android_armv8.2_2.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-base.so",
+        "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/darwin-x86_64/lib/clang/21/lib/linux/aarch64/libomp.so"
+      ]
+    },
+    "ggml-cpu-android_armv8.2_2-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv8.2_2-feats"
+    },
+    "ggml-cpu-android_armv8.6_1::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv8.6_1",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-cpu-android_armv8.6_1.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-base.so",
+        "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/darwin-x86_64/lib/clang/21/lib/linux/aarch64/libomp.so"
+      ]
+    },
+    "ggml-cpu-android_armv8.6_1-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv8.6_1-feats"
+    },
+    "ggml-cpu-android_armv9.0_1::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv9.0_1",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-cpu-android_armv9.0_1.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-base.so",
+        "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/darwin-x86_64/lib/clang/21/lib/linux/aarch64/libomp.so"
+      ]
+    },
+    "ggml-cpu-android_armv9.0_1-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv9.0_1-feats"
+    },
+    "ggml-cpu-android_armv9.2_1::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv9.2_1",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-cpu-android_armv9.2_1.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-base.so",
+        "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/darwin-x86_64/lib/clang/21/lib/linux/aarch64/libomp.so"
+      ]
+    },
+    "ggml-cpu-android_armv9.2_1-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv9.2_1-feats"
+    },
+    "ggml-cpu-android_armv9.2_2::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv9.2_2",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-cpu-android_armv9.2_2.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-base.so",
+        "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/darwin-x86_64/lib/clang/21/lib/linux/aarch64/libomp.so"
+      ]
+    },
+    "ggml-cpu-android_armv9.2_2-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "ggml-cpu-android_armv9.2_2-feats"
+    },
+    "llama::@b791850eb95f38641ccb": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "llama",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libllama.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml.so",
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/bin/libggml-base.so"
+      ]
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [
+    "c"
+  ],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

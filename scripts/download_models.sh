@@ -26,7 +26,9 @@ get_variant_info() {
     case "$1" in
         Q2_K)   echo "$UNSLOTH  Llama-3.2-3B-Instruct-Q2_K.gguf" ;;
         Q3_K_M) echo "$UNSLOTH  Llama-3.2-3B-Instruct-Q3_K_M.gguf" ;;
+        Q4_K_S) echo "$BARTOWSKI  Llama-3.2-3B-Instruct-Q4_K_S.gguf" ;;
         Q4_K_M) echo "$BARTOWSKI  Llama-3.2-3B-Instruct-Q4_K_M.gguf" ;;
+        Q5_K_M) echo "$BARTOWSKI  Llama-3.2-3B-Instruct-Q5_K_M.gguf" ;;
         Q6_K)   echo "$BARTOWSKI  Llama-3.2-3B-Instruct-Q6_K.gguf" ;;
         Q8_0)   echo "$BARTOWSKI  Llama-3.2-3B-Instruct-Q8_0.gguf" ;;
         F16)    echo "$BARTOWSKI  Llama-3.2-3B-Instruct-f16.gguf" ;;
@@ -34,7 +36,8 @@ get_variant_info() {
     esac
 }
 
-FEASIBLE_VARIANTS="Q2_K Q3_K_M Q4_K_M Q6_K Q8_0"
+# 7 research variants (ordered by bits-per-weight)
+FEASIBLE_VARIANTS="Q2_K Q3_K_M Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0"
 
 mkdir -p "$DEST_DIR"
 
@@ -81,6 +84,8 @@ download_variant() {
 if [ $# -eq 0 ]; then
     echo "Usage: $0 [VARIANT... | all]"
     echo "Available: $FEASIBLE_VARIANTS  (also F16 but unusable on 6 GB)"
+    echo ""
+    echo "New variants: Q4_K_S (~1.8 GB) and Q5_K_M (~2.2 GB)"
     exit 1
 fi
 

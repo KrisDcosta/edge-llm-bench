@@ -40,7 +40,7 @@ N_THREADS=4
 
 # Model filename prefix (consistent across all variants)
 MODEL_PREFIX="Llama-3.2-3B-Instruct"
-ALL_VARIANTS="Q2_K Q3_K_M Q4_K_M Q6_K Q8_0"
+ALL_VARIANTS="Q2_K Q3_K_M Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0"
 
 # ---------------------------------------------------------------------------
 # Parse arguments — bash 3.2 compatible (no declare -A)
@@ -51,7 +51,7 @@ VARIANTS=""
 for arg in "$@"; do
     case "$arg" in
         --imatrix) USE_IMATRIX=1 ;;
-        Q2_K|Q3_K_M|Q4_K_M|Q6_K|Q8_0) VARIANTS="$VARIANTS $arg" ;;
+        Q2_K|Q3_K_M|Q4_K_S|Q4_K_M|Q5_K_M|Q6_K|Q8_0) VARIANTS="$VARIANTS $arg" ;;
         *) echo "Unknown argument: $arg" >&2; exit 1 ;;
     esac
 done

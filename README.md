@@ -259,7 +259,7 @@ python scripts/benchmark_runner.py --all --wifi-adb
 | Component | Version |
 |-----------|---------|
 | Device | Google Pixel 6a (6 GB LPDDR5, Android 14 / API 34) |
-| SoC | Google Tensor G2 (2×Cortex-X1 @ 2.85 GHz + 2×A76 + 4×A55) |
+| SoC | Google Tensor G1 (2×Cortex-X1 @ 2.80 GHz + 2×A76 + 4×A55) |
 | Inference backend | llama.cpp (build-android, NDK arm64-v8a) |
 | NDK | 29.0.14206865 |
 | Python | 3.10+ |

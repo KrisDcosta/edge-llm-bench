@@ -11,10 +11,17 @@ Usage:
     python3 scripts/quality_eval.py Q4_K_M
     python3 scripts/quality_eval.py Q2_K Q4_K_M
 
-    # Standard benchmark datasets (ARC-Easy, BoolQ):
+    # Standard benchmark datasets (ARC-Easy, BoolQ, ARC-Challenge, HellaSwag, MMLU, TruthfulQA):
     python3 scripts/quality_eval.py --dataset data/arc_easy_100.yaml --tag arc_easy
     python3 scripts/quality_eval.py --dataset data/boolq_100.yaml --tag boolq
     python3 scripts/quality_eval.py --dataset data/arc_easy_100.yaml --tag arc_easy Q4_K_M Q8_0
+    python3 scripts/quality_eval.py --dataset data/arc_challenge_100.yaml --tag arc_challenge
+    python3 scripts/quality_eval.py --dataset data/hellaswag_100.yaml --tag hellaswag
+    python3 scripts/quality_eval.py --dataset data/mmlu_100.yaml --tag mmlu
+    python3 scripts/quality_eval.py --dataset data/truthfulqa_100.yaml --tag truthfulqa
+
+    # List all available benchmark YAML files:
+    python3 scripts/quality_eval.py --list-benchmarks
 
     # imatrix variants:
     python3 scripts/quality_eval.py --dataset data/arc_easy_100.yaml --tag arc_easy --imatrix
@@ -57,26 +64,32 @@ DEVICE_DIR        = "/data/local/tmp"
 LLAMA_CLI         = f"{DEVICE_DIR}/llama-completion"
 PROMPT_DEVICE_PATH = f"{DEVICE_DIR}/eval_prompt.txt"   # temp file for per-question prompts
 
+DEVICE_WORK_DIR = DEVICE_DIR  # alias used in GGUF path definitions below
+
 GGUF_DEVICE_PATHS = {
-    "Q2_K":   f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q2_K.gguf",
-    "Q3_K_M": f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q3_K_M.gguf",
-    "Q4_K_M": f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
-    "Q6_K":   f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q6_K.gguf",
-    "Q8_0":   f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q8_0.gguf",
-    "F16":    f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-F16.gguf",
+    "Q2_K":   f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q2_K.gguf",
+    "Q3_K_M": f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q3_K_M.gguf",
+    "Q4_K_M": f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    "Q4_K_S": f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q4_K_S.gguf",
+    "Q5_K_M": f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q5_K_M.gguf",
+    "Q6_K":   f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q6_K.gguf",
+    "Q8_0":   f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q8_0.gguf",
+    "F16":    f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-F16.gguf",
 }
 
 # imatrix variants (produced by requantize_imatrix.sh)
 GGUF_IMATRIX_DEVICE_PATHS = {
     "Q2_K":   f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q2_K-imatrix.gguf",
     "Q3_K_M": f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q3_K_M-imatrix.gguf",
+    "Q4_K_S": f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q4_K_S-imatrix.gguf",
     "Q4_K_M": f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q4_K_M-imatrix.gguf",
+    "Q5_K_M": f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q5_K_M-imatrix.gguf",
     "Q6_K":   f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q6_K-imatrix.gguf",
     "Q8_0":   f"{DEVICE_DIR}/Llama-3.2-3B-Instruct-Q8_0-imatrix.gguf",
 }
 
-ALL_VARIANTS         = ["Q2_K", "Q3_K_M", "Q4_K_M", "Q6_K", "Q8_0", "F16"]
-ALL_IMATRIX_VARIANTS = ["Q2_K", "Q3_K_M", "Q4_K_M", "Q6_K", "Q8_0"]
+ALL_VARIANTS         = ["Q2_K", "Q3_K_M", "Q4_K_S", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0", "F16"]
+ALL_IMATRIX_VARIANTS = ["Q2_K", "Q3_K_M", "Q4_K_S", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0"]
 
 DEFAULT_TAG = "custom_v1"
 
@@ -601,7 +614,32 @@ def main() -> int:
         "--output", default=str(OUTPUT_FILE),
         help="Output JSON file"
     )
+    parser.add_argument(
+        "--list-benchmarks", action="store_true",
+        help="List all available YAML benchmark files in the data/ directory and exit"
+    )
     args = parser.parse_args()
+
+    # --list-benchmarks: print available YAML files and exit
+    if args.list_benchmarks:
+        data_dir = PROJECT_ROOT / "data"
+        yaml_files = sorted(data_dir.glob("*.yaml"))
+        if not yaml_files:
+            print("No YAML benchmark files found in data/")
+            return 0
+        print(f"Available benchmark datasets in {data_dir}:")
+        for yf in yaml_files:
+            # Try to read question count from header comment
+            try:
+                import yaml as _yaml
+                d = _yaml.safe_load(yf.read_text())
+                n = len(d.get("prompts", []))
+                atypes = set(p.get("answer_type", "substring") for p in d.get("prompts", []))
+                print(f"  {yf.name:<35}  {n:>4} questions  [{', '.join(sorted(atypes))}]")
+            except Exception:
+                print(f"  {yf.name}")
+        print(f"\nUsage: python3 scripts/quality_eval.py --dataset data/<file>.yaml --tag <tag>")
+        return 0
 
     # Determine dataset file and tag
     if args.dataset:

@@ -66,9 +66,17 @@ class ModelManagerViewModel(application: Application) : AndroidViewModel(applica
             _uiState.update { it.copy(errorMessage = null) }
             try {
                 ModelRepository.loadFromPath(getApplication(), path, variant)
+            } catch (e: OutOfMemoryError) {
+                InferenceRepository.markUnloaded()
+                _uiState.update { it.copy(errorMessage = "Out of memory! $variant is too large for this device. Try Q8_0 (3.4 GB) instead.") }
             } catch (e: Exception) {
                 InferenceRepository.markUnloaded()
-                _uiState.update { it.copy(errorMessage = "Load failed: ${e.message}") }
+                val errorMsg = when {
+                    e.message?.contains("cannot load", ignoreCase = true) == true ->
+                        "Model file not found or invalid. Push the model first with:\nadb push Llama-3.2-3B-Instruct-$variant.gguf /data/local/tmp/"
+                    else -> "Load failed: ${e.message}"
+                }
+                _uiState.update { it.copy(errorMessage = errorMsg) }
             }
         }
     }
@@ -79,6 +87,9 @@ class ModelManagerViewModel(application: Application) : AndroidViewModel(applica
             _uiState.update { it.copy(errorMessage = null) }
             try {
                 ModelRepository.loadFromUri(getApplication(), uri, variant)
+            } catch (e: OutOfMemoryError) {
+                InferenceRepository.markUnloaded()
+                _uiState.update { it.copy(errorMessage = "Out of memory! $variant is too large for this device. Try Q8_0 (3.4 GB) instead.") }
             } catch (e: Exception) {
                 InferenceRepository.markUnloaded()
                 _uiState.update { it.copy(errorMessage = "Load failed: ${e.message}") }

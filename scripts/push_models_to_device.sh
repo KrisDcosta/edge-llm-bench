@@ -112,13 +112,13 @@ if [ $# -eq 0 ]; then
     echo "Usage: $0 [bins | all | VARIANT...]"
     echo "  bins      — push binaries and .so files only"
     echo "  all       — push everything (bins + all downloaded models)"
-    echo "  VARIANT   — push specific model(s): Q2_K Q3_K_M Q4_K_M Q6_K Q8_0"
+    echo "  VARIANT   — push specific model(s): Q2_K Q3_K_M Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0"
     exit 1
 fi
 
-# All variants including F16 (OOM expected but needed to document RQ5)
+# All 7 research variants + F16 (OOM expected but needed to document RQ5)
 # push_model() skips gracefully if local file doesn't exist yet
-FEASIBLE_VARIANTS=(Q2_K Q3_K_M Q4_K_M Q6_K Q8_0 F16)
+FEASIBLE_VARIANTS=(Q2_K Q3_K_M Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0 F16)
 
 push_bins_needed=false
 variants_to_push=()

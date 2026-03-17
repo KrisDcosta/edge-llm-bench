@@ -1,0 +1,570 @@
+{
+	"configurations" : 
+	[
+		{
+			"abstractTargets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "Git::Git::@824c2e0370b8c5599355",
+					"jsonFile" : "target-Git__Git-Release-33e6150bd737c1fc2ea4.json",
+					"name" : "Git::Git",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 6,
+					"id" : "Threads::Threads::@8bf2afb4d8037c7b7d92",
+					"jsonFile" : "target-Threads__Threads-Release-57f200181329ee498c2d.json",
+					"name" : "Threads::Threads",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 7,
+					"id" : "Threads::Threads::@e1f36686b082eccf6cbc",
+					"jsonFile" : "target-Threads__Threads-Release-2eccb3df1953eebeee22.json",
+					"name" : "Threads::Threads",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "Threads::Threads::@600a4496cf0786271b41",
+					"jsonFile" : "target-Threads__Threads-Release-6e25fad86be9d9e1682d.json",
+					"name" : "Threads::Threads",
+					"projectIndex" : 2
+				}
+			],
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Release-9ad1a58d4644cf6543fa.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10.0"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"build" : "build-llama",
+					"childIndexes" : 
+					[
+						2,
+						5,
+						6,
+						7
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-build-llama-Release-c027c5aa3becb07448f4.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp"
+				},
+				{
+					"abstractTargetIndexes" : 
+					[
+						3
+					],
+					"build" : "build-llama/ggml",
+					"childIndexes" : 
+					[
+						3
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-build-llama.ggml-Release-07edddf6f4e213d31bf7.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 2,
+					"source" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml"
+				},
+				{
+					"build" : "build-llama/ggml/src",
+					"childIndexes" : 
+					[
+						4
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-build-llama.ggml.src-Release-a0c4022f908c8fe40c57.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 2,
+					"source" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/src",
+					"targetIndexes" : 
+					[
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24,
+						25,
+						26,
+						27,
+						28,
+						29,
+						30,
+						31,
+						32,
+						33
+					]
+				},
+				{
+					"build" : "build-llama/ggml/src/ggml-cpu",
+					"jsonFile" : "directory-build-llama.ggml.src.ggml-cpu-Release-7a7d1b4c29bfd4caec3e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 2,
+					"source" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/src/ggml-cpu"
+				},
+				{
+					"build" : "build-llama/src",
+					"jsonFile" : "directory-build-llama.src-Release-4db9f4ede7e6f65f4b17.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/src",
+					"targetIndexes" : 
+					[
+						34
+					]
+				},
+				{
+					"abstractTargetIndexes" : 
+					[
+						1
+					],
+					"build" : "build-llama/common",
+					"jsonFile" : "directory-build-llama.common-Release-a83eb0d7cbcbef07ea2d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/common",
+					"targetIndexes" : 
+					[
+						1,
+						2
+					]
+				},
+				{
+					"abstractTargetIndexes" : 
+					[
+						2
+					],
+					"build" : "build-llama/vendor/cpp-httplib",
+					"jsonFile" : "directory-build-llama.vendor.cpp-httplib-Release-f70cbbff7350896d53ea.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/vendor/cpp-httplib",
+					"targetIndexes" : 
+					[
+						3
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "ai-chat",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"abstractTargetIndexes" : 
+					[
+						0,
+						1,
+						2
+					],
+					"childIndexes" : 
+					[
+						2
+					],
+					"directoryIndexes" : 
+					[
+						1,
+						5,
+						6,
+						7
+					],
+					"name" : "llama.cpp",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						3,
+						34
+					]
+				},
+				{
+					"abstractTargetIndexes" : 
+					[
+						3
+					],
+					"directoryIndexes" : 
+					[
+						2,
+						3,
+						4
+					],
+					"name" : "ggml",
+					"parentIndex" : 1,
+					"targetIndexes" : 
+					[
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24,
+						25,
+						26,
+						27,
+						28,
+						29,
+						30,
+						31,
+						32,
+						33
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ai-chat::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ai-chat-Release-37d302da11b59de8c28e.json",
+					"name" : "ai-chat",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 6,
+					"id" : "build_info::@8bf2afb4d8037c7b7d92",
+					"jsonFile" : "target-build_info-Release-7df6fd1cf942702776f6.json",
+					"name" : "build_info",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 6,
+					"id" : "common::@8bf2afb4d8037c7b7d92",
+					"jsonFile" : "target-common-Release-d500c881cd64d108b5f1.json",
+					"name" : "common",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 7,
+					"id" : "cpp-httplib::@e1f36686b082eccf6cbc",
+					"jsonFile" : "target-cpp-httplib-Release-364df08daa063369d851.json",
+					"name" : "cpp-httplib",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-Release-fb20a4f69c5adefd7302.json",
+					"name" : "ggml",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-base::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-base-Release-83c27f028d7e86b8d86c.json",
+					"name" : "ggml-base",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-alderlake::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-alderlake-Release-1e43e3fbe2db073fff93.json",
+					"name" : "ggml-cpu-alderlake",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-alderlake-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-alderlake-feats-Release-1de7e7817bf3ebec7aa3.json",
+					"name" : "ggml-cpu-alderlake-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-cannonlake::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-cannonlake-Release-41aa9d6ea14072b0414c.json",
+					"name" : "ggml-cpu-cannonlake",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-cannonlake-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-cannonlake-feats-Release-2318eb2c790f9ea6e131.json",
+					"name" : "ggml-cpu-cannonlake-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-cascadelake::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-cascadelake-Release-f627f1600f0d91bc29e5.json",
+					"name" : "ggml-cpu-cascadelake",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-cascadelake-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-cascadelake-feats-Release-6347fd4a735f92a934ba.json",
+					"name" : "ggml-cpu-cascadelake-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-cooperlake::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-cooperlake-Release-4c3722d45141425d08f6.json",
+					"name" : "ggml-cpu-cooperlake",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-cooperlake-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-cooperlake-feats-Release-11f5787a44369f031b70.json",
+					"name" : "ggml-cpu-cooperlake-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-haswell::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-haswell-Release-1259a43d903a67f22464.json",
+					"name" : "ggml-cpu-haswell",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-haswell-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-haswell-feats-Release-3184d7937e0a38edce62.json",
+					"name" : "ggml-cpu-haswell-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-icelake::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-icelake-Release-14d3b4cde8b50817afbd.json",
+					"name" : "ggml-cpu-icelake",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-icelake-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-icelake-feats-Release-98bde66ff6a12dfd61b4.json",
+					"name" : "ggml-cpu-icelake-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-ivybridge::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-ivybridge-Release-248de27f1cd2cb76eaaf.json",
+					"name" : "ggml-cpu-ivybridge",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-ivybridge-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-ivybridge-feats-Release-02004bb1f5365a83e840.json",
+					"name" : "ggml-cpu-ivybridge-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-piledriver::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-piledriver-Release-4c86d62e8aa9b6c89d0c.json",
+					"name" : "ggml-cpu-piledriver",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-piledriver-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-piledriver-feats-Release-7dea4855570459f8790e.json",
+					"name" : "ggml-cpu-piledriver-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-sandybridge::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-sandybridge-Release-69f76de2d22a5672ffae.json",
+					"name" : "ggml-cpu-sandybridge",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-sandybridge-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-sandybridge-feats-Release-7ddf6929e5c22c1388a3.json",
+					"name" : "ggml-cpu-sandybridge-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-sapphirerapids::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-sapphirerapids-Release-27c63c751c57f6cfebf9.json",
+					"name" : "ggml-cpu-sapphirerapids",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-sapphirerapids-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-sapphirerapids-feats-Release-4eb1c6aafa4c1aca6d82.json",
+					"name" : "ggml-cpu-sapphirerapids-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-skylakex::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-skylakex-Release-f0f7e27cdd79deee5e68.json",
+					"name" : "ggml-cpu-skylakex",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-skylakex-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-skylakex-feats-Release-2824e67ae142c78e4032.json",
+					"name" : "ggml-cpu-skylakex-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-sse42::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-sse42-Release-7bacc193d152ae1f0a41.json",
+					"name" : "ggml-cpu-sse42",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-sse42-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-sse42-feats-Release-12ecf5a118bebbc15e0d.json",
+					"name" : "ggml-cpu-sse42-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-x64::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-x64-Release-14d7360289a23c8120d0.json",
+					"name" : "ggml-cpu-x64",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-x64-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-x64-feats-Release-1621dc06bee58cbc797a.json",
+					"name" : "ggml-cpu-x64-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-zen4::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-zen4-Release-b013cef73a40d4a50471.json",
+					"name" : "ggml-cpu-zen4",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ggml-cpu-zen4-feats::@23533c6d68a59d54598d",
+					"jsonFile" : "target-ggml-cpu-zen4-feats-Release-9d9a4fa55bed37068eaf.json",
+					"name" : "ggml-cpu-zen4-feats",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "llama::@b791850eb95f38641ccb",
+					"jsonFile" : "target-llama-Release-efe230a5ff38275d4856.json",
+					"name" : "llama",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64",
+		"source" : "/Users/krisdcosta/291_EAI/android/lib/src/main/cpp"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	}
+}

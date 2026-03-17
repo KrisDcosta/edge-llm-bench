@@ -1,0 +1,111 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 336,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 337,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 405,
+				"parent" : 0
+			}
+		]
+	},
+	"codemodelVersion" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"bin/libggml.so"
+			],
+			"targetId" : "ggml::@23533c6d68a59d54598d",
+			"targetIndex" : 4,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 1,
+			"component" : "Unspecified",
+			"destination" : "include",
+			"paths" : 
+			[
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-cpu.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-alloc.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-backend.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-blas.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-cann.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-cpp.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-cuda.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-opt.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-metal.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-rpc.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-virtgpu.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-sycl.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-vulkan.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-webgpu.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/ggml-zendnn.h",
+				"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/include/gguf.h"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 2,
+			"component" : "Unspecified",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"bin/libggml-base.so"
+			],
+			"targetId" : "ggml-base::@23533c6d68a59d54598d",
+			"targetIndex" : 5,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 3,
+			"component" : "Unspecified",
+			"destination" : "lib/cmake/ggml",
+			"paths" : 
+			[
+				"/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/build-llama/ggml/ggml-config.cmake",
+				"/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/build-llama/ggml/ggml-version.cmake"
+			],
+			"type" : "file"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "build-llama/ggml",
+		"source" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml"
+	}
+}

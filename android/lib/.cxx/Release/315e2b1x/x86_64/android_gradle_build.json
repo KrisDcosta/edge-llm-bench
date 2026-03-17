@@ -1,0 +1,292 @@
+{
+  "buildFiles": [
+    "/Users/krisdcosta/291_EAI/android/lib/src/main/cpp/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/common/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/src/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/src/ggml-cpu/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/src/CMakeLists.txt",
+    "/Users/krisdcosta/291_EAI/vendor/llama.cpp/vendor/cpp-httplib/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/opt/homebrew/bin/ninja",
+      "-v",
+      "-C",
+      "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/opt/homebrew/bin/ninja",
+    "-v",
+    "-C",
+    "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "ai-chat::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ai-chat",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/build/intermediates/cxx/Release/315e2b1x/obj/x86_64/libai-chat.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libllama.so",
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml.so",
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "build_info::@8bf2afb4d8037c7b7d92": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "build_info"
+    },
+    "common::@8bf2afb4d8037c7b7d92": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "common",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/build-llama/common/libcommon.a"
+    },
+    "cpp-httplib::@e1f36686b082eccf6cbc": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "cpp-httplib",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/build-llama/vendor/cpp-httplib/libcpp-httplib.a"
+    },
+    "ggml::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-base::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-base",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so",
+      "runtimeFiles": []
+    },
+    "ggml-cpu-alderlake::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-alderlake",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-alderlake.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-alderlake-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-alderlake-feats"
+    },
+    "ggml-cpu-cannonlake::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-cannonlake",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-cannonlake.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-cannonlake-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-cannonlake-feats"
+    },
+    "ggml-cpu-cascadelake::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-cascadelake",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-cascadelake.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-cascadelake-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-cascadelake-feats"
+    },
+    "ggml-cpu-cooperlake::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-cooperlake",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-cooperlake.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-cooperlake-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-cooperlake-feats"
+    },
+    "ggml-cpu-haswell::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-haswell",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-haswell.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-haswell-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-haswell-feats"
+    },
+    "ggml-cpu-icelake::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-icelake",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-icelake.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-icelake-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-icelake-feats"
+    },
+    "ggml-cpu-ivybridge::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-ivybridge",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-ivybridge.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-ivybridge-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-ivybridge-feats"
+    },
+    "ggml-cpu-piledriver::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-piledriver",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-piledriver.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-piledriver-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-piledriver-feats"
+    },
+    "ggml-cpu-sandybridge::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-sandybridge",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-sandybridge.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-sandybridge-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-sandybridge-feats"
+    },
+    "ggml-cpu-sapphirerapids::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-sapphirerapids",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-sapphirerapids.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-sapphirerapids-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-sapphirerapids-feats"
+    },
+    "ggml-cpu-skylakex::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-skylakex",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-skylakex.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-skylakex-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-skylakex-feats"
+    },
+    "ggml-cpu-sse42::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-sse42",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-sse42.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-sse42-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-sse42-feats"
+    },
+    "ggml-cpu-x64::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-x64",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-x64.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-x64-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-x64-feats"
+    },
+    "ggml-cpu-zen4::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-zen4",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-cpu-zen4.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    },
+    "ggml-cpu-zen4-feats::@23533c6d68a59d54598d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "ggml-cpu-zen4-feats"
+    },
+    "llama::@b791850eb95f38641ccb": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "llama",
+      "output": "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libllama.so",
+      "runtimeFiles": [
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml.so",
+        "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/x86_64/bin/libggml-base.so"
+      ]
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [
+    "c"
+  ],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

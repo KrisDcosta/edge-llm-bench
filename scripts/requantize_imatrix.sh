@@ -75,7 +75,7 @@ echo "  Using: $LLAMA_QUANTIZE"
 # ---------------------------------------------------------------------------
 # Config — bash 3.2 compatible (quant type name = variant name for all 5)
 # ---------------------------------------------------------------------------
-ALL_VARIANTS="Q2_K Q3_K_M Q4_K_M Q6_K Q8_0"
+ALL_VARIANTS="Q2_K Q3_K_M Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0"
 N_THREADS=$(sysctl -n hw.logicalcpu 2>/dev/null || nproc 2>/dev/null || echo 4)
 
 # ---------------------------------------------------------------------------
@@ -87,7 +87,7 @@ FORCE=0
 for arg in "$@"; do
     case "$arg" in
         --force) FORCE=1 ;;
-        Q2_K|Q3_K_M|Q4_K_M|Q6_K|Q8_0) VARIANTS="$VARIANTS $arg" ;;
+        Q2_K|Q3_K_M|Q4_K_S|Q4_K_M|Q5_K_M|Q6_K|Q8_0) VARIANTS="$VARIANTS $arg" ;;
         *) echo "Unknown argument: $arg" >&2; exit 1 ;;
     esac
 done

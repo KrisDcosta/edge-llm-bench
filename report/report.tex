@@ -38,15 +38,15 @@ kdcosta@ucsd.edu}
 We present a systematic empirical study of six GGUF quantization variants of
 Llama~3.2~3B Instruct on a Google Pixel~6a (Tensor G1, 6~GB LPDDR5) using
 llama.cpp, yielding 661 valid measurements across five quantization levels, four
-context lengths (256--2048 tokens), and a thread-count sweep.
+KV-cache context window sizes (256--2048 tokens), and a thread-count sweep.
 We find four non-obvious results.
 (1)~\textbf{Throughput is non-monotonic with bit-width}: Q2\_K leads at 5.66~tok/s
 while Q6\_K is \emph{slowest} at 3.98~tok/s, 20\% below Q8\_0, due to kernel
 de-quantization overhead on ARM NEON.
-(2)~\textbf{Context-length sensitivity is variant-dependent}: Q4\_K\_M ($+6\%$)
-and Q2\_K ($-4\%$) are stable to 2048 tokens; Q8\_0 declines mildly ($-11\%$);
-while Q3\_K\_M drops 38\% and Q6\_K drops 49\% at ctx=2048, exposing a hidden
-memory-system fragility in these two quantization schemes.
+(2)~\textbf{KV-cache window sensitivity is variant-dependent}: Q4\_K\_M ($+2\%$)
+and Q2\_K ($-5\%$) are stable across window sizes up to 2048 tokens; Q8\_0 declines
+mildly ($-12\%$); while Q3\_K\_M drops 43\% and Q6\_K drops 52\% at window size
+2048, exposing a hidden memory-subsystem fragility in these two quantization schemes.
 (3)~\textbf{Accuracy is also non-monotonic}: on a 100-question BoolQ reading
 comprehension benchmark, Q4\_K\_M (72\%, 95\% CI: 63--80\%) achieves the highest
 accuracy while Q6\_K scores lowest (65\%, CI: 55--74\%), despite having more bits
@@ -114,15 +114,15 @@ memory bandwidth consumption makes empirical measurement essential.
 \begin{enumerate}
   \item A rigorous benchmark of six GGUF quantization variants of Llama~3.2~3B
         Instruct on physical Android hardware, yielding 661 valid measurements
-        across four context lengths and a thread-count sweep.
+        across four KV-cache window sizes and a thread-count sweep.
   \item Discovery and explanation of the non-monotonic decode throughput anomaly
         in which Q6\_K (6-bit) underperforms both Q8\_0 (8-bit) and Q4\_K\_M
         (4-bit) due to kernel de-quantization overhead.
-  \item Discovery that context-length sensitivity is \emph{variant-specific}:
-        Q4\_K\_M and Q2\_K are context-stable ($<$5\% across 256--2048 tokens);
-        Q8\_0 shows mild $-11\%$ decline; while Q3\_K\_M and Q6\_K collapse by
-        38\% and 49\% at ctx=2048---a hidden fragility with significant deployment
-        implications.
+  \item Discovery that KV-cache window-size sensitivity is \emph{variant-specific}:
+        Q4\_K\_M and Q2\_K are window-stable ($<$5\% across window sizes 256--2048);
+        Q8\_0 shows mild $-12\%$ decline; while Q3\_K\_M and Q6\_K collapse by
+        43\% and 52\% at window size 2048---a hidden memory-subsystem fragility
+        with significant deployment implications.
   \item A thread-count scaling study on the Tensor G1's heterogeneous ARM cluster
         showing a 5.0~tokens/s peak at 4 threads with degradation at 8.
   \item Complete on-device quality evaluation across all six variants using BoolQ
@@ -212,11 +212,21 @@ variants available in the GGUF format~\cite{gguf}, spanning the full range from
 \subsection{Experiment Design}
 
 We adopt a fully-crossed factorial design across four independent variables:
-quantization variant (6 levels), context length (256, 512, 1024, 2048 tokens),
-prompt type (short factual, medium summarization, reasoning task), and trial
-(5 runs per combination). We additionally include a thread-count sweep
+quantization variant (6 levels), KV-cache context window size (256, 512, 1024,
+2048 tokens), prompt type (short factual, medium summarization, reasoning task),
+and trial (5 runs per combination).
+
+\textbf{Note on ``context length'':} In all experiments, the actual input prompts
+contain 18--38 tokens. The parameter varied is the llama.cpp \texttt{-c} flag,
+which sets the maximum \emph{KV-cache context window} allocated in memory. Larger
+window sizes consume proportionally more LPDDR5 memory for the key-value cache,
+creating additional memory-access pressure alongside model weight loading. Results
+labelled ``ctx=N'' throughout this paper refer to this KV-cache allocation size,
+not to the prompt length processed.
+
+We additionally include a thread-count sweep
 (1, 2, 4, 8 threads) for Q4\_K\_M at 256-token context, and a dedicated
-extended-context sweep (ctx=2048) for all five non-F16 variants. In total, the
+extended-context sweep (KV-cache window=2048) for all five non-F16 variants. In total, the
 experiment produced \textbf{661 successful measurements} after discarding warmup
 runs, timed-out F16 trials, and one contaminated Q8\_0 ctx=2048 run
 (discarded due to concurrent-process memory interference; replaced by a
@@ -310,15 +320,16 @@ All throughput figures use 256-token context except Q4\_K\_M (512-token). PPL = 
 \textbf{Variant} & \textbf{Size (GB)} & \textbf{Decode TPS (±std)} &
 \textbf{Prefill TPS} & \textbf{TTFT (s)} & \textbf{E2E (s)} & \textbf{BoolQ (\%)} & \textbf{95\% CI} & \textbf{PPL$\downarrow$} \\
 \midrule
-Q2\_K    & 1.3 & $5.66 \pm 0.72$ & 7.59  & 3.81  & 26.62  & 69.0  & [59--77] & 11.71 \\
-Q3\_K\_M & 1.6 & $4.91 \pm 0.40$ & 6.29  & 4.50  & 30.57  & 66.0  & [56--75] & 10.15 \\
-Q4\_K\_M & 2.0 & $5.32 \pm 0.52$ & 7.09  & 3.98  & 28.11  & 72.0  & [63--80] & 11.36 \\
-Q6\_K    & 2.7 & $3.98 \pm 0.32$ & 4.90  & 5.71  & 29.33  & 65.0  & [55--74] & 11.22 \\
-Q8\_0    & 3.4 & $4.95 \pm 0.59$ & 7.14  & 3.95  & 23.21  & 68.0  & [58--76] & TBD \\
+Q2\_K    & 1.3 & $5.66 \pm 0.72$ & 7.59  & 3.81  & 26.62  & 69.0  & [59--77] & 13.29$\dagger$ \\
+Q3\_K\_M & 1.6 & $4.91 \pm 0.40$ & 6.29  & 4.50  & 30.57  & 66.0  & [56--75] & 11.08$\dagger$ \\
+Q4\_K\_M & 2.0 & $5.32 \pm 0.52$ & 7.09  & 3.98  & 28.11  & 72.0  & [63--80] & $\ddagger$ \\
+Q6\_K    & 2.7 & $3.98 \pm 0.32$ & 4.90  & 5.71  & 29.33  & 65.0  & [55--74] & $\ddagger$ \\
+Q8\_0    & 3.4 & $4.95 \pm 0.59$ & 7.14  & 3.95  & 23.21  & 68.0  & [58--76] & $\ddagger$ \\
 F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & 68.0  & [58--76] & \multicolumn{1}{l}{---} \\
 \midrule
 \multicolumn{9}{l}{\small BoolQ: yes/no reading comprehension accuracy on 100-question SuperGLUE validation subset; 95\% Wilson CI ($n{=}100$).}\\
-\multicolumn{9}{l}{\small ARC-Easy accuracy (not shown): 100\% for all quantized variants; F16: 95\%. PPL via \texttt{llama-perplexity} on WikiText-2 (50K tokens, ${\approx}$250KB).}\\
+\multicolumn{9}{l}{\small ARC-Easy accuracy (not shown): 100\% for all quantized variants; F16: 95\%.}\\
+\multicolumn{9}{l}{\small $\dagger$ PPL via \texttt{llama-perplexity} on full WikiText-2 test corpus (${\approx}$285K tokens). $\ddagger$ PPL measured on 12KB sample only; full-corpus re-run pending.}\\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -327,11 +338,11 @@ F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & 68.0  & [58--76] & \
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{../figures/fig2_decode_tps_vs_context.png}
-  \caption{Decode throughput (tokens/s) across context lengths for all quantization
-  variants (error bars = $\pm 1$ std). At 256--1024 tokens, ordering is non-monotonic
+  \caption{Decode throughput (tokens/s) across KV-cache context window sizes for all quantization
+  variants (error bars = $\pm 1$ std). At window sizes 256--1024 tokens, ordering is non-monotonic
   with bit-width: Q2\_K $>$ Q4\_K\_M $>$ Q8\_0 $\approx$ Q3\_K\_M $>$ Q6\_K. At
-  ctx=2048, Q3\_K\_M and Q6\_K collapse ($-38\%$ and $-49\%$) while Q4\_K\_M
-  ($+6\%$) and Q2\_K ($-4\%$) stay stable; Q8\_0 declines mildly ($-11\%$).}
+  ctx=2048, Q3\_K\_M and Q6\_K collapse ($-43\%$ and $-52\%$) while Q4\_K\_M
+  ($+2\%$) and Q2\_K ($-5\%$) stay stable; Q8\_0 declines mildly ($-12\%$).}
   \label{fig:decode_tps}
 \end{figure}
 
@@ -362,8 +373,8 @@ headroom in a 6~GB device.
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{../figures/fig3_ttft_vs_context.png}
-  \caption{Time-to-first-token (seconds) as a function of context length for each variant.
-  TTFT grows with context as the prefill phase processes more input tokens.}
+  \caption{Time-to-first-token (seconds) as a function of KV-cache context window size for each variant.
+  TTFT grows with window size as a larger KV-cache must be allocated and initialized before decoding begins.}
   \label{fig:ttft_context}
 \end{figure}
 
@@ -377,14 +388,14 @@ headroom in a 6~GB device.
 
 Context-length sensitivity is \textbf{variant-dependent}, not universal.
 Table~\ref{tab:ctx2048} summarises decode throughput across all four context lengths.
-Q4\_K\_M is strikingly context-invariant: 4.70, 5.03, 4.97, 5.26~tok/s across
+Q4\_K\_M is strikingly context-invariant: 4.79, 5.32, 5.18, 5.26~tok/s across
 256--2048 tokens ($<$5\% variation over an 8$\times$ context increase).
-Q2\_K is similarly stable ($-4\%$, 4.80 to 4.60~tok/s, well within noise).
-Q8\_0 declines 11\% at ctx=2048 (4.74 to 4.23~tok/s), a mild and operationally
+Q2\_K is similarly stable ($-5\%$, 4.83 to 4.60~tok/s, well within noise).
+Q8\_0 declines 12\% at ctx=2048 (4.83 to 4.23~tok/s), a mild and operationally
 acceptable degradation compared to the Q3\_K\_M/Q6\_K collapses.
 By contrast, Q3\_K\_M and Q6\_K show \textbf{severe performance collapse at
-ctx=2048}: Q3\_K\_M drops from 4.46 to 2.76~tok/s ($-38\%$) and Q6\_K from
-3.78 to 1.94~tok/s ($-49\%$) relative to ctx=1024.
+ctx=2048}: Q3\_K\_M drops from 4.81 to 2.76~tok/s ($-43\%$) and Q6\_K from
+4.01 to 1.94~tok/s ($-52\%$) relative to ctx=1024.
 
 \begin{table}[h]
 \centering
@@ -397,27 +408,29 @@ ctx=2048}: Q3\_K\_M drops from 4.46 to 2.76~tok/s ($-38\%$) and Q6\_K from
 \toprule
 \textbf{Var.} & \textbf{256} & \textbf{512} & \textbf{1024} & \textbf{2048} & \textbf{$\Delta$} \\
 \midrule
-Q2\_K    & 5.28{\tiny$\pm$.90} & 5.10{\tiny$\pm$.52} & 4.80{\tiny$\pm$.60} & 4.60{\tiny$\pm$.48} & $-4\%$ \\
-Q3\_K\_M & 4.75{\tiny$\pm$.58} & 4.65{\tiny$\pm$.59} & 4.46{\tiny$\pm$.48} & \textbf{2.76{\tiny$\pm$.87}} & $-38\%$ \\
-Q4\_K\_M & 4.70{\tiny$\pm$1.0} & 5.03{\tiny$\pm$.53} & 4.97{\tiny$\pm$.47} & 5.26{\tiny$\pm$.25} & $+6\%$ \\
-Q6\_K    & 3.77{\tiny$\pm$.34} & 3.73{\tiny$\pm$.49} & 3.78{\tiny$\pm$.35} & \textbf{1.94{\tiny$\pm$.26}} & $-49\%$ \\
-Q8\_0    & 4.84{\tiny$\pm$.64} & 4.80{\tiny$\pm$.64} & 4.74{\tiny$\pm$.64} & \textbf{4.23{\tiny$\pm$.49}} & $-11\%$ \\
+Q2\_K    & 5.66{\tiny$\pm$.72} & 5.05{\tiny$\pm$.48} & 4.83{\tiny$\pm$.43} & 4.60{\tiny$\pm$.48} & $-5\%$ \\
+Q3\_K\_M & 4.91{\tiny$\pm$.40} & 4.82{\tiny$\pm$.35} & 4.81{\tiny$\pm$.38} & \textbf{2.76{\tiny$\pm$.87}} & $-43\%$ \\
+Q4\_K\_M & 4.79{\tiny$\pm$.36} & 5.32{\tiny$\pm$.52} & 5.18{\tiny$\pm$.50} & 5.26{\tiny$\pm$.25} & $+2\%$ \\
+Q6\_K    & 3.98{\tiny$\pm$.32} & 4.03{\tiny$\pm$.39} & 4.01{\tiny$\pm$.34} & \textbf{1.94{\tiny$\pm$.26}} & $-52\%$ \\
+Q8\_0    & 4.95{\tiny$\pm$.59} & 4.95{\tiny$\pm$.68} & 4.83{\tiny$\pm$.70} & \textbf{4.23{\tiny$\pm$.49}} & $-12\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 This finding is mechanistically informative. The 2048-token KV-cache for
-Llama~3.2~3B occupies $\approx$233~MB. For Q4\_K\_M (2.0~GB weights) this is
-only 12\% of per-step memory traffic, keeping decode firmly weight-bandwidth-bound.
-Q6\_K (2.7~GB weights) has an even smaller KV fraction (8.6\%) yet collapses---
-pointing to Q6\_K's 6-bit asymmetric kernel imposing higher memory-access amplification
-that becomes unstable when the KV footprint grows to 233~MB.
+Llama~3.2~3B occupies $\approx$224~MB (2 $\times$ 28 layers $\times$ 8 KV heads
+$\times$ 128 head-dim $\times$ 2048 $\times$ 2 bytes). For Q4\_K\_M (2.0~GB weights)
+this is $\approx$11.2\% of per-step memory traffic, keeping decode firmly
+weight-bandwidth-bound. Q6\_K (2.7~GB weights) has an even smaller KV fraction
+($\approx$8.3\%) yet collapses---pointing to Q6\_K's 6-bit asymmetric kernel imposing
+higher memory-access amplification that becomes unstable when the KV footprint grows to 224~MB.
 \textbf{Recommendation}: prefer Q4\_K\_M, Q2\_K, or Q8\_0 for
 ctx$\geq$2048; avoid Q3\_K\_M and Q6\_K at maximum context.
 
-Figure~\ref{fig:ttft_context} confirms that TTFT grows with context length
-(as expected from the prefill phase) uniformly across all variants---the only
-context-length-sensitive metric for the context-stable variants.
+Figure~\ref{fig:ttft_context} confirms that TTFT grows with KV-cache window size
+uniformly across all variants---a consequence of the larger KV allocation cost,
+not longer input sequences. For context-stable variants, this is the
+\emph{only} metric that grows with the window-size parameter.
 
 \subsection{RQ3: Prefill vs. Decode Time Fraction}
 \label{sec:rq3}
@@ -500,13 +513,17 @@ reflects the complex interaction between K-quant block structure and
 Llama 3.2's layer-specific weight sensitivity.
 
 \textbf{Perplexity vs.\ BoolQ accuracy.}
-WikiText-2 perplexity (Table~\ref{tab:main_results}), measured on 50K-token corpus
-(${\approx}250$\,KB), shows Q6\_K (11.22) and Q4\_K\_M (11.36) have \emph{nearly identical}
-PPL ($\Delta{\approx}0.14$) while their BoolQ accuracy differs by 7\% (65\% vs.\ 72\%)
-and throughput by 34\%. Q2\_K (11.71) has measurably higher PPL despite moderate
-BoolQ performance (69\%), indicating PPL is an \emph{insufficient} quality proxy.
-Task-specific on-device evaluation is essential to surface quantization-specific
-failure modes and identify the practical best model for deployment.
+Full-corpus WikiText-2 PPL (${\approx}$285K tokens) is available for Q2\_K (13.29)
+and Q3\_K\_M (11.08); the remaining three variants were measured on a 12\,KB sample
+only (marked $\ddagger$ in Table~\ref{tab:main_results}) and are not directly
+comparable. Even from the available data, the PPL ordering ($\downarrow$better)
+does not predict BoolQ rank: Q3\_K\_M (PPL=11.08) scores \emph{lower} in BoolQ
+(66\%) than Q2\_K (PPL=13.29, BoolQ=69\%), while Q4\_K\_M achieves the highest
+BoolQ accuracy (72\%) with a PPL that is likely lower than Q2\_K based on bit-width.
+This confirms that WikiText-2 PPL is an \emph{insufficient} quality proxy for
+reading-comprehension tasks. Task-specific on-device evaluation is essential to
+surface quantization-specific failure modes and identify the practical best model
+for deployment.
 
 \subsection{RQ5: Deployment Limits and Thread Scaling}
 \label{sec:rq5}
@@ -604,12 +621,12 @@ provides strong evidence that decode throughput on this device is
 For Q4\_K\_M at 5.32~tokens/s, each decode step loads approximately 2.0~GB
 of weights, implying an effective DRAM bandwidth utilization of
 $2.0 \times 5.32 \approx 10.6$~GB/s for weight loading alone.
-The KV-cache at 2048-token context contributes at most 233~MB per step,
-less than 11\% of weight traffic---explaining Q4\_K\_M's near-zero throughput
+The KV-cache at 2048-token context contributes $\approx$224~MB per step,
+$\approx$11.2\% of weight traffic---explaining Q4\_K\_M's near-zero throughput
 variation across 256--2048 tokens. The Q3\_K\_M and Q6\_K collapses at ctx=2048
 (Table~\ref{tab:ctx2048}) suggest that their quantization kernels incur higher
 effective memory-access amplification that makes them sensitive to the larger
-allocation footprint when the KV-cache grows to 233~MB alongside these models.
+allocation footprint when the KV-cache grows to 224~MB alongside these models.
 
 \subsection{Deployment Recommendations}
 
@@ -640,15 +657,15 @@ to GPU-accelerated backends where the Q6\_K de-quantization overhead differs.
 big.LITTLE ARM SoCs), 4 threads matches the performance-core count and delivers
 peak throughput. Do not use all available threads.
 
-\textbf{Context length management (critical).} Context-length sensitivity is
-\emph{variant-specific}. Q4\_K\_M ($+6\%$) and Q2\_K ($-4\%$) are practically
-context-invariant through 2048 tokens and are the safest default for long-context
-applications. Q8\_0 shows a mild $-11\%$ decline at ctx=2048, remaining operationally
-viable. Q3\_K\_M
-loses 38\% and Q6\_K loses 49\% of throughput at ctx=2048 relative to ctx=1024;
-practitioners using these variants should limit context length to $\leq$1024
-tokens or accept the throughput penalty. TTFT grows linearly with context across
-all variants, so responsiveness decisions should be driven by TTFT budgets.
+\textbf{KV-cache window management (critical).} KV-cache window sensitivity is
+\emph{variant-specific}. Q4\_K\_M ($+2\%$) and Q2\_K ($-5\%$) are practically
+stable through 2048-token KV-cache windows and are the safest default for long-context
+applications. Q8\_0 shows a mild $-12\%$ decline at ctx=2048, remaining operationally
+viable. Q3\_K\_M loses 43\% and Q6\_K loses 52\% of throughput at ctx=2048 relative
+to ctx=1024; practitioners using these variants should limit the KV-cache window to
+$\leq$1024 tokens or accept the throughput penalty. TTFT grows with KV-cache window
+size across all variants (due to larger cache initialization), so responsiveness
+decisions should factor in TTFT budgets alongside decode throughput.
 
 \subsection{GPU Reference Baselines}
 \label{sec:gpu_baseline}
@@ -810,10 +827,10 @@ Our primary empirical findings are:
   \item \textbf{Non-monotonic throughput}: Q6\_K (6-bit, 2.7~GB) delivers
         3.98~tokens/s---slower than Q4\_K\_M (5.32~tokens/s) and Q8\_0 (4.95~tokens/s)
         due to kernel de-quantization overhead on ARM NEON.
-  \item \textbf{Context-length sensitivity is variant-specific}: Q4\_K\_M ($+6\%$)
-        and Q2\_K ($-4\%$) are context-invariant through 2048 tokens; Q8\_0 shows
-        a mild $-11\%$ decline. Q3\_K\_M and Q6\_K collapse at ctx=2048 ($-38\%$
-        and $-49\%$ respectively), exposing a hidden memory-system fragility that
+  \item \textbf{KV-cache window sensitivity is variant-specific}: Q4\_K\_M ($+2\%$)
+        and Q2\_K ($-5\%$) are stable through 2048-token KV-cache window; Q8\_0 shows
+        a mild $-12\%$ decline. Q3\_K\_M and Q6\_K collapse at ctx=2048 ($-43\%$
+        and $-52\%$ respectively), exposing a hidden memory-system fragility that
         makes them unsafe for maximum-context deployments.
   \item \textbf{Thread-count sweet spot}: 4 threads is optimal on the Tensor G1's
         heterogeneous cluster; 8 threads degrades throughput by 20\% due to

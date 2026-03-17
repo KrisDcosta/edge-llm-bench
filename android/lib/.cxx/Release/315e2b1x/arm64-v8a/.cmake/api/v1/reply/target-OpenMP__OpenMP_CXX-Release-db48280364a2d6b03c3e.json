@@ -1,0 +1,106 @@
+{
+	"abstract" : true,
+	"backtrace" : 5,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"find_package",
+			"ggml_add_cpu_backend_variant_impl",
+			"ggml_add_cpu_backend_variant",
+			"set_property"
+		],
+		"files" : 
+		[
+			"/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindOpenMP.cmake",
+			"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/src/ggml-cpu/CMakeLists.txt",
+			"/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/src/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 2
+			},
+			{
+				"command" : 3,
+				"file" : 2,
+				"line" : 400,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 2,
+				"line" : 348,
+				"parent" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 76,
+				"parent" : 2
+			},
+			{
+				"file" : 0,
+				"parent" : 3
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 757,
+				"parent" : 4
+			},
+			{
+				"command" : 3,
+				"file" : 2,
+				"line" : 406,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 2,
+				"line" : 348,
+				"parent" : 6
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 76,
+				"parent" : 7
+			},
+			{
+				"file" : 0,
+				"parent" : 8
+			},
+			{
+				"command" : 4,
+				"file" : 0,
+				"line" : 774,
+				"parent" : 9
+			}
+		]
+	},
+	"codemodelVersion" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	},
+	"id" : "OpenMP::OpenMP_CXX::@23533c6d68a59d54598d",
+	"imported" : true,
+	"interfaceLinkLibraries" : 
+	[
+		{
+			"backtrace" : 10,
+			"fragment" : "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/darwin-x86_64/lib/clang/21/lib/linux/aarch64/libomp.so"
+		}
+	],
+	"local" : true,
+	"name" : "OpenMP::OpenMP_CXX",
+	"paths" : 
+	{
+		"build" : "build-llama/ggml/src",
+		"source" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/src"
+	},
+	"sources" : [],
+	"type" : "INTERFACE_LIBRARY"
+}

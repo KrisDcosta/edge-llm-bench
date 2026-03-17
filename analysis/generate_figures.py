@@ -399,7 +399,7 @@ def fig5_battery_per_1k_tokens(records: list[dict]):
                        edgecolor="#cccccc", alpha=0.9))
 
     fig.suptitle("Energy Efficiency: Size-Adjusted Throughput & Battery Note\n"
-                 "(Llama 3.2 3B Instruct, Pixel 6a Tensor G2)", fontsize=11)
+                 "(Llama 3.2 3B Instruct, Pixel 6a Tensor G1)", fontsize=11)
     fig.tight_layout(rect=[0, 0, 1, 0.93])
     savefig(fig, "fig5_battery_per_1k_tokens.png")
 
@@ -556,7 +556,7 @@ def fig6_pareto_frontier(records: list[dict]):
 
     ax.set_xlabel("Decode Throughput (tokens/sec)", fontsize=11)
     ax.set_ylabel("Factual Accuracy (%, 15-question suite)", fontsize=11)
-    ax.set_title("Efficiency–Accuracy Trade-off\n(Llama 3.2 3B Instruct, Pixel 6a Tensor G2)", fontsize=11)
+    ax.set_title("Efficiency–Accuracy Trade-off\n(Llama 3.2 3B Instruct, Pixel 6a Tensor G1)", fontsize=11)
     ax.set_ylim(70, 105)
     ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.0f%%"))
     if quality_by_variant:

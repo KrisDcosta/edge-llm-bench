@@ -1,0 +1,850 @@
+{
+	"inputs" : 
+	[
+		{
+			"path" : "CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/CMakeFiles/4.2.3/CMakeSystem.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/build/cmake/android.toolchain.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/build/cmake/android-legacy.toolchain.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/build/cmake/abis.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/build/cmake/platforms.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Android-Initialize.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/build/cmake/hooks/pre/Android-Initialize.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linux-Initialize.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/CMakeFiles/4.2.3/CMakeCCompiler.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/CMakeFiles/4.2.3/CMakeCXXCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeSystemSpecificInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeGenericSystem.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeInitializeConfigs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Android.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/build/cmake/hooks/pre/Android.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linux.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/UnixPaths.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeCInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeLanguageInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Compiler/Clang-C.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Compiler/Clang.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Compiler/GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Android-Clang-C.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Android-Clang.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/build/cmake/hooks/pre/Android-Clang.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/build/cmake/flags.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Internal/CMakeCLinkerInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Internal/CMakeCommonLinkerInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Linker/LLD-C.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Linker/LLD.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Linker/GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linker/Android-LLD-C.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linker/Linux-LLD-C.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linker/Linux-LLD.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linker/Linux-GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linker/GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeCXXInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeLanguageInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Compiler/Clang-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Compiler/Clang.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Android-Clang-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Android-Clang.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Internal/CMakeCXXLinkerInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Internal/CMakeCommonLinkerInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Linker/LLD-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Linker/LLD.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Linker/GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linker/Android-LLD-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linker/Linux-LLD-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linker/Linux-LLD.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckIncludeFileCXX.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/cmake/build-info.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindGit.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/cmake/common.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/cmake/common.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/cmake/license.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/GNUInstallDirs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakePackageConfigHelpers.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/WriteBasicConfigVersionFile.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/cmake/llama-config.cmake.in"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/BasicConfigVersion-SameMajorVersion.cmake.in"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/cmake/llama.pc.in"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/CMakeFiles/4.2.3/CMakeASMCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeASMInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Compiler/Clang-ASM.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Compiler/Clang.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Android-Clang-ASM.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Android-Clang.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Internal/CMakeASMLinkerInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linker/Android-ASM.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linker/Android-GNU-ASM.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linker/Linux-GNU-ASM.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Platform/Linker/Linux-GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckIncludeFileCXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindThreads.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckLibraryExists.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckIncludeFile.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckCSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Internal/CheckSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/GNUInstallDirs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakePackageConfigHelpers.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/WriteBasicConfigVersionFile.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/cmake/ggml-config.cmake.in"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/BasicConfigVersion-SameMajorVersion.cmake.in"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/src/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckCXXCompilerFlag.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Internal/CheckCompilerFlag.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Internal/CheckFlagCommonConfig.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Internal/CheckSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/Internal/CheckSourceCompiles.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/cmake/common.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindOpenMP.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FetchContent.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/ExternalProject/shared_internal_commands.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FetchContent/CMakeLists.cmake.in"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindOpenMP.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FetchContent.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/ExternalProject/shared_internal_commands.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindOpenMP.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FetchContent.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/ExternalProject/shared_internal_commands.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindOpenMP.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FetchContent.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/ExternalProject/shared_internal_commands.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindOpenMP.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FetchContent.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/ExternalProject/shared_internal_commands.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindOpenMP.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FetchContent.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/ExternalProject/shared_internal_commands.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindOpenMP.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckCXXSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FetchContent.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/ExternalProject/shared_internal_commands.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/src/ggml-cpu/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/src/CMakeLists.txt"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/common/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindThreads.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckLibraryExists.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckIncludeFile.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckCSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageMessage.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/common/build-info.cpp.in"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/.git/index"
+		},
+		{
+			"isExternal" : true,
+			"path" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/vendor/cpp-httplib/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindThreads.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckLibraryExists.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckIncludeFile.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/CheckCSourceCompiles.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindPackageMessage.cmake"
+		}
+	],
+	"kind" : "cmakeFiles",
+	"paths" : 
+	{
+		"build" : "/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a",
+		"source" : "/Users/krisdcosta/291_EAI/android/lib/src/main/cpp"
+	},
+	"version" : 
+	{
+		"major" : 1,
+		"minor" : 1
+	}
+}

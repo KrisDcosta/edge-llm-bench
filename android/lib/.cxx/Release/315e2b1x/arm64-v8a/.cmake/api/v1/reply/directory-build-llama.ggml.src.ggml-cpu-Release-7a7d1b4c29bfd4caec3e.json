@@ -1,0 +1,19 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"codemodelVersion" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "build-llama/ggml/src/ggml-cpu",
+		"source" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp/ggml/src/ggml-cpu"
+	}
+}

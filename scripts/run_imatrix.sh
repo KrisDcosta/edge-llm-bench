@@ -61,7 +61,7 @@ echo "  Using: $LLAMA_IMATRIX"
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-ALL_VARIANTS="Q2_K Q3_K_M Q4_K_M Q6_K Q8_0"
+ALL_VARIANTS="Q2_K Q3_K_M Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0"
 
 # Number of calibration chunks (each chunk = ctx-size tokens)
 # 128 chunks × 512 tokens = 65,536 tokens for calibration
@@ -75,8 +75,8 @@ N_THREADS=$(sysctl -n hw.logicalcpu 2>/dev/null || nproc 2>/dev/null || echo 4)
 VARIANTS=""
 for arg in "$@"; do
     case "$arg" in
-        Q2_K|Q3_K_M|Q4_K_M|Q6_K|Q8_0) VARIANTS="$VARIANTS $arg" ;;
-        *) echo "Unknown variant: $arg. Valid: Q2_K Q3_K_M Q4_K_M Q6_K Q8_0" >&2; exit 1 ;;
+        Q2_K|Q3_K_M|Q4_K_S|Q4_K_M|Q5_K_M|Q6_K|Q8_0) VARIANTS="$VARIANTS $arg" ;;
+        *) echo "Unknown variant: $arg. Valid: Q2_K Q3_K_M Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0" >&2; exit 1 ;;
     esac
 done
 if [ -z "$VARIANTS" ]; then

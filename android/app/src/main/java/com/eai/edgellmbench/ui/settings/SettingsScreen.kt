@@ -297,7 +297,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                 HorizontalDivider()
                 AboutRow("Model family", "Llama 3.2 3B Instruct GGUF")
                 HorizontalDivider()
-                AboutRow("Device target", "Pixel 6a · Google Tensor G2 · 6 GB LPDDR5")
+                AboutRow("Device target", "Pixel 6a · Google Tensor G1 · 6 GB LPDDR5")
                 HorizontalDivider()
                 AboutRow("Min SDK", "API 33 (Android 13)")
             }

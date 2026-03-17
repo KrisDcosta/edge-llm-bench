@@ -35,6 +35,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eai.edgellmbench.data.repository.ModelRepository
+import androidx.compose.material3.AlertDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +58,8 @@ fun ModelManagerScreen(viewModel: ModelManagerViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var pendingVariant by remember { mutableStateOf("Q4_K_M") }
+    var showF16Warning by remember { mutableStateOf(false) }
+    var f16ConfirmedLoad by remember { mutableStateOf(false) }
 
     // File picker launcher — fallback for models NOT in /data/local/tmp/
     val launcher = rememberLauncherForActivityResult(
@@ -67,6 +71,38 @@ fun ModelManagerScreen(viewModel: ModelManagerViewModel = viewModel()) {
             snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Long)
             viewModel.dismissError()
         }
+    }
+
+    // Show F16 confirmation dialog if needed
+    if (showF16Warning) {
+        AlertDialog(
+            onDismissRequest = { showF16Warning = false },
+            title = { Text("F16 May Cause Out-of-Memory") },
+            text = {
+                Text(
+                    "F16 (full precision, 6.4 GB) is larger than the 6 GB Tensor G1's RAM. " +
+                    "Loading may fail or crash the app.\n\n" +
+                    "Recommended: Use Q8_0 (3.4 GB, 8-bit) instead for high quality.\n\n" +
+                    "Proceed anyway?"
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showF16Warning = false
+                        f16ConfirmedLoad = true
+                        viewModel.loadFromDevicePath("F16")
+                    }
+                ) {
+                    Text("Load F16 Anyway")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showF16Warning = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -201,7 +237,13 @@ fun ModelManagerScreen(viewModel: ModelManagerViewModel = viewModel()) {
                                 // Primary: load from /data/local/tmp/ if already pushed
                                 if (onDevice) {
                                     Button(
-                                        onClick = { viewModel.loadFromDevicePath(info.name) },
+                                        onClick = {
+                                            if (info.name == "F16") {
+                                                showF16Warning = true
+                                            } else {
+                                                viewModel.loadFromDevicePath(info.name)
+                                            }
+                                        },
                                         enabled = !uiState.isLoading,
                                         modifier = Modifier.weight(1f),
                                     ) {

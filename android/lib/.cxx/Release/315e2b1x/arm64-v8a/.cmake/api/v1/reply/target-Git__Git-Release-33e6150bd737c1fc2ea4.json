@@ -1,0 +1,74 @@
+{
+	"abstract" : true,
+	"artifacts" : 
+	[
+		{
+			"path" : "/opt/homebrew/bin/git"
+		}
+	],
+	"backtrace" : 5,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_executable",
+			"find_package",
+			"include"
+		],
+		"files" : 
+		[
+			"/opt/homebrew/Cellar/cmake/4.2.3/share/cmake/Modules/FindGit.cmake",
+			"/Users/krisdcosta/291_EAI/vendor/llama.cpp/cmake/build-info.cmake",
+			"/Users/krisdcosta/291_EAI/vendor/llama.cpp/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 2
+			},
+			{
+				"command" : 2,
+				"file" : 2,
+				"line" : 120,
+				"parent" : 0
+			},
+			{
+				"file" : 1,
+				"parent" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 7,
+				"parent" : 2
+			},
+			{
+				"file" : 0,
+				"parent" : 3
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 179,
+				"parent" : 4
+			}
+		]
+	},
+	"codemodelVersion" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	},
+	"id" : "Git::Git::@824c2e0370b8c5599355",
+	"imported" : true,
+	"local" : true,
+	"name" : "Git::Git",
+	"nameOnDisk" : "git",
+	"paths" : 
+	{
+		"build" : "build-llama",
+		"source" : "/Users/krisdcosta/291_EAI/vendor/llama.cpp"
+	},
+	"sources" : [],
+	"type" : "EXECUTABLE"
+}

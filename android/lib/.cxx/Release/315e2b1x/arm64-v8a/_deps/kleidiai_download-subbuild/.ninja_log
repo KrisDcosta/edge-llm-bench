@@ -1,0 +1,21 @@
+# ninja log v7
+1	25	1772818817624820299	kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-mkdir	ee7dffccdee58fdf
+1	25	1772818817624820299	/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/_deps/kleidiai_download-subbuild/kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-mkdir	ee7dffccdee58fdf
+25	1174	1772818818774542400	kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-download	8e76597c9e28746f
+25	1174	1772818818774542400	/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/_deps/kleidiai_download-subbuild/kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-download	8e76597c9e28746f
+1174	1194	1772818818794277718	kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-update	647727e3766075b4
+1174	1194	1772818818794277718	/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/_deps/kleidiai_download-subbuild/kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-update	647727e3766075b4
+1194	1213	1772818818813277082	kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-patch	b3b477fd872e36a2
+1194	1213	1772818818813277082	/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/_deps/kleidiai_download-subbuild/kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-patch	b3b477fd872e36a2
+1213	1232	1772818818831953572	kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-configure	633e9f0daa64b5bc
+1213	1232	1772818818831953572	/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/_deps/kleidiai_download-subbuild/kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-configure	633e9f0daa64b5bc
+1232	1251	1772818818850982686	kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-build	5e9568a9ee2fc024
+1232	1251	1772818818850982686	/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/_deps/kleidiai_download-subbuild/kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-build	5e9568a9ee2fc024
+1251	1270	1772818818870199840	kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-install	444714a19f0aaedc
+1251	1270	1772818818870199840	/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/_deps/kleidiai_download-subbuild/kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-install	444714a19f0aaedc
+1270	1290	1772818818890408947	kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-test	8f98b5d4e18e0840
+1270	1290	1772818818890408947	/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/_deps/kleidiai_download-subbuild/kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-test	8f98b5d4e18e0840
+1290	1319	1772818818918669556	CMakeFiles/kleidiai_download-populate-complete	29977015f9a7492f
+1290	1319	1772818818918669556	kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-done	29977015f9a7492f
+1290	1319	1772818818918669556	/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/_deps/kleidiai_download-subbuild/CMakeFiles/kleidiai_download-populate-complete	29977015f9a7492f
+1290	1319	1772818818918669556	/Users/krisdcosta/291_EAI/android/lib/.cxx/Release/315e2b1x/arm64-v8a/_deps/kleidiai_download-subbuild/kleidiai_download-populate-prefix/src/kleidiai_download-populate-stamp/kleidiai_download-populate-done	29977015f9a7492f

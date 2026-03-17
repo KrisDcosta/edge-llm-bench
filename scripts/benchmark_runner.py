@@ -59,10 +59,24 @@ _WIFI_IP: str | None = None
 GGUF_DEVICE_PATHS = {
     "Q2_K":   f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q2_K.gguf",
     "Q3_K_M": f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q3_K_M.gguf",
+    "Q4_K_S": f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q4_K_S.gguf",
     "Q4_K_M": f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    "Q5_K_M": f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q5_K_M.gguf",
     "Q6_K":   f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q6_K.gguf",
     "Q8_0":   f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q8_0.gguf",
     "F16":    f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-F16.gguf",
+}
+
+# All standard variants in order (used for sweeps)
+ALL_VARIANTS = ["Q2_K", "Q3_K_M", "Q4_K_S", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0"]
+
+# imatrix model files on device — keyed by gguf_variant (importance-matrix calibrated)
+GGUF_IMATRIX_DEVICE_PATHS = {
+    "Q2_K":   f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q2_K-imatrix.gguf",
+    "Q3_K_M": f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q3_K_M-imatrix.gguf",
+    "Q4_K_M": f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q4_K_M-imatrix.gguf",
+    "Q6_K":   f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q6_K-imatrix.gguf",
+    "Q8_0":   f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-Q8_0-imatrix.gguf",
 }
 
 # Default smoke test prompt
@@ -398,10 +412,21 @@ def run_trial(
     trial_index: int,
     is_warmup: bool,
     threads: int = 4,
+    flash_attention: bool = False,
+    kv_cache_type: str | None = None,
+    load_time_s: float | None = None,
+    imatrix: bool = False,
 ) -> dict:
     """Run one inference trial on device. Returns schema-valid dict."""
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S") + f"-{uuid.uuid4().hex[:6]}"
-    model_path = GGUF_DEVICE_PATHS.get(gguf_variant)
+    # Select model path: imatrix variant overrides standard path if requested
+    if imatrix:
+        model_path = GGUF_IMATRIX_DEVICE_PATHS.get(gguf_variant)
+        if not model_path:
+            # Fallback: construct expected path pattern
+            model_path = f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-{gguf_variant}-imatrix.gguf"
+    else:
+        model_path = GGUF_DEVICE_PATHS.get(gguf_variant)
 
     if not model_path:
         return _failure_record(
@@ -423,8 +448,14 @@ def run_trial(
         f"--seed 42 "
         f"-t {threads} "        # configurable thread count (default 4)
         f"-no-cnv "             # disable chat/conversation mode, single-shot only
-        f"-p \"{prompt}\""
     )
+    # Optional: Flash Attention (-fa) — may prevent KV-cache collapse at long contexts
+    if flash_attention:
+        llama_cmd += "-fa on "
+    # Optional: KV cache quantization type (e.g. "q8_0") — reduces KV cache memory pressure
+    if kv_cache_type:
+        llama_cmd += f"-ctk {kv_cache_type} "
+    llama_cmd += f"-p \"{prompt}\""
 
     # --- Pre-inference measurements ---
     mem_before_kb = get_mem_available_kb()
@@ -447,7 +478,8 @@ def run_trial(
             artifact_hash, "TIMEOUT", "inference", str(e), retryable=True,
         )
 
-    t_end = time.monotonic()  # noqa: F841  (wall time available if needed)
+    t_end = time.monotonic()
+    wall_time_s = t_end - t_request_start
 
     # --- Post-inference measurements ---
     power_stats = sampler.stop()
@@ -571,6 +603,7 @@ def run_trial(
         },
         "resources": {
             "peak_rss_mb": peak_rss_mb,
+            "load_time_s": round(load_time_s, 4) if load_time_s is not None else None,
             "battery_start_pct": battery_start,
             "battery_end_pct": battery_end,
             "battery_drop_pct": round(battery_drop, 4) if battery_drop is not None else None,
@@ -626,7 +659,8 @@ def _failure_record(
             "gen_over_prefill": None, "prefill_frac": None, "gen_frac": None,
         },
         "resources": {
-            "peak_rss_mb": None, "battery_start_pct": None, "battery_end_pct": None,
+            "peak_rss_mb": None, "load_time_s": None,
+            "battery_start_pct": None, "battery_end_pct": None,
             "battery_drop_pct": None, "battery_drop_per_1k_tokens": None, "temperature_c": None,
             "power_mw_mean": None, "energy_mj": None, "energy_per_1k_tokens_mj": None,
         },
@@ -643,13 +677,67 @@ def _failure_record(
 # Experiment runner
 # ---------------------------------------------------------------------------
 
+def _measure_cold_load_time(
+    gguf_variant: str,
+    context_length: int,
+    threads: int,
+    flash_attention: bool,
+    kv_cache_type: str | None,
+    imatrix: bool,
+) -> float | None:
+    """Issue a single -n 1 invocation and return total wall time as load_time_s.
+
+    This is a cold-start measurement: the time from adb shell invocation until
+    the process exits after generating exactly 1 token.  Because output is
+    minimal, this is dominated by model-load + KV-cache init time.
+    Returns wall-clock seconds, or None on failure.
+    """
+    if imatrix:
+        model_path = GGUF_IMATRIX_DEVICE_PATHS.get(gguf_variant) or (
+            f"{DEVICE_WORK_DIR}/Llama-3.2-3B-Instruct-{gguf_variant}-imatrix.gguf"
+        )
+    else:
+        model_path = GGUF_DEVICE_PATHS.get(gguf_variant)
+    if not model_path:
+        return None
+
+    load_cmd = (
+        f"LD_LIBRARY_PATH={DEVICE_WORK_DIR} "
+        f"{LLAMA_CLI_DEVICE} "
+        f"-m {model_path} "
+        f"-c {context_length} "
+        f"-n 1 "
+        f"--temp 0.0 --seed 42 "
+        f"-t {threads} "
+        f"-no-cnv "
+    )
+    if flash_attention:
+        load_cmd += "-fa on "
+    if kv_cache_type:
+        load_cmd += f"-ctk {kv_cache_type} "
+    load_cmd += '-p "ping"'
+
+    t0 = time.monotonic()
+    try:
+        adb_shell(load_cmd, timeout=300)
+    except Exception:
+        return None
+    return time.monotonic() - t0
+
+
 def run_experiment(entry: dict, prompts: dict, device_info: dict, llama_version: str,
-                   output_file: Path, artifact_hash: str | None = None) -> dict:
+                   output_file: Path, artifact_hash: str | None = None,
+                   measure_load_time: bool = False) -> dict:
     """Run all trials for one registry entry. Returns summary stats.
 
     Protocol: 2 warmup runs using the first prompt (to warm CPU caches),
     then for every prompt in the suite: trials recorded runs.
     Total recorded runs = len(prompts) × trials.
+
+    If measure_load_time is True, one additional cold-start invocation
+    (-n 1) is issued before warmups to capture model load overhead;
+    the resulting load_time_s is stored in every trial record for
+    this experiment.
     """
     gguf_variant = entry["gguf_variant"]
     quant_bits = entry["quant_bits"]
@@ -658,6 +746,9 @@ def run_experiment(entry: dict, prompts: dict, device_info: dict, llama_version:
     warmups = entry.get("warmups", 2)
     trials = entry.get("trials", 5)
     threads = entry.get("threads", 4)  # thread count (default 4; configurable for sweep)
+    flash_attention = bool(entry.get("flash_attention", False))
+    kv_cache_type = entry.get("kv_cache_type") or None
+    imatrix = bool(entry.get("imatrix", False))
     exp_id = entry["id"]
 
     prompt_list = list(prompts.items())  # [(id, text), ...]
@@ -670,10 +761,33 @@ def run_experiment(entry: dict, prompts: dict, device_info: dict, llama_version:
     print(f"  Context: {context_length} | Output: {output_length} tokens")
     print(f"  Warmups: {warmups} | Prompts: {n_prompts} | Trials/prompt: {trials} "
           f"→ {total_recorded} recorded runs")
+    if flash_attention:
+        print(f"  Flash Attention: enabled (-fa)")
+    if kv_cache_type:
+        print(f"  KV cache type: {kv_cache_type} (-ctk)")
+    if imatrix:
+        print(f"  imatrix: enabled (importance-matrix calibrated model)")
     print(f"{'='*60}")
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     records = []
+
+    # --- Optional cold-start load time measurement ---
+    variant_load_time_s: float | None = None
+    if measure_load_time:
+        print(f"  [load-time probe] cold-start invocation (-n 1)...", end=" ", flush=True)
+        variant_load_time_s = _measure_cold_load_time(
+            gguf_variant=gguf_variant,
+            context_length=context_length,
+            threads=threads,
+            flash_attention=flash_attention,
+            kv_cache_type=kv_cache_type,
+            imatrix=imatrix,
+        )
+        if variant_load_time_s is not None:
+            print(f"load_time_s={variant_load_time_s:.2f}s")
+        else:
+            print("FAILED (will record null)")
 
     # --- Warmup runs (using first prompt) ---
     warmup_prompt_id, warmup_text = prompt_list[0]
@@ -694,6 +808,10 @@ def run_experiment(entry: dict, prompts: dict, device_info: dict, llama_version:
             trial_index=i,
             is_warmup=True,
             threads=threads,
+            flash_attention=flash_attention,
+            kv_cache_type=kv_cache_type,
+            load_time_s=variant_load_time_s,
+            imatrix=imatrix,
         )
 
         status = record["status"]
@@ -736,6 +854,10 @@ def run_experiment(entry: dict, prompts: dict, device_info: dict, llama_version:
                 trial_index=t,
                 is_warmup=False,
                 threads=threads,
+                flash_attention=flash_attention,
+                kv_cache_type=kv_cache_type,
+                load_time_s=variant_load_time_s,
+                imatrix=imatrix,
             )
 
             status = record["status"]
@@ -787,8 +909,35 @@ def main():
         "--wifi-adb", action="store_true",
         help="Switch to WiFi ADB before sweep (unplug USB for accurate battery/power measurements)"
     )
+    parser.add_argument(
+        "--measure-load-time", action="store_true",
+        help=(
+            "Before warmups for each variant, issue one cold-start invocation (-n 1) "
+            "and record the total wall time as load_time_s in every trial record for "
+            "that variant. Captures model load + KV-cache init overhead."
+        ),
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true",
+        help="Parse arguments and registry without connecting to device (for CI/import checks)",
+    )
 
     args = parser.parse_args()
+
+    # --dry-run: validate config/registry without touching a device
+    if args.dry_run:
+        print("Dry-run mode: checking registry and imports only (no device required).")
+        try:
+            registry = load_registry()
+            print(f"  Registry loaded: {len(registry)} experiment(s)")
+            planned = [e for e in registry if e.get("status") == "planned"]
+            complete = [e for e in registry if e.get("status") == "complete"]
+            print(f"  Planned: {len(planned)}  Complete: {len(complete)}")
+        except Exception as e:
+            print(f"  Registry load FAILED: {e}")
+            sys.exit(1)
+        print("Dry-run OK.")
+        return
 
     # Check device
     print("Checking device connection...")
@@ -845,7 +994,11 @@ def main():
         print("  Computing model hash (may take ~30s for 2GB file)...", end=" ", flush=True)
         artifact_hash = compute_model_hash("Q4_K_M")
         print("done" if artifact_hash else "not found (local model missing)")
-        summary = run_experiment(entry, prompts, device_info, llama_version, out_file, artifact_hash=artifact_hash)
+        summary = run_experiment(
+            entry, prompts, device_info, llama_version, out_file,
+            artifact_hash=artifact_hash,
+            measure_load_time=args.measure_load_time,
+        )
         print(f"\nSmoke test complete. Log: {out_file}")
         return
 
@@ -889,7 +1042,8 @@ def main():
 
         summary = run_experiment(
             entry, prompts, device_info, llama_version, out_file,
-            artifact_hash=_hash_cache.get(variant)
+            artifact_hash=_hash_cache.get(variant),
+            measure_load_time=args.measure_load_time,
         )
         all_summaries.append(summary)
 
