@@ -313,7 +313,7 @@ Q8\_0    & 3.4 & $4.54 \pm 0.59$ & 7.14  & 3.95  & 23.21  & 68.0  & [58--76] & $
 F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & 68.0  & [58--76] & \multicolumn{1}{l}{---} \\
 \midrule
 \multicolumn{9}{l}{\small BoolQ: yes/no reading comprehension accuracy on 100-question SuperGLUE validation subset; 95\% Wilson CI ($n{=}100$).}\\
-\multicolumn{9}{l}{\small ARC-Easy accuracy (not shown): $\geq$95\% for all tested variants (re-verification in progress); Q4\_K\_S and Q5\_K\_M not run.}\\
+\multicolumn{9}{l}{\small ARC-Easy (not shown): 76--82\% across all 7 variants; Q4\_K\_M leads at 82\%, Q2\_K lowest at 76\%; verified with extracted-letter eval.}\\
 \multicolumn{9}{l}{\small $\dagger$ PPL via \texttt{llama-perplexity} on full WikiText-2 test corpus (${\approx}$285K tokens). $\ddagger$ PPL measured on 12KB sample only; full-corpus re-run pending.}\\
 \multicolumn{9}{l}{\small $^{\S}$ Q4\_K\_S TPS interpolated from quality sweep (not included in main TPS sweep); prefill/TTFT/E2E figures not measured for this variant.}\\
 \bottomrule
@@ -344,8 +344,9 @@ phase and compensating for its higher memory footprint.
 the 100-question reading comprehension evaluation, followed by Q4\_K\_M at 72\%
 (CI: 63--80\%). Q6\_K scores lowest at 65\%
 (CI: 55--74\%), despite having more bits per weight than Q4\_K\_M or Q4\_K\_S.
-All five tested variants score $\geq$95\% on ARC-Easy factual retrieval (near-ceiling; Q4\_K\_S and Q5\_K\_M not run),
-confirming BoolQ as the primary discriminator among variants.
+ARC-Easy scores range 76--82\% across all seven variants (Q4\_K\_M highest at 82\%,
+Q2\_K lowest at 76\%), with a narrower 6-point spread than BoolQ's 9-point spread,
+confirming BoolQ as the stronger discriminator among variants.
 
 \textbf{F16 is effectively unusable} in this deployment scenario. At 0.15~tokens/s
 with TTFT of 14.53~s, the variant produced only one complete trial result within the
@@ -492,13 +493,12 @@ With $n{=}100$, the Wilson CIs are $\pm$8--9\%, making the 9-point gap between
 Q4\_K\_S (74\%) and Q6\_K (65\%) the most statistically robust pairwise distinction.
 The cluster between Q4\_K\_M (72\%), Q2\_K through Q5\_K\_M (65--69\%)
 spans overlapping CIs and should be interpreted cautiously.
-ARC-Easy accuracy was near-ceiling for all five tested variants
-($\geq$95\%; Q4\_K\_S and Q5\_K\_M not run on this benchmark),
-confirming that these models retain strong factual retrieval capacity
-at all quantization levels and that BoolQ---which requires cross-sentence reasoning---is
-the more informative quality discriminator.
-(Note: ARC-Easy results were collected with an earlier evaluation script that stored
-raw output rather than extracted letters; a re-run to confirm is in progress.)
+ARC-Easy accuracy ranges 76--82\% across all seven variants
+(Q4\_K\_M highest at 82\%, Q2\_K lowest at 76\%, all verified with the
+current extracted-letter evaluation script).
+The 6-point spread is narrower than BoolQ's 9-point spread, confirming
+that BoolQ---which requires cross-sentence reasoning---is the more
+informative quality discriminator among variants at this model scale.
 
 \textbf{Instruction-following collapse at extreme quantization.}
 HellaSwag---a four-choice sentence completion task requiring selection of a lettered
@@ -506,10 +506,10 @@ option (A/B/C/D)---reveals a qualitatively different failure mode at Q2\_K: all
 responses default to ``No'' regardless of the correct choice, yielding 19\% accuracy
 (near-random for a four-way task, expected 25\%) compared to 39--45\% for all
 higher-precision variants. This collapse does not appear on BoolQ (yes/no format,
-Q2\_K scores 69\%) or ARC-Easy (direct-answer format), indicating a
-task-format-specific failure: at 3.40 bits per weight, the model retains factual
-recall and binary judgment but loses the ability to follow structured multi-choice
-prompts. Practitioners targeting structured-output tasks (classification, MCQ,
+Q2\_K scores 69\%) or ARC-Easy (76\%, only 6 points below the best variant),
+indicating a task-format-specific failure: at 3.40 bits per weight, the model
+retains factual recall and binary judgment but loses the ability to follow
+structured multi-choice sentence-completion prompts. Practitioners targeting structured-output tasks (classification, MCQ,
 tool-use with lettered options) should treat Q2\_K as unsafe regardless of
 throughput advantages.
 
@@ -581,17 +581,17 @@ of downstream task quality.
 \toprule
 \textbf{Var.} & \textbf{ARC-C} & \textbf{ARC-E} & \textbf{HellaS.} & \textbf{MMLU} & \textbf{BoolQ} & \textbf{TruthQA} \\
 \midrule
-Q2\_K   & 50 & $\star$ & \phantom{0}19 & 42 & 69 & 50 \\
-Q3\_K\_M & 52 & $\star$ & 44 & 48 & 69 & \textbf{68} \\
-Q4\_K\_S & \textbf{62} & --- & 39 & 49 & \textbf{74} & 57 \\
-Q4\_K\_M & 60 & $\star$ & 43 & 47 & 72 & 60 \\
-Q5\_K\_M & 61 & --- & \textbf{45} & \textbf{50} & 67 & 65 \\
-Q6\_K   & 58 & $\star$ & 41 & 48 & 65 & 60 \\
-Q8\_0   & 56 & $\star$ & 43 & 47 & 68 & 58 \\
+Q2\_K    & 50 & 76 & \phantom{0}19 & 42 & 69 & 50 \\
+Q3\_K\_M & 52 & 78 & 44 & 48 & 69 & \textbf{68} \\
+Q4\_K\_S & \textbf{62} & 81 & 39 & 49 & \textbf{74} & 57 \\
+Q4\_K\_M & 60 & \textbf{82} & 43 & 47 & 72 & 60 \\
+Q5\_K\_M & 61 & 81 & \textbf{45} & \textbf{50} & 67 & 65 \\
+Q6\_K    & 58 & 79 & 41 & 48 & 65 & 60 \\
+Q8\_0    & 56 & 80 & 43 & 47 & 68 & 58 \\
 \bottomrule
 \end{tabular}
 \vspace{2pt}
-\footnotesize{ARC-E $\star$ = 100\% (5 variants; Q4\_K\_S, Q5\_K\_M not run). All n=100.}
+\footnotesize{All results n=100, verified with current extracted-letter eval script.}
 \end{table}
 
 \textbf{Perplexity vs.\ BoolQ accuracy.}
@@ -937,7 +937,8 @@ Our primary empirical findings are:
         accuracy does not monotonically improve with bit-width (65--74\%):
         Q4\_K\_S (4-bit, small) achieves the highest score at 74\%, Q6\_K (6-bit)
         scores lowest at 65\% despite having more bits per weight.
-        ARC-Easy factual accuracy is near-ceiling (95--100\%) for all variants.
+        ARC-Easy factual accuracy ranges 76--82\% (Q4\_K\_M highest, Q2\_K lowest),
+        non-monotonic with bit-width and narrower than BoolQ variance.
         Q2\_K exhibits instruction-following collapse on HellaSwag MCQ tasks (19\%),
         despite 69\% on BoolQ, revealing a task-format-specific failure mode.
         Q6\_K is strictly dominated on both BoolQ accuracy and throughput,
@@ -1126,5 +1127,9 @@ Choices: A) {A} B) {B} C) {C} D) {D}
 Answer with only A, B, C, or D:
 \end{verbatim}
 Scoring uses exact-match on the predicted letter (A/B/C/D).
+The \texttt{model\_output} field in stored JSON records the extracted letter only
+(e.g., ``A''), not the raw llama-completion output, ensuring stored results are
+directly verifiable and reproducible. Verified accuracy across all seven variants:
+Q2\_K 76\%, Q3\_K\_M 78\%, Q4\_K\_S 81\%, Q4\_K\_M 82\%, Q5\_K\_M 81\%, Q6\_K 79\%, Q8\_0 80\%.
 
 \end{document}
