@@ -75,10 +75,9 @@
 
 | Document | Status | Location | Notes |
 |----------|--------|----------|-------|
-| **IEEE Publication Paper** | ✅ Complete | `report/report.pdf` | 10 pages; all findings verified |
-| **Course Project Report** | ✅ Complete | `report/course_report.pdf` | 13–15 pages; comprehensive methodology |
-| **Research Paper Blueprint** | ✅ Complete | `PAPER_PLAN.md` | 19-section submission plan for top-tier conferences (MobiSys/MLSys/USENIX ATC 2027) |
-| **Project Plan** | ✅ Complete | `PROJECT_PLAN.md` | WBS, scope, 5 research questions, artifact registry |
+| **IEEE Publication Paper** | ✅ Complete | `report/report.pdf` | 12 pages; all findings verified, 0 LaTeX errors |
+| **Audit Report** | ✅ Complete | `AUDIT_REPORT_2026_03_27.md` | Publication-readiness audit across all dimensions |
+| **Conference Roadmap** | ✅ Complete | `PAPER_ROADMAP.md` | Submission plan for MobiSys/MLSys/USENIX ATC |
 
 ---
 
@@ -146,10 +145,8 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 291_EAI/
 ├── README.md                              # This file
-├── PAPER_PLAN.md                          # 19-section blueprint for top-tier conference submission
-├── PROJECT_PLAN.md                        # Full project plan: WBS, scope, RQs, timeline
-├── PRD.md                                 # Product requirements document
-├── QUICKSTART.md                          # Quick start guide for contributors
+├── AUDIT_REPORT_2026_03_27.md             # Publication-readiness audit (all findings verified)
+├── PAPER_ROADMAP.md                       # Conference submission roadmap (MobiSys/MLSys/ATC)
 │
 ├── report/                                # Academic papers & reports
 │   ├── report.tex                         # IEEE publication paper (LaTeX source)
@@ -172,11 +169,16 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 │   └── imatrix_*.dat                      # imatrix calibration files (5 variants)
 │
 ├── figures/
-│   ├── fig1_throughput_all_contexts.png   # Decode TPS vs context (7 variants)
-│   ├── fig2_collapse_curve.png            # KV-cache collapse (ctx 256→2048)
-│   ├── fig3_collapse_granular.png         # Granular sweep (ctx 1024→2048, Q3_K_M, Q6_K)
-│   ├── fig4_quality_heatmap.png           # Accuracy matrix (7 variants × 7 benchmarks)
-│   ├── fig5_crossdev_comparison.png       # Cross-device throughput (4 platforms)
+│   ├── fig1_prefill_tps_vs_context.png    # Prefill TPS vs context size (7 variants)
+│   ├── fig2_decode_tps_vs_context.png     # Decode TPS vs context size (7 variants)
+│   ├── fig3_ttft_vs_context.png           # Time-to-first-token vs context
+│   ├── fig4_peak_memory_vs_quant.png      # Peak working memory by quantization
+│   ├── fig5_battery_per_1k_tokens.png     # Energy cost per 1K tokens
+│   ├── fig6_pareto_efficiency_quality.png # BoolQ accuracy vs decode TPS (Pareto frontier)
+│   ├── fig7_prefill_vs_decode_fraction.png # Prefill/decode time decomposition
+│   ├── fig8_latency_distribution.png      # Decode TPS distribution across trials
+│   ├── fig9_model_size_vs_decode_tps.png  # Model size vs decode throughput
+│   ├── fig_kv_cliff.png                   # KV-cache cliff (filled-context sweep, all 7 variants)
 │   └── summary_table.csv                  # Results summary (all variants, all contexts)
 │
 ├── results/
@@ -257,7 +259,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 
 | Variant | Bits/Weight | File Size | K Value | Superblock | imatrix | Notes |
 |---------|-------------|-----------|---------|-----------|---------|-------|
-| Q2_K    | 3.40        | 1.3 GB    | 32      | 6×8       | No      | NEON 2-bit; highest throughput on ARM; most context-sensitive (−35%) |
+| Q2_K    | 3.40        | 1.3 GB    | 32      | 6×8       | No      | NEON 2-bit; highest throughput on ARM; most context-sensitive (−40%, cliff at ctx=768) |
 | Q3_K_M  | 3.95        | 1.6 GB    | 64      | 6×8       | Yes     | Mid-range quality; imatrix hurts (−8% BoolQ) |
 | Q4_K_S  | 4.85        | 1.8 GB    | 32      | 8×8       | Yes     | **Accuracy-dominant Pareto**; 74% BoolQ, 4.80 tok/s |
 | Q4_K_M  | 5.30        | 1.9 GB    | 64      | 8×8       | Yes     | Most stable across contexts (<2%); 72% BoolQ |
@@ -400,4 +402,4 @@ Research project for DSC 291 (Efficient AI). Contact author for usage permission
 
 ---
 
-**Last Updated:** March 26, 2026 | **Status:** Complete (all benchmarks, cross-device validation done)
+**Last Updated:** March 27, 2026 | **Status:** Complete (all 6 benchmarks × 7 variants verified; M4 Metal cross-device validated; x86 HP Pavilion pending)

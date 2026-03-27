@@ -1,3 +1,7 @@
+# Python >= 3.9 required
 matplotlib>=3.7
 numpy>=1.24
+pandas>=1.5
 pyyaml>=6.0
+huggingface_hub>=0.19   # for download_models.sh / hf_transfer
+tqdm>=4.65              # progress bars in download scripts
