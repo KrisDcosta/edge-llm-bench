@@ -257,8 +257,9 @@ def score_choice(model_output: str, expected: str) -> bool:
     if re.search(rf"\bAnswer\s*(?:is\s*)?:?\s*{letter}\b", out, re.IGNORECASE):
         return True
 
-    # Pattern 3: "(X)" or "X)" or "X." at word boundary
-    if re.search(rf"\b\(?{letter}[.):]?\b", out, re.IGNORECASE):
+    # Pattern 3: "(X)" or "X)" — letter must be inside parentheses or followed
+    # by ")" to avoid matching the bare article "A" in prose text.
+    if re.search(rf"\({letter}\)|{letter}\)", out, re.IGNORECASE):
         return True
 
     # Pattern 4: "The answer is X" or "The correct answer is X"
@@ -329,24 +330,67 @@ def extract_model_answer(raw_output: str) -> str:
     llama-completion echoes the full prompt (with special tokens
     detokenized to plain text like "user" and "assistant") followed by
     the model's response. The pattern is always:
-      "Answer with only yes or no:assistant"  (text appears together)
-      <newline>
-      "Yes" or "No"                           (response on next line/word)
 
-    Larger quantization variants (Q8_0, F16) sometimes produce verbose
-    responses like "The answer is: No." or "## Step 1: ..." instead of
-    a bare "Yes"/"No". We handle this by scanning for the first yes/no
-    token anywhere in the first 400 chars after the answer marker.
+      "Answer with only yes or no:assistant"  (BoolQ)
+      <newline>
+      "Yes" or "No"
+
+      "Answer with only the letter (A, B, C, or D):assistant"  (ARC/MMLU/etc.)
+      <newline>
+      "B"  (or "The answer is B.", etc.)
+
+    Strategy: find the "assistant" header that marks where the model's
+    generated text begins, then extract yes/no or A/B/C/D from that
+    portion only. This avoids false-positive letter matches inside the
+    echoed question text.
     """
     import re
 
-    # Primary strategy: Find "Answer with only yes or no:assistant" and
-    # then search for the first yes/no within the next 400 chars.
-    # This handles:
-    #   - "Yes"  / "No"               (small models, direct answer)
-    #   - "Yes." / "No."              (with trailing punctuation)
-    #   - "The answer is: No."        (Q8_0 preamble style)
-    #   - "## Step 1: ..."            (chain-of-thought — scan past it)
+    # ── PRIMARY: anchor on the assistant header ──────────────────────────────
+    # llama-completion detokenizes <|start_header_id|>assistant<|end_header_id|>
+    # as the bare word "assistant" followed by newlines, immediately after the
+    # last ":" in the instruction phrase (e.g. "...or D):assistant\n\n").
+    asst_match = re.search(r"assistant\s*\n", raw_output, re.IGNORECASE)
+    if asst_match:
+        after_asst = raw_output[asst_match.end():].strip()
+
+        # 1a. Standalone choice letter at start of generated text
+        #     Matches: "B", "B.", "B)", "B:"  but NOT "Because..." or "Basically..."
+        choice_lead = re.match(r'^([ABCD])(?:[.):\s\n]|$)', after_asst, re.IGNORECASE)
+        if choice_lead:
+            return choice_lead.group(1).upper()
+
+        # 1b. Yes / No at start of generated text
+        yn_lead = re.match(r'^(yes|no)(?:[.,!?\s\n]|$)', after_asst, re.IGNORECASE)
+        if yn_lead:
+            return yn_lead.group(1).capitalize()
+
+        # 1c. Verbose choice: "The answer is B" / "Answer: C" / "(D)" style
+        verbose_choice = re.search(
+            r'(?:\bthe\s+(?:correct\s+)?answer\s+is\s+([ABCD])\b'
+            r'|\bAnswer\s*:\s*([ABCD])\b'
+            r'|\(([ABCD])\))',
+            after_asst[:150], re.IGNORECASE
+        )
+        if verbose_choice:
+            letter = next(g for g in verbose_choice.groups() if g)
+            return letter.upper()
+
+        # 1d. Verbose yes/no: "The answer is yes/no" / "Answer: yes"
+        verbose_yn = re.search(
+            r'(?:\bthe\s+answer\s+is\s+(yes|no)\b|\bAnswer\s*:\s*(yes|no)\b)',
+            after_asst[:150], re.IGNORECASE
+        )
+        if verbose_yn:
+            word = next(g for g in verbose_yn.groups() if g)
+            return word.capitalize()
+
+        # 1e. Scan up to 400 chars for yes/no (handles chain-of-thought preamble)
+        yn = re.search(r'\b(yes|no)\b', after_asst[:400], re.IGNORECASE)
+        if yn:
+            return yn.group(1).capitalize()
+
+    # ── FALLBACK 1: BoolQ-specific anchor (legacy) ───────────────────────────
     match = re.search(r"Answer with only yes or no:\s*assistant", raw_output, re.IGNORECASE)
     if match:
         after_match = raw_output[match.end():]
@@ -354,15 +398,19 @@ def extract_model_answer(raw_output: str) -> str:
         if yn:
             return yn.group(1).capitalize()
 
-    # Fallback 1: broader "Answer with...:" anchor, same yes/no scan
+    # ── FALLBACK 2: broader anchor ────────────────────────────────────────────
     match = re.search(r"Answer with.*?:", raw_output, re.IGNORECASE | re.DOTALL)
     if match:
         after_match = raw_output[match.end():]
+        # Try choice first, then yes/no
+        choice = re.search(r'^\s*([ABCD])(?:[.):\s\n]|$)', after_match, re.IGNORECASE)
+        if choice:
+            return choice.group(1).upper()
         yn = re.search(r'\b(yes|no)\b', after_match[:400], re.IGNORECASE)
         if yn:
             return yn.group(1).capitalize()
 
-    # Fallback 2: scan entire (non-log) output for first yes/no
+    # ── FALLBACK 3: scan non-log lines for yes/no only ───────────────────────
     filtered = "\n".join(
         line for line in raw_output.splitlines()
         if not any(kw in line for kw in _LOG_KEYWORDS)
@@ -370,15 +418,6 @@ def extract_model_answer(raw_output: str) -> str:
     yn = re.search(r'\b(yes|no)\b', filtered, re.IGNORECASE)
     if yn:
         return yn.group(1).capitalize()
-
-    # Fallback 3: return first non-log, non-empty word (legacy behaviour)
-    for line in raw_output.splitlines():
-        if not any(kw in line for kw in _LOG_KEYWORDS):
-            stripped = line.strip()
-            if stripped and "[end of text]" not in stripped:
-                first_word = stripped.split()[0] if stripped.split() else ""
-                if first_word and len(first_word) > 1:
-                    return first_word
 
     return ""
 

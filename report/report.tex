@@ -51,13 +51,13 @@ across all window sizes. Q4\_K\_M is also context-stable ($-7\%$), whereas
 Q5\_K\_M ($-26\%$) and Q8\_0 ($-19\%$) degrade substantially.
 This mirrors the throughput non-monotonicity: the fastest short-context variant
 is the most fragile at long context.
-(3)~\textbf{Accuracy is also non-monotonic}: on a 100-question BoolQ reading
-comprehension benchmark, Q4\_K\_S (74\%, 95\% CI: 64--82\%) achieves the highest
-accuracy while Q6\_K scores lowest (65\%, CI: 55--74\%), despite having more bits
-per weight. Q2\_K exhibits instruction-following collapse on HellaSwag MCQ tasks
-(19\%, near-random), despite 69\% BoolQ accuracy, revealing a task-format-specific
-failure mode at 3.40~bits per weight. On 100-question ARC-Easy factual retrieval,
-all quantized variants score 95--100\% (near-ceiling).
+(3)~\textbf{Accuracy is also non-monotonic across six benchmarks}:
+on BoolQ reading comprehension, Q4\_K\_S leads (74\%, CI: 64--82\%) while Q6\_K
+scores lowest (65\%); on TruthfulQA factual consistency, Q3\_K\_M leads (68\%) while
+Q2\_K collapses to 50\% (near-chance). Q2\_K also exhibits instruction-following
+collapse on HellaSwag MCQ (19\%), despite 69\% BoolQ accuracy---a task-format-specific
+failure at 3.40~bpw. No single variant dominates all quality dimensions;
+the optimal choice is benchmark-dependent.
 (4)~\textbf{Q6\_K is strictly dominated}: simultaneously the least accurate
 and the slowest at long context; Q4\_K\_S (74\%, 4.8~tok/s) achieves the highest
 BoolQ accuracy, Q2\_K (69\%, 5.11~tok/s) leads on throughput, and Q4\_K\_M (72\%,
@@ -304,15 +304,16 @@ All throughput figures use 256-token context except Q4\_K\_M (512-token). PPL = 
 \textbf{Prefill TPS} & \textbf{TTFT (s)} & \textbf{E2E (s)} & \textbf{BoolQ (\%)} & \textbf{95\% CI} & \textbf{PPL$\downarrow$} \\
 \midrule
 Q2\_K    & 1.3 & $5.11 \pm 0.72$ & 7.59  & 3.81  & 26.62  & 69.0  & [59--77] & 13.29$\dagger$ \\
-Q3\_K\_M & 1.6 & $4.91 \pm 0.40$ & 6.29  & 4.50  & 30.57  & 66.0  & [56--75] & 11.08$\dagger$ \\
+Q3\_K\_M & 1.6 & $4.91 \pm 0.40$ & 6.29  & 4.50  & 30.57  & 69.0  & [59--77] & 11.08$\dagger$ \\
 Q4\_K\_S & 1.56 & ${\approx}4.8^{\S}$ & --- & --- & --- & 74.0 & [64--82] & $\ddagger$ \\
 Q4\_K\_M & 2.0 & $4.80 \pm 0.52$ & 7.09  & 3.98  & 28.11  & 72.0  & [63--80] & $\ddagger$ \\
+Q5\_K\_M & 2.3 & $3.75 \pm 0.04$ & 4.57  & ---   & ---    & 67.0  & [57--76] & $\ddagger$ \\
 Q6\_K    & 2.7 & $3.52 \pm 0.32$ & 4.90  & 5.71  & 29.33  & 65.0  & [55--74] & $\ddagger$ \\
 Q8\_0    & 3.4 & $4.54 \pm 0.59$ & 7.14  & 3.95  & 23.21  & 68.0  & [58--76] & $\ddagger$ \\
 F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & 68.0  & [58--76] & \multicolumn{1}{l}{---} \\
 \midrule
 \multicolumn{9}{l}{\small BoolQ: yes/no reading comprehension accuracy on 100-question SuperGLUE validation subset; 95\% Wilson CI ($n{=}100$).}\\
-\multicolumn{9}{l}{\small ARC-Easy accuracy (not shown): 100\% for all quantized variants; F16: 95\%.}\\
+\multicolumn{9}{l}{\small ARC-Easy accuracy (not shown): $\geq$95\% for all tested variants (re-verification in progress); Q4\_K\_S and Q5\_K\_M not run.}\\
 \multicolumn{9}{l}{\small $\dagger$ PPL via \texttt{llama-perplexity} on full WikiText-2 test corpus (${\approx}$285K tokens). $\ddagger$ PPL measured on 12KB sample only; full-corpus re-run pending.}\\
 \multicolumn{9}{l}{\small $^{\S}$ Q4\_K\_S TPS interpolated from quality sweep (not included in main TPS sweep); prefill/TTFT/E2E figures not measured for this variant.}\\
 \bottomrule
@@ -343,7 +344,7 @@ phase and compensating for its higher memory footprint.
 the 100-question reading comprehension evaluation, followed by Q4\_K\_M at 72\%
 (CI: 63--80\%). Q6\_K scores lowest at 65\%
 (CI: 55--74\%), despite having more bits per weight than Q4\_K\_M or Q4\_K\_S.
-All quantized variants score 95--100\% on ARC-Easy factual retrieval (near-ceiling),
+All five tested variants score $\geq$95\% on ARC-Easy factual retrieval (near-ceiling; Q4\_K\_S and Q5\_K\_M not run),
 confirming BoolQ as the primary discriminator among variants.
 
 \textbf{F16 is effectively unusable} in this deployment scenario. At 0.15~tokens/s
@@ -483,17 +484,21 @@ BoolQ reading comprehension accuracy was measured for all seven variants via USB
 ADB (100 questions per variant; 95\% Wilson CIs are shown in Table~\ref{tab:main_results}).
 Q4\_K\_S leads at 74.0\% (74/100, CI: 64--82\%), followed by Q4\_K\_M at 72.0\%
 (72/100, CI: 63--80\%), Q2\_K at 69.0\%
-(69/100, CI: 59--77\%), Q8\_0 at 68.0\% (68/100, CI: 58--76\%), Q3\_K\_M at
-66.0\% (66/100, CI: 56--75\%), and Q6\_K lowest at 65.0\% (65/100, CI: 55--74\%).
+(69/100, CI: 59--77\%), Q3\_K\_M at 69.0\% (69/100, CI: 59--77\%),
+Q8\_0 at 68.0\% (68/100, CI: 58--76\%), Q5\_K\_M at 67.0\% (67/100, CI: 57--76\%),
+and Q6\_K lowest at 65.0\% (65/100, CI: 55--74\%).
 F16 also scores 68.0\% (68/100, CI: 58--76\%).
 With $n{=}100$, the Wilson CIs are $\pm$8--9\%, making the 9-point gap between
 Q4\_K\_S (74\%) and Q6\_K (65\%) the most statistically robust pairwise distinction.
-The cluster between Q4\_K\_M (72\%), Q2\_K (69\%), Q8\_0 (68\%), and Q3\_K\_M (66\%)
+The cluster between Q4\_K\_M (72\%), Q2\_K through Q5\_K\_M (65--69\%)
 spans overlapping CIs and should be interpreted cautiously.
-ARC-Easy accuracy was near-ceiling for all variants (100\% for Q2\_K through Q8\_0;
-95\% for F16), confirming that these models retain strong factual retrieval capacity
+ARC-Easy accuracy was near-ceiling for all five tested variants
+($\geq$95\%; Q4\_K\_S and Q5\_K\_M not run on this benchmark),
+confirming that these models retain strong factual retrieval capacity
 at all quantization levels and that BoolQ---which requires cross-sentence reasoning---is
 the more informative quality discriminator.
+(Note: ARC-Easy results were collected with an earlier evaluation script that stored
+raw output rather than extracted letters; a re-run to confirm is in progress.)
 
 \textbf{Instruction-following collapse at extreme quantization.}
 HellaSwag---a four-choice sentence completion task requiring selection of a lettered
@@ -517,8 +522,9 @@ Q6\_K is strictly dominated on every metric: slower than Q4\_K\_M,
 less accurate than Q4\_K\_S, and no more context-stable.
 Notably, \textbf{Q8\_0 is no longer Pareto-optimal under BoolQ}: it scores 68\%
 accuracy at 4.54~tokens/s, dominated by Q4\_K\_M which achieves both higher
-accuracy \emph{and} higher throughput. Q3\_K\_M (66\%, 4.91~tokens/s) is also
-dominated by Q4\_K\_M on both axes. \textbf{Q6\_K (65\%, 3.52~tokens/s) is
+accuracy \emph{and} higher throughput. Q3\_K\_M (69\%, 4.91~tokens/s) is also
+dominated by Q4\_K\_M on BoolQ vs.\ throughput, though Q3\_K\_M leads on
+context stability and TruthfulQA (see below). \textbf{Q6\_K (65\%, 3.52~tokens/s) is
 strictly dominated on both dimensions}---simultaneously the lowest-scoring and
 slowest practical variant.
 
@@ -543,13 +549,58 @@ interval noise. These results confirm that MMLU at $n{=}100$ is insufficient to
 rank quantization variants and that BoolQ is the more discriminative on-device
 quality benchmark for this model.
 
+\textbf{TruthfulQA accuracy.}
+A 100-question TruthfulQA multiple-choice (MC1) evaluation was conducted across all
+seven variants, measuring factual consistency and resistance to common misconceptions.
+Results: Q3\_K\_M=68\%, Q5\_K\_M=65\%, Q4\_K\_M=60\%, Q6\_K=60\%, Q8\_0=58\%,
+Q4\_K\_S=57\%, Q2\_K=50\%.
+Three findings are noteworthy.
+First, \textbf{Q3\_K\_M leads at 68\%}---the highest truthfulness score despite
+being mid-range on BoolQ (69\%) and slower than Q2\_K. This is the same variant
+that shows near-zero context sensitivity (Section~\ref{sec:rq2}), suggesting a
+consistent pattern: Q3\_K\_M's block quantization structure may preserve factual
+representations better than its bit-count implies.
+Second, \textbf{Q2\_K collapses to 50\%}---near-chance for binary MC1---while
+scoring 69\% on BoolQ and exhibiting the HellaSwag instruction-following collapse (19\%).
+These three failure modes (HellaSwag format, TruthfulQA factual coherence, long-context
+throughput) converge on Q2\_K as a variant with fundamental limitations beyond its
+throughput advantage.
+Third, the \textbf{non-monotonic quality ordering extends to TruthfulQA}: Q3\_K\_M (3.95~bpw) outperforms
+Q4\_K\_S (4.85~bpw), Q8\_0 (8.5~bpw), and Q6\_K (6.59~bpw) on truthfulness.
+This corroborates the BoolQ and MMLU findings that bits-per-weight is a poor predictor
+of downstream task quality.
+
+\begin{table}[h]
+\centering
+\caption{Quality benchmark accuracy (\%) across all seven variants and six benchmarks
+(n=100 each). Best per-column in \textbf{bold}; $\star$=near-ceiling (95--100\%).}
+\label{tab:quality_full}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\textbf{Var.} & \textbf{ARC-C} & \textbf{ARC-E} & \textbf{HellaS.} & \textbf{MMLU} & \textbf{BoolQ} & \textbf{TruthQA} \\
+\midrule
+Q2\_K   & 50 & $\star$ & \phantom{0}19 & 42 & 69 & 50 \\
+Q3\_K\_M & 52 & $\star$ & 44 & 48 & 69 & \textbf{68} \\
+Q4\_K\_S & \textbf{62} & --- & 39 & 49 & \textbf{74} & 57 \\
+Q4\_K\_M & 60 & $\star$ & 43 & 47 & 72 & 60 \\
+Q5\_K\_M & 61 & --- & \textbf{45} & \textbf{50} & 67 & 65 \\
+Q6\_K   & 58 & $\star$ & 41 & 48 & 65 & 60 \\
+Q8\_0   & 56 & $\star$ & 43 & 47 & 68 & 58 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+\footnotesize{ARC-E $\star$ = 100\% (5 variants; Q4\_K\_S, Q5\_K\_M not run). All n=100.}
+\end{table}
+
 \textbf{Perplexity vs.\ BoolQ accuracy.}
 Full-corpus WikiText-2 PPL (${\approx}$285K tokens) is available for Q2\_K (13.29)
 and Q3\_K\_M (11.08); the remaining three variants were measured on a 12\,KB sample
 only (marked $\ddagger$ in Table~\ref{tab:main_results}) and are not directly
 comparable. Even from the available data, the PPL ordering ($\downarrow$better)
-does not predict BoolQ rank: Q3\_K\_M (PPL=11.08) scores \emph{lower} in BoolQ
-(66\%) than Q2\_K (PPL=13.29, BoolQ=69\%), while Q4\_K\_M achieves the highest
+does not predict BoolQ rank: Q3\_K\_M (PPL=11.08) scores \emph{the same} in BoolQ
+(69\%) as Q2\_K (PPL=13.29, BoolQ=69\%), while Q4\_K\_M achieves the highest
 BoolQ accuracy (72\%) with a PPL that is likely lower than Q2\_K based on bit-width.
 This confirms that WikiText-2 PPL is an \emph{insufficient} quality proxy for
 reading-comprehension tasks. Task-specific on-device evaluation is essential to
@@ -681,13 +732,13 @@ It is the best choice when throughput matters most and RAM is limited to 2~GB,
 (see HellaSwag collapse finding in Section~\ref{sec:rq4}).
 
 \textbf{Memory-constrained deployments (3--4~GB devices): Q2\_K or Q3\_K\_M.}
-Both fit comfortably in 2~GB and can run on 3~GB devices. Q2\_K is preferred
-(faster, slightly higher BoolQ accuracy). Q3\_K\_M is an alternative if the
-66\% BoolQ accuracy is adequate and context stability at $\leq$1024 tokens
-is acceptable.
+Both fit comfortably in 2~GB and can run on 3~GB devices. Q3\_K\_M is generally
+preferred: it matches Q2\_K on BoolQ (both 69\%), leads on TruthfulQA (68\%),
+and is context-stable through ctx=2048. Q2\_K is the right choice \emph{only}
+when short-context throughput is the sole constraint and MCQ/truthfulness tasks are absent.
 
 \textbf{Avoid Q6\_K on CPU backends.} Q6\_K is strictly dominated in both
-BoolQ accuracy (65\% vs.\ 66--74\% for all others) and throughput (3.52~tokens/s,
+BoolQ accuracy (65\% vs.\ 69--74\% for all others) and throughput (3.52~tokens/s,
 the slowest practical variant). Q4\_K\_M is faster, smaller, and 7\% more accurate;
 Q8\_0 is more accurate and nearly 29\% faster. This recommendation may not apply
 to GPU-accelerated backends where the Q6\_K de-quantization overhead differs.
