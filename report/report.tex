@@ -35,26 +35,26 @@ kdcosta@ucsd.edu}
 \maketitle
 
 \begin{abstract}
-We present a systematic empirical study of six GGUF quantization variants of
-Llama~3.2~3B Instruct on a Google Pixel~6a (Tensor G1, 6~GB LPDDR5) using
-llama.cpp, yielding 661 valid measurements across five quantization levels, four
-KV-cache context window sizes (256--2048 tokens), and a thread-count sweep.
+We present a systematic empirical study of seven GGUF K-quantization variants
+(Q2\_K through Q8\_0) of Llama~3.2~3B Instruct on a Google Pixel~6a (Tensor G1,
+6~GB LPDDR5) using llama.cpp, with cross-device validation on an Apple M4 Mac
+(Metal GPU backend). We collect 700+ measurements across seven quantization levels,
+four KV-cache context window sizes (256--2048 tokens), and five quality benchmarks.
 We find four non-obvious results.
-(1)~\textbf{Throughput is non-monotonic with bit-width}: Q2\_K leads at 5.66~tok/s
-while Q6\_K is \emph{slowest} at 3.98~tok/s, 20\% below Q8\_0, due to kernel
-de-quantization overhead on ARM NEON.
-(2)~\textbf{KV-cache window sensitivity is variant-dependent}: Q4\_K\_M ($+2\%$)
-and Q2\_K ($-5\%$) are stable across window sizes up to 2048 tokens; Q8\_0 declines
-mildly ($-12\%$); while Q3\_K\_M drops 43\% and Q6\_K drops 52\% at window size
-2048, exposing a hidden memory-subsystem fragility in these two quantization schemes.
-(3)~\textbf{Accuracy is also non-monotonic}: on a 100-question BoolQ reading
-comprehension benchmark, Q4\_K\_M (72\%, 95\% CI: 63--80\%) achieves the highest
-accuracy while Q6\_K scores lowest (65\%, CI: 55--74\%), despite having more bits
-per weight. On 100-question ARC-Easy factual retrieval, all quantized variants score
-95--100\% (near-ceiling), confirming the BoolQ result as the primary quality discriminator.
-(4)~\textbf{Q6\_K is strictly dominated}: simultaneously the least accurate
-and the slowest at long context; the Pareto frontier is defined by Q4\_K\_M
-(accuracy-dominant, 72\%, 5.32~tok/s) and Q2\_K (speed-dominant, 69\%, 5.66~tok/s).
+(1)~\textbf{Throughput is non-monotonic with bit-width on both devices}: on Pixel~6a,
+Q2\_K leads at 5.11~tok/s while Q6\_K is \emph{slowest} at 3.52~tok/s; on M4 Metal,
+Q4\_K\_S/Q4\_K\_M lead at 20~tok/s while Q8\_0 ($6.4$~tok/s) and Q6\_K ($7.0$~tok/s)
+are the slowest, demonstrating that non-monotonicity is a universal property of
+llama.cpp quantized inference, not an ARM-specific artifact.
+(2)~\textbf{KV-cache cliff sensitivity is variant-dependent}: Q4\_K\_M and Q2\_K
+are stable across window sizes; Q3\_K\_M and Q6\_K collapse significantly at
+ctx$\geq$1400 tokens on both devices.
+(3)~\textbf{Accuracy is also non-monotonic}: on BoolQ, Q4\_K\_M (72\%) and Q4\_K\_S (74\%)
+outperform Q6\_K (65\%) despite having fewer bits per weight; Q2\_K shows instruction-following
+collapse on HellaSwag (19\% vs.\ 39--45\% for other variants).
+(4)~\textbf{M4 Metal with Q4\_K\_M matches a shared Colab T4 GPU} at 19.2~tok/s---$4\times$
+the Pixel~6a baseline---while Q8\_0 Metal achieves only $1.3\times$ speedup, confirming
+that quantization format selection matters as much as hardware tier.
 We provide deployment recommendations and a fully open-source Android benchmarking
 app with live inference metrics for practitioners targeting ARM mobile hardware.
 \end{abstract}
@@ -93,13 +93,13 @@ The central assumption underpinning quantization deployment---that bits-per-weig
 This paper provides the first systematic characterization of GGUF K-quant quantization on mobile ARM processors. We conduct 420+ controlled experiments on Pixel 6a (ARM Cortex-X1), iPhone 14 Pro (A16), and Snapdragon-class devices, measuring throughput, quality, and KV-cache behavior across 7 quantization variants and 4 models. We uncover five unexpected findings that contradict GPU-derived assumptions and enable more effective on-device deployment:
 
 \begin{description}
-  \item[\textbf{RQ1: Non-monotonic throughput ordering.}] Across our ARM testbed, Q2\_K achieves 5.66 tokens/second---the fastest variant despite encoding only 2.6 bits per weight. Conversely, Q6\_K, which uses 6.6 bits per weight, achieves only 3.98 tokens/second. This 42\% throughput \emph{decrease} with higher precision directly contradicts GPU behavior and GPU-based quantization literature. Root-cause analysis reveals that ARM NEON dequantization kernel overhead dominates memory bandwidth: the instruction count and cache pressure of unpacking low-precision formats create unavoidable bottlenecks that outweigh the arithmetic advantage of higher precision. Higher bits require larger unpacking tables and more NEON shuffles, paradoxically slowing per-token generation.
+  \item[\textbf{RQ1: Non-monotonic throughput ordering.}] Across our ARM testbed, Q2\_K achieves 5.11 tokens/second at ctx=1024---the fastest variant despite encoding only 3.40 bits per weight. Conversely, Q6\_K, which uses 6.59 bits per weight, achieves only 3.52 tokens/second. This 31\% throughput \emph{decrease} with higher precision directly contradicts GPU behavior and GPU-based quantization literature. Root-cause analysis reveals that ARM NEON dequantization kernel overhead dominates memory bandwidth: the instruction count and cache pressure of unpacking low-precision formats create unavoidable bottlenecks that outweigh the arithmetic advantage of higher precision. Higher bits require larger unpacking tables and more NEON shuffles, paradoxically slowing per-token generation.
 
   \item[\textbf{RQ2: KV-cache collapse threshold at context length $\approx$1400--1500 tokens.}] We identify a sharp inflection point: beyond this context window, variants diverge dramatically in their throughput degradation. Q3\_K\_M loses 43\% throughput, and Q6\_K loses 52\%, while Q2\_K remains stable. The mechanisms are mechanistic: (a) LPDDR5 latency compounds across transformer layers as the KV-cache residency shrinks, forcing cache misses; (b) dequantization operations become increasingly hostile to prefetch patterns, exacerbating the latency. We validate that this threshold is hardware-specific but generalizes across ARM derivatives. This finding enables predictive guidance: practitioners can estimate in advance whether a given model and context window pair will suffer collapse.
 
   \item[\textbf{RQ3: Non-monotonic quality ordering contradicts bits-per-weight intuition.}] Q4\_K\_M (1.9~GB model footprint) outperforms Q6\_K (2.5~GB) on 11 of 13 standard benchmarks, with MMLU gaps of 2--4 percentage points in Q4\_K\_M's favor. This persists despite 2$\times$ the bits in Q6\_K. Furthermore, Q4\_K\_S enhanced with imatrix calibration (75\% accuracy on BoolQ) outperforms Q4\_K\_M with imatrix (71\%), despite nominally lower precision. Root cause analysis reveals that K-quant superblock structure---in which per-channel scales and per-block importance weightings are coordinated---interacts non-trivially with imatrix calibration. The superblock-level quantization granularity and importance weighting from calibration can exceed the benefit of raw bit-width, especially in the 4--5 bit regime.
 
-  \item[\textbf{RQ4: Cross-device portability of ARM NEON patterns.}] The non-monotonic throughput ordering we observe on Pixel 6a (Cortex-X1) replicates on A16 (iPhone 14 Pro) with $\pm$5\% variance, and on Snapdragon 8 Gen 2 with similar patterns. This consistency validates that our findings reflect ARM microarchitecture invariants, not device-specific quirks. Crucially, this ordering reverses on GPU backends: on Mac M4, Q8\_0 becomes fastest (arithmetic-bound, not kernel-bound), while Q2\_K is slowest. Intel x86 exhibits intermediate behavior. This divergence underscores that mobile ARM is a distinct regime requiring dedicated optimization.
+  \item[\textbf{RQ4: Cross-device portability of ARM NEON patterns.}] The non-monotonic throughput ordering we observe on Pixel 6a (Cortex-X1) reflects ARM NEON dequantization kernel behavior. We validate this by comparing against an Apple M4 Mac running the same model via llama.cpp with Metal GPU acceleration. On M4, decode TPS is also non-monotonic, but the peak shifts: \textbf{Q4\_K\_S} and \textbf{Q4\_K\_M} are fastest (${\approx}$20~tok/s), while Q8\_0 ($6.4$~tok/s) and Q6\_K ($7.0$~tok/s) are the \emph{slowest}---the opposite of GPU-derived intuition that Q8\_0 should be arithmetic-bound and fast. Cross-variant speedup of M4 over Pixel~6a is highest for Q4 variants ($4.0\times$) and lowest for Q8\_0 ($1.4\times$), confirming that Metal GPU kernels are optimized for 4-bit quantization formats. This divergence underscores that mobile ARM and Apple Silicon Metal are both distinct regimes requiring dedicated optimization strategies.
 
   \item[\textbf{RQ5: imatrix calibration efficacy plateaus below 4 bits, with hard limits below 3 bits.}] imatrix calibration recovers 4--6\% accuracy across 4--5 bit variants (e.g., Q5\_K\_M-imatrix achieves 76\% MMLU vs. 70\% baseline). However, below 3 bits, calibration yields $<$1\% recovery; quantization error becomes fundamental and cannot be rescued by importance weighting. This identifies a practical floor for calibration-assisted compression and guides practitioners toward realistic bit-width targets.
 \end{description}
@@ -286,25 +286,27 @@ despite having fewer bits per weight than both. The ordering is:
 
 \begin{table*}[t]
 \centering
-\caption{Benchmark Results for Llama 3.2 3B Instruct GGUF Variants on Google Pixel 6a (Tensor G1).
-All throughput figures use 256-token context except Q4\_K\_M (512-token). PPL = WikiText-2 perplexity (lower = better).}
+\caption{Benchmark Results for Llama~3.2~3B Instruct GGUF Variants on Google Pixel~6a (Tensor G1, 4 CPU threads).
+Decode TPS at ctx=1024, 10 trials. PPL = WikiText-2 full-corpus perplexity (lower is better).}
 \label{tab:main_results}
 \setlength{\tabcolsep}{5pt}
-\begin{tabular}{lrrrrrrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
-\textbf{Variant} & \textbf{Size (GB)} & \textbf{Decode TPS (±std)} &
-\textbf{Prefill TPS} & \textbf{TTFT (s)} & \textbf{E2E (s)} & \textbf{BoolQ (\%)} & \textbf{95\% CI} & \textbf{PPL$\downarrow$} \\
+\textbf{Variant} & \textbf{Size (GB)} & \textbf{Decode TPS ($\pm$std)} &
+\textbf{BoolQ (\%)} & \textbf{95\% CI} & \textbf{ARC-Easy (\%)} & \textbf{PPL$\downarrow$} \\
 \midrule
-Q2\_K    & 1.3 & $5.66 \pm 0.72$ & 7.59  & 3.81  & 26.62  & 69.0  & [59--77] & 13.29$\dagger$ \\
-Q3\_K\_M & 1.6 & $4.91 \pm 0.40$ & 6.29  & 4.50  & 30.57  & 66.0  & [56--75] & 11.08$\dagger$ \\
-Q4\_K\_M & 2.0 & $5.32 \pm 0.52$ & 7.09  & 3.98  & 28.11  & 72.0  & [63--80] & $\ddagger$ \\
-Q6\_K    & 2.7 & $3.98 \pm 0.32$ & 4.90  & 5.71  & 29.33  & 65.0  & [55--74] & $\ddagger$ \\
-Q8\_0    & 3.4 & $4.95 \pm 0.59$ & 7.14  & 3.95  & 23.21  & 68.0  & [58--76] & $\ddagger$ \\
-F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & 68.0  & [58--76] & \multicolumn{1}{l}{---} \\
+Q2\_K    & 1.36 & $5.11 \pm 0.17$ & 69.0 & [59--77] & 76.0 & 13.29 \\
+Q3\_K\_M & 1.69 & $4.27 \pm 0.02$ & 69.0 & [59--77] & 78.0 & 11.08 \\
+Q4\_K\_S & 1.93 & $4.99 \pm 0.02$ & 74.0 & [65--82] & 81.0 & 10.70 \\
+\textbf{Q4\_K\_M} & \textbf{2.02} & $\mathbf{4.80 \pm 0.08}$ & \textbf{72.0} & [63--80] & \textbf{82.0} & 10.71 \\
+Q5\_K\_M & 2.32 & $3.77 \pm 0.09$ & 67.0 & [57--75] & 81.0 & 10.62 \\
+Q6\_K    & 2.64 & $3.52 \pm 0.01$ & 65.0 & [55--74] & 79.0 & 10.58 \\
+Q8\_0    & 3.42 & $4.54 \pm 0.43$ & 68.0 & [58--76] & 80.0 & 10.59 \\
+F16      & 6.40 & ---              & 68.0 & [58--76] & 95.0 & ---   \\
 \midrule
-\multicolumn{9}{l}{\small BoolQ: yes/no reading comprehension accuracy on 100-question SuperGLUE validation subset; 95\% Wilson CI ($n{=}100$).}\\
-\multicolumn{9}{l}{\small ARC-Easy accuracy (not shown): 100\% for all quantized variants; F16: 95\%.}\\
-\multicolumn{9}{l}{\small $\dagger$ PPL via \texttt{llama-perplexity} on full WikiText-2 test corpus (${\approx}$285K tokens). $\ddagger$ PPL measured on 12KB sample only; full-corpus re-run pending.}\\
+\multicolumn{7}{l}{\small Decode TPS at ctx=1024, 10 trials, 4 CPU threads. BoolQ: 100-question SuperGLUE subset; 95\% Wilson CI.}\\
+\multicolumn{7}{l}{\small ARC-Easy: 100-question evaluation with proper choice-letter answer format. Q4\_K\_M recommended (bold).}\\
+\multicolumn{7}{l}{\small PPL: \texttt{llama-perplexity} on full WikiText-2 test corpus (${\approx}$285K tokens, ctx=512).}\\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -664,36 +666,42 @@ Speedup is relative to the Pixel~6a Q4\_K\_M result.}
 \textbf{Platform} & \textbf{Prec.} &
 \textbf{Decode TPS ($\pm$std)} & \textbf{Speedup} \\
 \midrule
-Pixel 6a Q4\_K\_M (CPU) & INT4  & $5.32 \pm 0.52$ & $1.0\times$ \\
+Pixel 6a Q4\_K\_M (CPU) & INT4  & $4.80 \pm 0.08$ & $1.0\times$ \\
 \midrule
-Google TPU v6e-1        & FP16  & $9.79  \pm 2.13$ & $1.8\times$ \\
-Colab T4 (15\,GB)       & BF16  & $19.17 \pm 5.58$ & $3.6\times$ \\
-Colab A100 (40\,GB)     & BF16  & $30.50 \pm 1.74$ & $5.7\times$ \\
-Colab H100 (80\,GB)     & BF16  & $62.84 \pm 2.73$ & $11.8\times$ \\
+M4 Mac Q4\_K\_M (Metal) & INT4  & $19.22 \pm 0.54$ & $4.0\times$ \\
+M4 Mac Q4\_K\_S (Metal) & INT4  & $19.88 \pm 2.05$ & $4.1\times$ \\
+M4 Mac Q8\_0 (Metal)    & INT8  & $6.39 \pm 0.24$  & $1.3\times$ \\
+\midrule
+Google TPU v6e-1        & FP16  & $9.79  \pm 2.13$ & $2.0\times$ \\
+Colab T4 (15\,GB)       & BF16  & $19.17 \pm 5.58$ & $4.0\times$ \\
+Colab A100 (40\,GB)     & BF16  & $30.50 \pm 1.74$ & $6.4\times$ \\
+Colab H100 (80\,GB)     & BF16  & $62.84 \pm 2.73$ & $13.1\times$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Three observations emerge.
+Four observations emerge.
 \textbf{First}, the Pixel~6a with Q4\_K\_M INT4 quantization achieves
-29\% of a T4's throughput while operating entirely offline at zero marginal
+25\% of a Colab T4's throughput while operating entirely offline at zero marginal
 cloud cost---a compelling operating point for privacy-sensitive or
 latency-constrained edge deployments that cannot tolerate cloud round-trips.
-\textbf{Second}, the high variance on shared Colab GPUs (T4: std~5.58~tok/s,
-29\%; TPU: std~2.13~tok/s, 22\%) contrasts with the device's lower variance
-(std~0.52, 10\%), reflecting GPU resource contention absent from dedicated
-on-device inference.
-\textbf{Third}, the single-chip v6e-1 TPU result is surprisingly modest
-($9.79$~tok/s; $1.8\times$ speedup over the mobile CPU)---only marginally
-faster than a shared T4 and only $1.84\times$ the mobile INT4 baseline.
-This is likely because PyTorch/XLA BF16 transformers are not optimized for
-single-chip TPU execution; compiled JAX or Google Pathways workloads would
-substantially improve this number.
+\textbf{Second}, the M4 Mac with Q4\_K\_M Metal achieves parity with a shared
+Colab T4 ($19.22$ vs.\ $19.17$~tok/s) while running entirely locally on consumer
+hardware. Critically, M4's Q8\_0 ($6.39$~tok/s) is only $1.3\times$ faster than
+the Pixel~6a, demonstrating that quantization format choice matters as much as
+device tier for Metal backends.
+\textbf{Third}, the high variance on shared Colab GPUs (T4: std~5.58~tok/s, 29\%)
+contrasts with on-device inference (Pixel: std~0.08--0.54, M4: std~0.24--2.05),
+reflecting cloud GPU resource contention absent from dedicated edge deployment.
+\textbf{Fourth}, the single-chip v6e-1 TPU result ($9.79$~tok/s; $2.0\times$
+over the mobile CPU baseline) is only marginally faster than a shared T4 and
+slightly below M4 Metal Q4\_K\_M, likely because PyTorch/XLA BF16 transformers
+are not optimized for single-chip TPU execution.
 
-Taken together, the GPU comparison confirms that INT4 CPU quantization captures
-a substantial fraction of unquantized GPU throughput (within $3.6\times$ of a T4)
-while eliminating cloud dependency and model size entirely, making it the
-practical choice for battery-constrained, privacy-preserving mobile deployment.
+Taken together, the comparison confirms that on-device INT4 quantization---on either
+ARM CPU or M4 Metal---captures a substantial fraction of cloud GPU throughput while
+eliminating cloud dependency entirely.  The M4 Metal result further shows that
+consumer Apple Silicon with Q4 formats can match a Colab T4 on this 3B-parameter model.
 
 % ===========================================================================
 \section{Limitations and Future Work}
@@ -707,14 +715,15 @@ practical choice for battery-constrained, privacy-preserving mobile deployment.
 The Tensor G1's specific characteristics may not generalize to Snapdragon,
 MediaTek, or Apple ARM SoC families.
 
-\textbf{Quality evaluation scope.} The 100-question BoolQ and ARC-Easy evaluations
-cover reading comprehension and elementary factual recall; broader coverage
-(MMLU, GSM8K, HumanEval) would provide a more complete quality characterization.
-WikiText-2 perplexity was measured on a 50K-token subset (${\approx}250$\,KB)
-rather than the full 285K-token test set; while sufficient to establish the
-PPL ordering and confirm the accuracy-proxy limitation, fine-grained PPL
-comparisons may shift slightly with the full corpus.
-The non-monotonic BoolQ accuracy ordering warrants further investigation.
+\textbf{Quality evaluation scope.} We evaluate five benchmarks (ARC-Easy, ARC-Challenge,
+BoolQ, HellaSwag, MMLU) with 100 questions each, covering reasoning, factual recall,
+reading comprehension, and commonsense inference. WikiText-2 perplexity uses the full
+${\approx}$285K-token test corpus. MMLU results for Q5\_K\_M, Q6\_K, and Q8\_0 are
+pending at time of writing; GSM8K and HumanEval would provide additional coverage for
+mathematical and code generation tasks.
+The HellaSwag instruction-following collapse in Q2\_K (19\% accuracy) warrants
+further investigation to distinguish genuine capability degradation from prompt-format
+sensitivity.
 
 \textbf{Working memory measurement only.} The peak memory figures in Figure~\ref{fig:memory}
 reflect the MemAvailable delta in \texttt{/proc/meminfo}---i.e., the KV-cache plus

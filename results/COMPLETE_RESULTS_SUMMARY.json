@@ -1,0 +1,49 @@
+{
+  "project": "GGUF Quantization Benchmarking (2-Device Scope)",
+  "date_completed": "2026-03-19",
+  "scope": {
+    "devices": ["M4 Mac", "Pixel 6a"],
+    "quantization_variants": ["Q2_K", "Q3_K_M", "Q4_K_S", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0"],
+    "benchmarks": ["TPS (M4)", "WikiText-2 PPL (Pixel 6a)", "Quality Metrics (M4)"]
+  },
+  "m4_mac_gpu_benchmarks": {
+    "status": "✅ COMPLETE",
+    "total_runs": 420,
+    "variants": 7,
+    "contexts": [256, 512, 1024, 2048],
+    "trials_per_config": 15,
+    "data_validity": "VALID - TPS values in 30-50 t/s range",
+    "results_dir": "results/m4_mac_metal_20260317_035633/",
+    "figures": ["fig1_prefill_tps_vs_context.png", "fig2_decode_tps_vs_context.png", "fig3_ttft_vs_context.png", "fig8_latency_distribution.png"]
+  },
+  "pixel_6a_wikitext2_ppl": {
+    "status": "✅ COMPLETE",
+    "corpus": "Full WikiText-2 (285K tokens)",
+    "variants_measured": 7,
+    "results": {
+      "Q2_K": "13.29 +/- 0.10",
+      "Q3_K_M": "11.08 +/- 0.08",
+      "Q4_K_S": "10.70 +/- 0.08",
+      "Q4_K_M": "10.71 +/- 0.08",
+      "Q5_K_M": "10.62 +/- 0.08",
+      "Q6_K": "10.58 +/- 0.08",
+      "Q8_0": "10.59 +/- 0.08"
+    },
+    "results_dir": "results/pixel_6a_ppl_final/"
+  },
+  "m4_quality_metrics": {
+    "status": "🟡 90% COMPLETE",
+    "datasets": {
+      "BoolQ": "✅ Q2_K, Q4_K_M, Q6_K, Q8_0",
+      "ARC-Easy": "✅ Q2_K, Q4_K_M, Q6_K, Q8_0",
+      "ARC-Challenge": "✅ Q2_K, Q4_K_M, Q6_K, Q8_0",
+      "HellaSwag": "✅ Q2_K, Q4_K_M, Q6_K, Q8_0",
+      "MMLU": "⏳ Q2_K DONE, Q4_K_M/Q6_K/Q8_0 in progress (72+ hrs total)"
+    },
+    "results_file": "results/quality_metrics_m4.json"
+  },
+  "known_issues": {
+    "m4_cpu_tps": "Corrupted (19069.67 for all) - CPU runs didn't produce inference output",
+    "missing_variants_quality": "Q3_K_M, Q4_K_S, Q5_K_M quality evals not run (deferrable for follow-up)"
+  }
+}

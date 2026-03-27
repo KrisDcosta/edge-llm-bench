@@ -1,8 +1,17 @@
-# GGUF Quantization on Mobile ARM: KV-Cache Collapse & Non-Monotonic Orderings
-### DSC 291 — Efficient AI | Llama 3.2 3B × llama.cpp × Pixel 6a
+# GGUF K-Quant Benchmarking for Mobile LLM Deployment
 
-> **Comprehensive benchmarking study**: 7 GGUF K-quant variants (Q2_K–Q8_0) + imatrix calibration
-> on Google Pixel 6a (Tensor G1 ARM64), with cross-device validation (iPhone 14 Pro, Mac M4, x86).
+Empirical study of GGUF K-quantization behavior on mobile CPUs, with focus on the
+**KV-cache cliff phenomenon**: non-monotonic, context-dependent throughput collapse that
+makes certain K-quant variants (Q3_K_M, Q6_K) unsuitable for long-context interactive
+workloads despite appearing competitive at short contexts.
+
+**Models:** Llama 3.2 3B Instruct, Qwen 2.5 1.5B
+**Primary device:** Google Pixel 6a (Google Tensor G1, ARM CPU, 6 GB LPDDR5)
+**Secondary device:** Apple M4 Mac (Metal GPU backend + CPU mode)
+
+See [PAPER_ROADMAP.md](PAPER_ROADMAP.md) for the full conference paper plan.
+
+---
 >
 > **Key findings:** Non-monotonic throughput (Q2_K fastest ≠ Q8_0 best), KV-cache collapse threshold
 > (~ctx 1400–1500), non-monotonic quality (superblock structure > bits), imatrix 4–6% recovery.
