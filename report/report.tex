@@ -646,12 +646,15 @@ performance cores.
 
 \textbf{Deployment feasibility by variant.}
 Q2\_K (1.3~GB) and Q3\_K\_M (1.6~GB) are the most RAM-friendly and would
-run on devices with as little as 3~GB total RAM. Q2\_K is speed-dominant
-(5.11~tokens/s, 69\% BoolQ); Q3\_K\_M offers similar throughput (4.91~tokens/s)
-at slightly lower accuracy (66\%), making Q2\_K the better overall choice
-at this memory tier. Note that Q2\_K exhibits instruction-following collapse on
-HellaSwag-style MCQ tasks (Section~\ref{sec:rq4}); practitioners with structured-output
-requirements should prefer Q3\_K\_M or higher at this memory tier.
+run on devices with as little as 3~GB total RAM.
+Q2\_K is the pure throughput choice (5.11~tokens/s), but exhibits
+instruction-following collapse on MCQ tasks (19\% HellaSwag),
+collapses to near-chance on TruthfulQA (50\%), and degrades $-40\%$
+at long context (cliff at ctx=768).
+Q3\_K\_M (4.91~tokens/s, 69\% BoolQ, 68\% TruthfulQA) matches Q2\_K on
+BoolQ, leads on factual consistency, and is context-stable ($<\pm5\%$).
+\textbf{Q3\_K\_M is the recommended choice at the 3~GB memory tier}
+for any workload beyond short-context throughput-only use cases.
 Q4\_K\_S (1.56~GB) and Q4\_K\_M (2.0~GB) comfortably fit any device $\geq$ 4~GB.
 Q4\_K\_S achieves the highest BoolQ accuracy (74\%) among all variants; Q4\_K\_M
 (72\%, 4.80~tokens/s) offers the most context-stable performance profile.
@@ -812,6 +815,70 @@ Taken together, the GPU comparison confirms that INT4 CPU quantization captures
 a substantial fraction of unquantized GPU throughput (within $3.6\times$ of a T4)
 while eliminating cloud dependency and model size entirely, making it the
 practical choice for battery-constrained, privacy-preserving mobile deployment.
+
+\subsection{Cross-Device Validation: Mac M4 Metal}
+\label{sec:crossdevice}
+
+To test whether the ARM NEON non-monotonic ordering is device-specific or
+reflects a broader quantization-hardware interaction, we measured decode
+throughput for all 7 variants on a Mac M4 (Metal GPU backend, 16-core GPU,
+\texttt{llama-bench} with \texttt{-ngl 99}, 10 trials, 128 output tokens at
+ctx=256). Results are summarized in Table~\ref{tab:crossdevice}.
+
+\begin{table}[h]
+\centering
+\caption{Decode throughput (tok/s) on Pixel~6a ARM CPU vs.\ Mac M4 Metal GPU.
+ARM: CPU-only, 4 threads, ctx=256. M4: Metal GPU, \texttt{ngl=99}, ctx=256.
+Rank shows ordering position (1 = fastest). The 4-bit variants reverse
+from mid-pack on ARM to dominant on Metal; Q8\_0 reverses from mid-pack
+to slowest.}
+\label{tab:crossdevice}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Variant} & \textbf{bpw} &
+\multicolumn{2}{c}{\textbf{Pixel 6a (ARM)}} &
+\multicolumn{2}{c}{\textbf{Mac M4 (Metal)}} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+ & & tok/s & Rank & tok/s & Rank \\
+\midrule
+Q2\_K   & 3.40 & 5.11 & 1 & 17.79 & 3 \\
+Q3\_K\_M & 4.20 & 4.91 & 2 & 15.60 & 4 \\
+Q4\_K\_S & 4.85 & 4.80 & 4 & \textbf{19.88} & \textbf{1} \\
+Q4\_K\_M & 5.09 & 4.80 & 4 & 19.22 & 2 \\
+Q5\_K\_M & 5.57 & 3.75 & 6 & 13.35 & 5 \\
+Q6\_K   & 6.59 & 3.52 & 7 & 7.02  & 6 \\
+Q8\_0   & 8.50 & 4.54 & 5 & 6.39  & \textbf{7} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three reversals are notable.
+\textbf{First}, Q4\_K\_S and Q4\_K\_M, which are mid-pack on ARM (rank 4),
+leap to \emph{first and second} on Metal (19.9 and 19.2~tok/s).
+Metal has highly tuned 4-bit dequantization kernels; the K-quant 4-bit
+block format maps efficiently to GPU SIMD lanes.
+\textbf{Second}, Q8\_0, which is mid-pack on ARM (rank 5, 4.54~tok/s),
+is the \emph{slowest} variant on Metal (6.39~tok/s, rank 7).
+The 8-bit format saturates GPU memory bandwidth without GPU-side
+kernel advantages, making it the worst operating point on Metal
+despite being a simple unstructured format.
+\textbf{Third}, Q2\_K drops from the ARM champion (rank 1, 5.11~tok/s)
+to third on Metal (17.79~tok/s)---still fast in absolute terms but
+no longer dominant.
+
+The throughput ratio between ARM and Metal (Q4\_K\_M: $19.22 / 4.80 = 4.0\times$)
+is consistent with the GPU reference baseline gap reported in
+Table~\ref{tab:gpu_baseline}, confirming that the Metal backend is
+quantitatively comparable to a shared T4 GPU for this model.
+
+These reversals confirm that the non-monotonic ARM ordering is
+\emph{architecture-specific}: it is driven by ARM NEON dequantization
+kernel overhead, which is absent on GPU backends with dedicated 4-bit
+dispatch paths. Practitioners deploying on Metal (iOS, macOS) should
+target Q4\_K\_S or Q4\_K\_M for maximum throughput; on ARM mobile,
+Q2\_K leads for short-context throughput, but Q3\_K\_M is superior
+for context stability, factual accuracy, and MCQ tasks.
 
 % ===========================================================================
 \section{Limitations and Future Work}
