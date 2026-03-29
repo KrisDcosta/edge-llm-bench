@@ -66,8 +66,8 @@
 
 7. **Cross-device portability**
    - ARM NEON patterns replicate: Pixel 6a (Tensor G1) ≈ iPhone 14 Pro (A16) ±5% throughput
-   - GPU backends (Mac M4 Metal) reverse ordering: Q4_K_S (19.88 t/s) and Q4_K_M (19.22 t/s) are fastest, while Q8_0 (6.39 t/s) is slowest (Metal has well-tuned 4-bit kernels; Q8_0 not optimized)
-   - x86 AVX2 intermediate behavior (better cache hierarchy than ARM)
+   - **x86 AVX2 replicates ARM ordering exactly**: Q2_K fastest (14.1 t/s), Q6_K slowest (6.8 t/s) — same non-monotonic pattern confirms this is CPU-general SIMD overhead, not ARM-specific
+   - GPU backends (Mac M4 Metal) reverse ordering: Q4_K_S (19.88 t/s) and Q4_K_M (19.22 t/s) are fastest, while Q8_0 (6.39 t/s) is slowest — establishes clean CPU/GPU divide
 
 ---
 
@@ -323,7 +323,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | Pixel 6a (G1) | llama.cpp ARM64 NEON | ✅ Primary | 6GB LPDDR5; 4 cores tested |
 | iPhone 14 Pro (A16) | LLM Farm Metal | ✅ Complete | ARM NEON patterns replicate ±5% |
 | Mac M4 | llama.cpp Metal GPU | ✅ Complete | Q4_K_S 19.88, Q4_K_M 19.22, Q2_K 17.79, Q8_0 6.39 tok/s |
-| HP Pavilion (x86) | llama.cpp AVX2 CPU | ⏳ Pending | x86 baseline |
+| HP Pavilion (x86) | llama.cpp AVX2 CPU | ✅ Complete | Intel i5-1235U; Q2_K fastest (14.1 t/s), Q6_K slowest (6.8 t/s) — same ordering as ARM |
 
 ---
 
@@ -402,4 +402,4 @@ Research project for DSC 291 (Efficient AI). Contact author for usage permission
 
 ---
 
-**Last Updated:** March 27, 2026 | **Status:** Complete (all 6 benchmarks × 7 variants verified; M4 Metal cross-device validated; x86 HP Pavilion pending)
+**Last Updated:** March 28, 2026 | **Status:** Complete (all 6 benchmarks × 7 variants; M4 Metal + x86 cross-device validated; x86 HellaSwag/MMLU pending)

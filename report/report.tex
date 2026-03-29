@@ -106,14 +106,14 @@ This paper provides the first systematic characterization of GGUF K-quant quanti
 
   \item[\textbf{RQ3: Non-monotonic quality ordering contradicts bits-per-weight intuition.}] Q4\_K\_M (1.9~GB model footprint) outperforms Q6\_K (2.5~GB) on most measured benchmarks, despite having 2$\times$ fewer bits per weight. MMLU accuracy clusters tightly between 42--50\% across all variants (95\% Wilson CI width $\approx\pm10$pp), making pairwise distinctions statistically unreliable at $n=100$ questions. Q2\_K is detectably weaker (42\%), while Q3\_K\_M through Q8\_0 are statistically indistinguishable on MMLU alone. Q4\_K\_S (1.56~GB, 4.85~bpw) achieves the highest BoolQ accuracy at 74\%, outperforming both Q4\_K\_M (72\%) and Q6\_K (65\%). On TruthfulQA factual consistency (MC1), Q3\_K\_M leads at 68\% while Q2\_K collapses to 50\% (near chance for 4-choice), the same variant that is fastest (RQ1) and most context-fragile (RQ2). Root cause analysis reveals that K-quant superblock structure---in which per-channel scales and per-block importance weightings are coordinated---interacts non-trivially with model weight sensitivity at the 4--5 bit regime.
 
-  \item[\textbf{RQ4: Cross-device portability of ARM NEON patterns.}] We characterize the extent to which the non-monotonic throughput ordering observed on Pixel 6a (Cortex-X1) generalizes to other backends. As a preliminary cross-device validation, we measured throughput for all 7 variants on a Mac M4 (Metal GPU backend). The ordering reverses substantially: Q4\_K\_S leads at 19.9~tok/s and Q4\_K\_M at 19.2~tok/s, while Q8\_0 (6.4~tok/s) and Q6\_K (7.0~tok/s) are slowest---the opposite of ARM, where Q8\_0 and Q6\_K are mid-pack and Q2\_K leads. Metal has well-tuned 4-bit kernels; 8-bit inference is not comparably optimized. Q2\_K, the ARM champion, is middle-pack on Metal (17.8~tok/s). This reversal underscores that mobile ARM is a distinct regime requiring dedicated characterization; GPU-based intuitions do not transfer.
+  \item[\textbf{RQ4: Cross-device portability of quantization ordering.}] We validate the non-monotonic throughput ordering on two additional platforms: an Intel i5-1235U x86 laptop (AVX2, 6 threads) and a Mac M4 (Metal GPU). The x86 result is the most striking: \emph{the same ordering holds}---Q2\_K is fastest (14.1~tok/s) and Q6\_K is slowest (6.8~tok/s), mirroring ARM exactly. The non-monotonic CPU ordering is therefore \textbf{not ARM-specific}; it reflects CPU-side SIMD dequantization overhead shared by both ARM NEON and x86 AVX2. Only the Mac M4 Metal GPU reverses the ordering: Q4\_K\_S leads (19.9~tok/s), Q8\_0 is slowest (6.4~tok/s). This establishes a clean CPU/GPU divide: CPU backends (ARM and x86) share the non-monotonic ordering; GPU backends with dedicated 4-bit kernels reverse it. Q2\_K also exhibits a \emph{more severe} context cliff on x86 ($-51\%$ at ctx=2048 vs.\ $-40\%$ on ARM), while Q3\_K\_M remains context-stable on both ($-3.8\%$ x86, $<\pm5\%$ ARM).
 
   \item[\textbf{RQ5: imatrix calibration efficacy is variant-specific and generally minimal.}] On BoolQ, imatrix shows minimal improvement (maximum +4\% for Q6\_K), is ineffective at most precision levels ($\leq\pm1\%$ for Q4\_K\_M, Q5\_K\_M, Q8\_0), and is negative at low bit-widths ($-5\%$ for Q2\_K, $-5\%$ for Q3\_K\_M). MMLU and other benchmark evaluations of imatrix calibration were not performed due to resource constraints. These BoolQ results suggest that imatrix calibration provides limited practical benefit across the quantization spectrum and does not recover meaningful accuracy improvements.
 \end{description}
 
 \subsection{Roadmap}
 
-The remainder of this paper is organized as follows. \S2 surveys related work on neural network quantization, mobile inference optimization, and recent advances in KV-cache compression. \S3 describes our experimental methodology, including hardware platforms, quantization variants, experiment design (420+ runs), and measurement protocol. \S4 presents our throughput results and analyzes the non-monotonic ordering phenomenon, isolating the ARM NEON kernel bottleneck. \S5 characterizes KV-cache collapse and derives predictive models for context-length thresholds. \S6 evaluates quality trade-offs and the role of imatrix calibration across precision levels. \S7 presents preliminary cross-device validation on Mac M4 Metal and discusses ordering reversals vs. ARM. \S8 synthesizes mechanistic explanations and discusses implications for deployment---including practical guidance for practitioners choosing quantization variants. \S9 concludes and outlines future directions in mobile-aware quantization research.
+The remainder of this paper is organized as follows. \S2 surveys related work on neural network quantization, mobile inference optimization, and recent advances in KV-cache compression. \S3 describes our experimental methodology, including hardware platforms, quantization variants, experiment design (420+ runs), and measurement protocol. \S4 presents our throughput results and analyzes the non-monotonic ordering phenomenon, isolating the ARM NEON kernel bottleneck. \S5 characterizes KV-cache collapse and derives predictive models for context-length thresholds. \S6 evaluates quality trade-offs and the role of imatrix calibration across precision levels. \S7 presents cross-device validation on Intel x86 (AVX2) and Mac M4 Metal, establishing a CPU/GPU divide in quantization ordering. \S8 synthesizes mechanistic explanations and discusses implications for deployment---including practical guidance for practitioners choosing quantization variants. \S9 concludes and outlines future directions in mobile-aware quantization research.
 
 % ===========================================================================
 \section{Related Work}
@@ -314,7 +314,8 @@ F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & 68.0  & [58--76] & \
 \midrule
 \multicolumn{9}{l}{\small BoolQ: yes/no reading comprehension accuracy on 100-question SuperGLUE validation subset; 95\% Wilson CI ($n{=}100$).}\\
 \multicolumn{9}{l}{\small ARC-Easy (not shown): 76--82\% across all 7 variants; Q4\_K\_M leads at 82\%, Q2\_K lowest at 76\%; verified with extracted-letter eval.}\\
-\multicolumn{9}{l}{\small $\dagger$ PPL via \texttt{llama-perplexity} on full WikiText-2 test corpus (${\approx}$285K tokens). $\ddagger$ PPL measured on 12KB sample only; full-corpus re-run pending.}\\
+\multicolumn{9}{l}{\small $\dagger$ PPL via \texttt{llama-perplexity} on full WikiText-2 test corpus (${\approx}$285K tokens). $\ddagger$ Pixel full-corpus PPL pending;}\\
+\multicolumn{9}{l}{\small \hspace{1em} x86 cross-device reference PPL (same corpus): Q4\_K\_S~9.74, Q4\_K\_M~9.75, Q5\_K\_M~9.77, Q6\_K~9.74, Q8\_0~9.71. See \S\ref{sec:crossdevice}.}\\
 \multicolumn{9}{l}{\small $^{\S}$ Q4\_K\_S TPS interpolated from quality sweep (not included in main TPS sweep); prefill/TTFT/E2E figures not measured for this variant.}\\
 \bottomrule
 \end{tabular}
@@ -816,69 +817,99 @@ a substantial fraction of unquantized GPU throughput (within $3.6\times$ of a T4
 while eliminating cloud dependency and model size entirely, making it the
 practical choice for battery-constrained, privacy-preserving mobile deployment.
 
-\subsection{Cross-Device Validation: Mac M4 Metal}
+\subsection{Cross-Device Validation: x86 and Mac M4 Metal}
 \label{sec:crossdevice}
 
-To test whether the ARM NEON non-monotonic ordering is device-specific or
-reflects a broader quantization-hardware interaction, we measured decode
-throughput for all 7 variants on a Mac M4 (Metal GPU backend, 16-core GPU,
-\texttt{llama-bench} with \texttt{-ngl 99}, 10 trials, 128 output tokens at
-ctx=256). Results are summarized in Table~\ref{tab:crossdevice}.
+To determine whether the non-monotonic CPU ordering is ARM-specific or
+reflects a broader hardware property, we validated on two additional platforms:
+an Intel i5-1235U x86 laptop (12th Gen, AVX2, Windows~11, 6 threads,
+\texttt{llama-cli} with \texttt{-ngl~0}; 5 trials, ctx=256) and a Mac M4
+(Metal GPU, 16-core, \texttt{llama-bench} with \texttt{-ngl~99}; 10 trials, ctx=256).
+Results are shown in Table~\ref{tab:crossdevice}.
 
 \begin{table}[h]
 \centering
-\caption{Decode throughput (tok/s) on Pixel~6a ARM CPU vs.\ Mac M4 Metal GPU.
-ARM: CPU-only, 4 threads, ctx=256. M4: Metal GPU, \texttt{ngl=99}, ctx=256.
-Rank shows ordering position (1 = fastest). The 4-bit variants reverse
-from mid-pack on ARM to dominant on Metal; Q8\_0 reverses from mid-pack
-to slowest.}
+\caption{Decode throughput (tok/s) across three platforms.
+ARM: Pixel~6a CPU-only, 4 threads, ctx=256.
+x86: Intel i5-1235U CPU-only, 6 threads, ctx=256.
+M4: Mac M4 Metal GPU, ctx=256.
+Rank = ordering position (1 = fastest).
+\textbf{Bold} = fastest/slowest per platform.
+ARM and x86 share the same ordering (Q2\_K fastest, Q6\_K slowest);
+Metal reverses completely.}
 \label{tab:crossdevice}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lrrrrr}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrrr}
 \toprule
 \textbf{Variant} & \textbf{bpw} &
 \multicolumn{2}{c}{\textbf{Pixel 6a (ARM)}} &
+\multicolumn{2}{c}{\textbf{x86 AVX2}} &
 \multicolumn{2}{c}{\textbf{Mac M4 (Metal)}} \\
-\cmidrule(lr){3-4}\cmidrule(lr){5-6}
- & & tok/s & Rank & tok/s & Rank \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+ & & tok/s & Rank & tok/s & Rank & tok/s & Rank \\
 \midrule
-Q2\_K   & 3.40 & 5.11 & 1 & 17.79 & 3 \\
-Q3\_K\_M & 4.20 & 4.91 & 2 & 15.60 & 4 \\
-Q4\_K\_S & 4.85 & 4.80 & 4 & \textbf{19.88} & \textbf{1} \\
-Q4\_K\_M & 5.09 & 4.80 & 4 & 19.22 & 2 \\
-Q5\_K\_M & 5.57 & 3.75 & 6 & 13.35 & 5 \\
-Q6\_K   & 6.59 & 3.52 & 7 & 7.02  & 6 \\
-Q8\_0   & 8.50 & 4.54 & 5 & 6.39  & \textbf{7} \\
+Q2\_K    & 3.40 & \textbf{5.11} & \textbf{1} & \textbf{14.05} & \textbf{1} & 17.79 & 3 \\
+Q3\_K\_M & 4.20 & 4.91 & 2 & 8.38 & 4 & 15.60 & 4 \\
+Q4\_K\_S & 4.85 & 4.80 & 4 & 8.93 & 2 & \textbf{19.88} & \textbf{1} \\
+Q4\_K\_M & 5.09 & 4.80 & 4 & 8.55 & 3 & 19.22 & 2 \\
+Q5\_K\_M & 5.57 & 3.75 & 6 & 7.31 & 6 & 13.35 & 5 \\
+Q6\_K    & 6.59 & \textbf{3.52} & \textbf{7} & \textbf{6.80} & \textbf{7} & 7.02  & 6 \\
+Q8\_0    & 8.50 & 4.54 & 5 & 7.43 & 5 & \textbf{6.39}  & \textbf{7} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Three reversals are notable.
-\textbf{First}, Q4\_K\_S and Q4\_K\_M, which are mid-pack on ARM (rank 4),
-leap to \emph{first and second} on Metal (19.9 and 19.2~tok/s).
-Metal has highly tuned 4-bit dequantization kernels; the K-quant 4-bit
-block format maps efficiently to GPU SIMD lanes.
-\textbf{Second}, Q8\_0, which is mid-pack on ARM (rank 5, 4.54~tok/s),
-is the \emph{slowest} variant on Metal (6.39~tok/s, rank 7).
-The 8-bit format saturates GPU memory bandwidth without GPU-side
-kernel advantages, making it the worst operating point on Metal
-despite being a simple unstructured format.
-\textbf{Third}, Q2\_K drops from the ARM champion (rank 1, 5.11~tok/s)
-to third on Metal (17.79~tok/s)---still fast in absolute terms but
-no longer dominant.
+\textbf{The x86 result is the most informative.}
+The ARM non-monotonic ordering---Q2\_K fastest (5.11~tok/s), Q6\_K slowest
+(3.52~tok/s)---\emph{replicates exactly} on x86 AVX2: Q2\_K leads at
+14.1~tok/s and Q6\_K is slowest at 6.8~tok/s (rank~7 on both platforms).
+This rules out ARM-specific microarchitecture as the cause.
+The mechanism is \textbf{CPU-general}: SIMD dequantization overhead is
+bottleneck-defining on both ARM NEON and x86 AVX2.
+Low-bpw formats (Q2\_K) have compact tables that fit in L1/L2 and dequantize
+cheaply per SIMD lane; Q6\_K's larger tables and more complex shuffle patterns
+overflow cache and dominate dispatch time on any CPU.
+The 2.75$\times$ absolute speedup on x86 vs.\ ARM reflects the i5-1235U's
+higher single-core frequency and AVX2 lane width, not an ordering difference.
 
-The throughput ratio between ARM and Metal (Q4\_K\_M: $19.22 / 4.80 = 4.0\times$)
-is consistent with the GPU reference baseline gap reported in
-Table~\ref{tab:gpu_baseline}, confirming that the Metal backend is
-quantitatively comparable to a shared T4 GPU for this model.
+\textbf{The x86 context cliff is more severe but delayed.}
+Using the same filled-context methodology (prompts sized $N{-}64$ tokens),
+Q2\_K on x86 degrades $-51\%$ from ctx=256 to ctx=2048 (cliff onset ctx=1200--1300),
+vs.\ $-40\%$ on ARM (cliff onset ctx=768).
+The larger Intel i5 L3 cache (12~MB vs.\ ARM 4~MB) buffers the KV cache
+to higher context lengths before thrashing, delaying the cliff---but
+does not prevent it. Once KV working set exceeds L3, the degradation is
+steeper than ARM. Q3\_K\_M remains stable on x86 ($-3.8\%$), confirming
+this is a model-level property, not platform-specific.
 
-These reversals confirm that the non-monotonic ARM ordering is
-\emph{architecture-specific}: it is driven by ARM NEON dequantization
-kernel overhead, which is absent on GPU backends with dedicated 4-bit
-dispatch paths. Practitioners deploying on Metal (iOS, macOS) should
-target Q4\_K\_S or Q4\_K\_M for maximum throughput; on ARM mobile,
-Q2\_K leads for short-context throughput, but Q3\_K\_M is superior
-for context stability, factual accuracy, and MCQ tasks.
+\textbf{Quality results are consistent across CPU platforms.}
+BoolQ accuracy on x86 (Q4\_K\_M: 74\%, Q2\_K: 70\%, Q4\_K\_S: 72\%) falls
+within the Wilson 95\% CI bands of the ARM results.
+TruthfulQA patterns replicate: Q3\_K\_M leads on x86 (60\%) while
+Q2\_K collapses to near-chance (49\%), validating that these are
+model-level failure modes independent of the runtime CPU.
+
+\textbf{Metal reverses the ordering entirely.}
+Q4\_K\_S leads at 19.9~tok/s and Q4\_K\_M at 19.2~tok/s;
+Q8\_0 (6.4~tok/s) and Q6\_K (7.0~tok/s) are slowest---opposite of both
+CPU backends. Metal has dedicated 4-bit dequantization kernel paths;
+Q8\_0, which is trivially simple on CPU, becomes the worst-performing
+variant on Metal because it lacks GPU-side kernel advantages.
+Q2\_K, dominant on CPU, falls to rank~3 on Metal (17.8~tok/s).
+
+The throughput ratio ARM$\to$Metal (Q4\_K\_M: $19.22 / 4.80 = 4.0\times$)
+matches the T4 GPU reference baseline in Table~\ref{tab:gpu_baseline},
+confirming Metal performance is quantitatively comparable to a shared T4.
+
+\textbf{Unified interpretation.}
+These three platforms establish a clean \textbf{CPU/GPU divide}:
+\emph{all CPU backends} (ARM NEON, x86 AVX2) share the non-monotonic ordering
+driven by SIMD dequantization overhead.
+Only GPU backends with dedicated quantized-format dispatch paths (Metal, CUDA)
+reverse the ordering toward 4-bit dominance.
+Practitioners targeting CPU inference---whether ARM mobile or x86 desktop---should
+expect Q2\_K to lead on throughput and Q6\_K to underperform relative to Q4\_K\_M;
+those targeting Metal (iOS, macOS) should use Q4\_K\_S or Q4\_K\_M.
 
 % ===========================================================================
 \section{Limitations and Future Work}

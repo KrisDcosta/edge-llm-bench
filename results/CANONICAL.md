@@ -54,11 +54,19 @@ are sized N-64 tokens so the KV cache is actually saturated. Earlier runs using
 | fig9_model_size_vs_decode_tps | `figures/fig9_model_size_vs_decode_tps.png` | pixel_llama_tps_20260325_120022 |
 | fig_kv_cliff | `figures/fig_kv_cliff.png` | pixel_llama_cliff_filled_20260326_132101 |
 
-### Cross-Device (M4 Metal) — RQ4
+### Cross-Device (x86 + M4 Metal) — RQ4 / §5.5
 
 | Claim | Source |
 |-------|--------|
+| x86 TPS (Q2_K 14.05, Q4_K_S 8.93, Q4_K_M 8.55, Q6_K 6.80 tok/s) | `results/x86_tps_results.json` |
+| x86 filled-context cliff (Q2_K −51% at ctx=2048, cliff ctx=1200–1300) | `results/x86_llama_cliff_20260329_002333/` |
+| x86 quality (BoolQ, ARC-Easy, ARC-Challenge, TruthfulQA) | `results/quality_scores.json` keys `x86_*` |
+| x86 PPL (Q2_K 11.73, Q4_K_S 9.74, Q4_K_M 9.75, Q8_0 9.71) | `results/x86_perplexity_results.json` |
 | M4 Metal TPS (Q4_K_S 19.9, Q4_K_M 19.2, Q2_K 17.8, Q8_0 6.4 tok/s) | `results/m4_llama_tps_20260326_001546/` |
+
+**Platform metadata:**
+- x86: Intel i5-1235U, 12th Gen, Windows 11, 6 threads, llama-cli CPU-only (ngl=0)
+- M4: Mac M4, Metal GPU (16-core), llama-bench ngl=99, 10 trials
 
 ---
 
