@@ -576,6 +576,14 @@ def run_inference_x86(
                           stdout_text[:200], re.IGNORECASE)
             if m:
                 return m.group(1).capitalize()
+            # Pattern 5: "The best completion is A" / "continuation is A" style
+            m = re.search(r'\bis\s+([ABCD])(?:[.):\s\n]|$)', stdout_text)
+            if m:
+                return m.group(1).upper()
+            # Pattern 6: explicit option label "A)" anywhere in short output
+            m = re.search(r'(?<![A-Za-z])([ABCD])\)', stdout_text)
+            if m:
+                return m.group(1).upper()
         # Fallback: parse combined output with the full extractor
         return extract_model_answer(stdout_clean + result.stderr)
     except subprocess.TimeoutExpired:
