@@ -115,7 +115,19 @@ def _find_adb() -> str:
     raise RuntimeError("adb not found. Add Android SDK platform-tools to PATH or set ADB=/path/to/adb")
 
 
-ADB_BIN = _find_adb()
+try:
+    ADB_BIN = _find_adb()
+except RuntimeError:
+    ADB_BIN = None  # deferred — only fails if ADB is actually used
+
+# ---------------------------------------------------------------------------
+# x86 mode globals (set by --x86 CLI flag)
+# ---------------------------------------------------------------------------
+
+_X86_MODE        = False
+_X86_LLAMA_CLI   = ""
+_X86_MODELS_DIR  = ""
+_X86_THREADS     = 4
 
 
 # ---------------------------------------------------------------------------
@@ -183,7 +195,7 @@ def load_prompts_from_yaml(yaml_path: Path) -> list[dict]:
 
     try:
         import yaml
-        with open(yaml_path) as f:
+        with open(yaml_path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
         prompts = data.get("prompts", [])
         # Ensure answer_type defaults to "substring" if not specified
@@ -197,7 +209,7 @@ def load_prompts_from_yaml(yaml_path: Path) -> list[dict]:
     prompts: list[dict] = []
     current: dict = {}
 
-    with open(yaml_path) as f:
+    with open(yaml_path, encoding="utf-8") as f:
         for line in f:
             if m := re.match(r"\s*-\s+id:\s*(.+)", line):
                 if current.get("id"):
@@ -347,10 +359,13 @@ def extract_model_answer(raw_output: str) -> str:
     import re
 
     # ── PRIMARY: anchor on the assistant header ──────────────────────────────
-    # llama-completion detokenizes <|start_header_id|>assistant<|end_header_id|>
-    # as the bare word "assistant" followed by newlines, immediately after the
-    # last ":" in the instruction phrase (e.g. "...or D):assistant\n\n").
-    asst_match = re.search(r"assistant\s*\n", raw_output, re.IGNORECASE)
+    # Handles both output formats across llama.cpp versions:
+    #   Older (detokenized):  "...or D):assistant\n\nA"
+    #   Newer (literal tokens): "...<|end_header_id|>\n\nassistant<|end_header_id|>\n\nA"
+    asst_match = re.search(
+        r"(?:<\|start_header_id\|>)?assistant(?:<\|end_header_id\|>)?\s*\n",
+        raw_output, re.IGNORECASE
+    )
     if asst_match:
         after_asst = raw_output[asst_match.end():].strip()
 
@@ -401,7 +416,8 @@ def extract_model_answer(raw_output: str) -> str:
     # ── FALLBACK 2: broader anchor ────────────────────────────────────────────
     match = re.search(r"Answer with.*?:", raw_output, re.IGNORECASE | re.DOTALL)
     if match:
-        after_match = raw_output[match.end():]
+        # Strip literal Llama-3 special tokens so the letter/word sits at position 0
+        after_match = re.sub(r'<\|[^|>]+\|>', '', raw_output[match.end():]).strip()
         # Try choice first, then yes/no
         choice = re.search(r'^\s*([ABCD])(?:[.):\s\n]|$)', after_match, re.IGNORECASE)
         if choice:
@@ -410,14 +426,29 @@ def extract_model_answer(raw_output: str) -> str:
         if yn:
             return yn.group(1).capitalize()
 
-    # ── FALLBACK 3: scan non-log lines for yes/no only ───────────────────────
+    # ── FALLBACK 3 & 4: scan non-log lines for yes/no and choice letters ────────
     filtered = "\n".join(
         line for line in raw_output.splitlines()
         if not any(kw in line for kw in _LOG_KEYWORDS)
     )
-    yn = re.search(r'\b(yes|no)\b', filtered, re.IGNORECASE)
+    # Strip any remaining literal special tokens before scanning
+    filtered_clean = re.sub(r'<\|[^|>]+\|>', '', filtered).strip()
+
+    yn = re.search(r'\b(yes|no)\b', filtered_clean, re.IGNORECASE)
     if yn:
         return yn.group(1).capitalize()
+
+    # FALLBACK 4: choice letter in clean output (last resort for choice questions)
+    for line in filtered_clean.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if re.match(r'^([ABCD])(?:[.):\s]|$)', line, re.IGNORECASE):
+            return line[0].upper()
+        m = re.search(r'(?:\bthe\s+(?:correct\s+)?answer\s+is\s+|answer\s*:\s*)([ABCD])\b',
+                      line[:120], re.IGNORECASE)
+        if m:
+            return m.group(1).upper()
 
     return ""
 
@@ -436,15 +467,15 @@ def run_inference(
     n_tokens: int = 32,
     dry_run: bool = False,
 ) -> str | None:
-    """Run one inference on device. Returns model output text or None on failure.
+    """Run one inference. Routes to x86 (local) or Android (ADB) depending on mode.
 
-    Applies the Llama-3.2-3B-Instruct chat template and pushes the formatted
-    prompt to a temp file on device (avoids all shell-quoting problems with
-    long BoolQ/ARC passages containing $, `, <, >, etc.).
-
+    Applies the Llama-3.2-3B-Instruct chat template.
     Context window is 2048 tokens to accommodate the longest BoolQ passages
     without silent truncation.
     """
+    if _X86_MODE:
+        return run_inference_x86(prompt, model_path, n_tokens, dry_run)
+
     formatted_prompt = format_llama3_instruct(prompt)
 
     cmd = (
@@ -483,6 +514,82 @@ def run_inference(
         return None
 
 
+def run_inference_x86(
+    prompt: str,
+    model_path_str: str,
+    n_tokens: int = 32,
+    dry_run: bool = False,
+) -> str | None:
+    """Run one inference locally via llama-cli.exe (x86 mode)."""
+    import tempfile
+
+    formatted_prompt = format_llama3_instruct(prompt)
+
+    if dry_run:
+        print(f"    [DRY RUN x86] llama-cli -m {Path(model_path_str).name} -n {n_tokens}")
+        return "DRY_RUN_OUTPUT"
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as tf:
+        tf.write(formatted_prompt)
+        tmp_path = tf.name
+
+    try:
+        cmd = [
+            _X86_LLAMA_CLI,
+            "-m", model_path_str,
+            "-c", "2048",
+            "-n", str(n_tokens),
+            "--temp", "0.0",
+            "--seed", "42",
+            "-t", str(_X86_THREADS),
+            "-no-cnv",              # disable conversation mode
+            "--no-display-prompt",  # stdout = generated tokens only (no prompt echo)
+            "--no-warmup",          # skip warmup run to reduce per-question overhead
+            "-co", "off",           # disable ANSI color codes — subprocess.PIPE is not a TTY on Windows
+            "-f", tmp_path,
+        ]
+        result = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            stdin=subprocess.DEVNULL,  # close stdin so process exits cleanly
+            text=True,
+            timeout=300,
+        )
+        # With --no-display-prompt stdout is purely the generated answer.
+        # Strip ANSI escape codes (Windows subprocess.PIPE may still get color output).
+        # Try a direct parse first; fall back to full output parsing.
+        stdout_clean = re.sub(r'\x1b\[[0-9;]*[mGKHFJA-Z]', '', result.stdout)
+        stdout_text = stdout_clean.strip()
+        if stdout_text:
+            m = re.match(r'^([ABCD])(?:[.):\s\n]|$)', stdout_text, re.IGNORECASE)
+            if m:
+                return m.group(1).upper()
+            m = re.match(r'^(yes|no)(?:[.,!?\s\n]|$)', stdout_text, re.IGNORECASE)
+            if m:
+                return m.group(1).capitalize()
+            m = re.search(r'(?:the\s+(?:correct\s+)?answer\s+is\s+|answer\s*:\s*)([ABCD])\b',
+                          stdout_text[:200], re.IGNORECASE)
+            if m:
+                return m.group(1).upper()
+            m = re.search(r'(?:the\s+answer\s+is\s+|answer\s*:\s*)(yes|no)\b',
+                          stdout_text[:200], re.IGNORECASE)
+            if m:
+                return m.group(1).capitalize()
+        # Fallback: parse combined output with the full extractor
+        return extract_model_answer(stdout_clean + result.stderr)
+    except subprocess.TimeoutExpired:
+        return None
+    except Exception as e:
+        print(f"    ERROR: {e}")
+        return None
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+
+
 # ---------------------------------------------------------------------------
 # Variant evaluation
 # ---------------------------------------------------------------------------
@@ -503,16 +610,25 @@ def evaluate_variant(
             "accuracy_pct": None, "correct": None, "total": len(prompts),
         }
 
-    # Verify model exists on device
+    # Verify model exists
     if not dry_run:
-        check = adb_shell(f"ls {model_path} 2>/dev/null", timeout=10)
-        if ".gguf" not in check:
-            print(f"  [{variant}] SKIP — model not on device at {model_path}")
-            return {
-                "variant": variant, "tag": tag,
-                "status": "skipped_not_on_device",
-                "accuracy_pct": None, "correct": None, "total": len(prompts),
-            }
+        if _X86_MODE:
+            if not Path(model_path).exists():
+                print(f"  [{variant}] SKIP — model not found at {model_path}")
+                return {
+                    "variant": variant, "tag": tag,
+                    "status": "skipped_not_on_disk",
+                    "accuracy_pct": None, "correct": None, "total": len(prompts),
+                }
+        else:
+            check = adb_shell(f"ls {model_path} 2>/dev/null", timeout=10)
+            if ".gguf" not in check:
+                print(f"  [{variant}] SKIP — model not on device at {model_path}")
+                return {
+                    "variant": variant, "tag": tag,
+                    "status": "skipped_not_on_device",
+                    "accuracy_pct": None, "correct": None, "total": len(prompts),
+                }
 
     print(f"\n  [{variant}] Evaluating {len(prompts)} prompts (tag={tag})...")
     per_question: list[dict] = []
@@ -525,8 +641,9 @@ def evaluate_variant(
         category    = p.get("category", "unknown")
         answer_type = p.get("answer_type", "substring")
 
-        # Tokens needed: choice/yesno need only 4-8 tokens; substring needs 32
-        n_tokens = 8 if answer_type in ("choice", "yesno") else 32
+        # choice/yesno: 16 tokens — enough for verbose preambles like "The answer is A"
+        # substring: 32 tokens for open-ended answers
+        n_tokens = 16 if answer_type in ("choice", "yesno") else 32
 
         print(f"    [{i:3d}/{len(prompts)}] {prompt_id} ({answer_type}) ... ", end="", flush=True)
         try:
@@ -557,7 +674,7 @@ def evaluate_variant(
 
         is_correct = score_answer(model_output, expected, answer_type)
         correct_count += int(is_correct)
-        status_str = "✓" if is_correct else "✗"
+        status_str = "OK" if is_correct else "XX"
         print(f"{status_str}  (expected={expected!r}, got={model_output[:50]!r})")
 
         per_question.append({
@@ -657,6 +774,23 @@ def main() -> int:
         "--list-benchmarks", action="store_true",
         help="List all available YAML benchmark files in the data/ directory and exit"
     )
+    # x86 / local execution flags
+    parser.add_argument(
+        "--x86", action="store_true",
+        help="Run inference locally via llama-cli.exe instead of via ADB"
+    )
+    parser.add_argument(
+        "--x86-llama-cli", default="C:/temp/llama.cpp/build/bin/Release/llama-completion.exe",
+        help="Path to llama-completion.exe for x86 mode"
+    )
+    parser.add_argument(
+        "--x86-models-dir", default="C:/temp/llama3_2_3b_gguf",
+        help="Directory containing GGUF model files for x86 mode"
+    )
+    parser.add_argument(
+        "--threads", type=int, default=4,
+        help="CPU threads for inference in x86 mode (default: 4)"
+    )
     args = parser.parse_args()
 
     # --list-benchmarks: print available YAML files and exit
@@ -712,8 +846,19 @@ def main() -> int:
                 print(f"ERROR: Unknown variant {v!r}. Valid: {', '.join(valid_variants)}")
                 return 1
 
-    # Check device
-    if not args.dry_run:
+    # x86 mode: set globals, override model paths to local disk paths
+    if args.x86:
+        global _X86_MODE, _X86_LLAMA_CLI, _X86_MODELS_DIR, _X86_THREADS
+        _X86_MODE       = True
+        _X86_LLAMA_CLI  = args.x86_llama_cli
+        _X86_MODELS_DIR = args.x86_models_dir
+        _X86_THREADS    = args.threads
+        # Build local model paths (GGUF files named Q4_K_M.gguf etc.)
+        models_dir_path = Path(_X86_MODELS_DIR)
+        model_paths = {v: str(models_dir_path / f"{v}.gguf") for v in valid_variants}
+
+    # Check device (skip in x86 mode)
+    if not args.dry_run and not args.x86:
         if not check_device():
             print("ERROR: No Android device connected.")
             print("  Connect device via USB and ensure USB debugging is enabled.")

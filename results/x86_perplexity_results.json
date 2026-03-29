@@ -1,0 +1,48 @@
+{
+  "meta": {
+    "timestamp": "2026-03-28T18:34:00",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-1235U",
+    "platform": "Windows-11-10.0.26200",
+    "threads": 6,
+    "variants": [
+      "Q2_K",
+      "Q3_K_M",
+      "Q4_K_M",
+      "Q4_K_S",
+      "Q5_K_M",
+      "Q6_K",
+      "Q8_0"
+    ],
+    "models_dir": "C:/temp/llama3_2_3b_gguf"
+  },
+  "results": {
+    "Q2_K": {
+      "status": "ok",
+      "perplexity": 11.7265
+    },
+    "Q3_K_M": {
+      "status": "ok",
+      "perplexity": 10.1575
+    },
+    "Q4_K_M": {
+      "status": "ok",
+      "perplexity": 9.7466
+    },
+    "Q4_K_S": {
+      "status": "ok",
+      "perplexity": 9.7414
+    },
+    "Q5_K_M": {
+      "status": "ok",
+      "perplexity": 9.768
+    },
+    "Q6_K": {
+      "status": "ok",
+      "perplexity": 9.7366
+    },
+    "Q8_0": {
+      "status": "ok",
+      "perplexity": 9.7101
+    }
+  }
+}

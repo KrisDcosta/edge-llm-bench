@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "timestamp": "2026-03-28T18:34:00",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-1235U",
+    "platform": "Windows-11-10.0.26200",
+    "threads": 6,
+    "variants": [
+      "Q2_K",
+      "Q3_K_M",
+      "Q4_K_M",
+      "Q4_K_S",
+      "Q5_K_M",
+      "Q6_K",
+      "Q8_0"
+    ],
+    "models_dir": "C:/temp/llama3_2_3b_gguf"
+  },
+  "results": {
+    "Q2_K": {
+      "status": "ok",
+      "prefill_tps": 24.68,
+      "decode_tps": 14.05,
+      "threads": 6
+    },
+    "Q3_K_M": {
+      "status": "ok",
+      "prefill_tps": 18.92,
+      "decode_tps": 8.38,
+      "threads": 6
+    },
+    "Q4_K_M": {
+      "status": "ok",
+      "prefill_tps": 22.19,
+      "decode_tps": 8.55,
+      "threads": 6
+    },
+    "Q4_K_S": {
+      "status": "ok",
+      "prefill_tps": 25.19,
+      "decode_tps": 8.93,
+      "threads": 6
+    },
+    "Q5_K_M": {
+      "status": "ok",
+      "prefill_tps": 14.21,
+      "decode_tps": 7.31,
+      "threads": 6
+    },
+    "Q6_K": {
+      "status": "ok",
+      "prefill_tps": 13.93,
+      "decode_tps": 6.8,
+      "threads": 6
+    },
+    "Q8_0": {
+      "status": "ok",
+      "prefill_tps": 19.1,
+      "decode_tps": 7.43,
+      "threads": 6
+    }
+  }
+}
