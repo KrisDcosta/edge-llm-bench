@@ -78,21 +78,46 @@ for VARIANT in "${VARIANTS[@]}"; do
             CURRENT_RUN=$((CURRENT_RUN + 1))
             PROGRESS=$((CURRENT_RUN * 100 / TOTAL_RUNS))
 
-            # Run benchmark and capture output
-            BENCH_OUTPUT=$(llama-cli \
+            # Run benchmark with timeout wrapper
+            # Save output to temp file, kill after timeout to avoid interactive mode
+            BENCH_TEMP="/tmp/bench_$$_${VARIANT}_${CTX}_${TRIAL}.txt"
+            llama-cli \
                 -m "$MODEL_PATH" \
                 -c "$CTX" \
                 -n "$OUTPUT_TOKENS" \
                 -p "$PROMPT" \
                 -t 4 \
-                --log-format json \
-                2>/dev/null || echo "{}")
+                > "$BENCH_TEMP" 2>&1 &
+            LLAMA_PID=$!
 
-            # Extract TPS if available, otherwise estimate
-            TPS=$(echo "$BENCH_OUTPUT" | grep -o '"tokens_per_second_tokens":[0-9.]*' | cut -d: -f2 || echo "0")
+            # Wait up to 15 seconds for inference to complete
+            for i in {1..15}; do
+                if ! kill -0 $LLAMA_PID 2>/dev/null; then
+                    break
+                fi
+                sleep 1
+            done
+
+            # Kill if still running
+            kill -9 $LLAMA_PID 2>/dev/null || true
+            wait $LLAMA_PID 2>/dev/null || true
+
+            # Read output
+            BENCH_OUTPUT=$(cat "$BENCH_TEMP")
+            rm -f "$BENCH_TEMP"
+
+            # Extract Generation TPS from output: [ Prompt: XX.X t/s | Generation: YY.Y t/s ]
+            # We want the Generation rate (decoding speed), not Prompt rate (encoding speed)
+            TPS=$(echo "$BENCH_OUTPUT" | grep -oE "Generation: [0-9]+\.[0-9]+" | cut -d: -f2 | tr -d ' ' || echo "0")
+
+            # Fallback: if Generation not found, try last t/s value
             if [ -z "$TPS" ] || [ "$TPS" = "0" ]; then
-                # Fallback: parse from text output if JSON unavailable
-                TPS=$(echo "$BENCH_OUTPUT" | grep -i "tokens/s" | head -1 | grep -o '[0-9.]*' | head -1 || echo "0")
+                TPS=$(echo "$BENCH_OUTPUT" | grep -oE "[0-9]+\.[0-9]+ t/s" | tail -1 | cut -d' ' -f1 || echo "0")
+            fi
+
+            # Final fallback: any decimal number
+            if [ -z "$TPS" ] || [ "$TPS" = "0" ]; then
+                TPS=$(echo "$BENCH_OUTPUT" | grep -oE "[0-9]+\.[0-9]+" | tail -1 || echo "0")
             fi
 
             # Create result record

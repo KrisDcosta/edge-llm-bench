@@ -1,0 +1,52 @@
+================================================================================
+                        QUICK START — DO THIS NOW
+================================================================================
+
+📍 You are here: Waiting for wireless ADB pairing
+
+✅ What's already done:
+   • App: Updated with Q4_K_S/Q5_K_M, device name fixed (135 MB APK ready)
+   • Report: Full NeurIPS paper written (441 lines, ready to review)
+   • Qwen Benchmark: Running in background (currently 10% done)
+
+🎯 Your next action (copy-paste ready):
+
+Open Terminal and run:
+
+    adb pair 100.96.96.89:33873
+
+When it says "Enter pairing code:", paste:
+
+    937356
+
+Then run:
+
+    adb connect 100.96.96.89:5555
+    adb devices
+
+
+📊 Check progress anytime:
+
+    bash STATUS.sh
+    tail -f results/qwen_tps_sweep_corrected.log
+
+================================================================================
+
+AFTER PAIRING IS DONE:
+
+1. Unplug USB from Pixel 6a
+2. Run: adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+3. Take screenshots of app for report
+4. Power measurement will start automatically
+5. Review report at: report/course_project_report.tex
+
+================================================================================
+
+📚 More details:
+
+   Full guide: cat SESSION_HANDOFF.md
+   Pairing troubleshooting: cat WIRELESS_ADB_SETUP.md
+   Progress summary: cat PROGRESS_SUMMARY.txt
+   Status check: bash STATUS.sh
+
+================================================================================

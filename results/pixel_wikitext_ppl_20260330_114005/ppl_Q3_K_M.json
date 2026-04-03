@@ -1,0 +1,2 @@
+{"variant":"Q3_K_M","ppl":null,"ctx_size":512,"corpus":"wikitext2_full","corpus_bytes":1230111,"threads":4,"device":"Pixel6a","model":"Llama-3.2-3B-Instruct-Q3_K_M","raw_local":"results/pixel_wikitext_ppl_20260330_114005/ppl_raw_Q3_K_M.txt","n_chunks":0
+0,"ts":"2026-03-31T04:29:00Z"}

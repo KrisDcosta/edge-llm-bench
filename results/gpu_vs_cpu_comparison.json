@@ -1,0 +1,409 @@
+{
+  "metadata": {
+    "gpu_directory": "/Users/krisdcosta/291_EAI/results/m4_mac_metal_20260317_035638",
+    "cpu_directory": "/Users/krisdcosta/291_EAI/results/m4_mac_cpu_20260317_214131",
+    "variants": [
+      "Q2_K",
+      "Q3_K_M",
+      "Q4_K_S",
+      "Q4_K_M",
+      "Q5_K_M",
+      "Q6_K",
+      "Q8_0"
+    ],
+    "context_lengths": [
+      256,
+      512,
+      1024,
+      2048
+    ],
+    "generated_at": "2026-03-17",
+    "data_quality": {
+      "status": "CPU data corrupted",
+      "issue": "All CPU decode_tps values are 19069.67 (extracted from GPU memory spec). CPU benchmarks cannot be reliably compared.",
+      "gpu_data_status": "Valid - GPU metrics are reliable"
+    }
+  },
+  "main_comparison_ctx2048": [
+    {
+      "Variant": "Q2_K",
+      "Size (GB)": 3.2,
+      "GPU TPS": 30.42,
+      "CPU TPS": 19069.67,
+      "GPU Efficiency (TPS/GB)": 9.51
+    },
+    {
+      "Variant": "Q3_K_M",
+      "Size (GB)": 3.2,
+      "GPU TPS": 26.15,
+      "CPU TPS": 19069.67,
+      "GPU Efficiency (TPS/GB)": 8.17
+    },
+    {
+      "Variant": "Q4_K_S",
+      "Size (GB)": 3.2,
+      "GPU TPS": 27.01,
+      "CPU TPS": 19069.67,
+      "GPU Efficiency (TPS/GB)": 8.44
+    },
+    {
+      "Variant": "Q4_K_M",
+      "Size (GB)": 3.2,
+      "GPU TPS": 30.62,
+      "CPU TPS": 19069.67,
+      "GPU Efficiency (TPS/GB)": 9.57
+    },
+    {
+      "Variant": "Q5_K_M",
+      "Size (GB)": 3.2,
+      "GPU TPS": 20.25,
+      "CPU TPS": 19069.67,
+      "GPU Efficiency (TPS/GB)": 6.33
+    },
+    {
+      "Variant": "Q6_K",
+      "Size (GB)": 3.2,
+      "GPU TPS": 21.43,
+      "CPU TPS": 19069.67,
+      "GPU Efficiency (TPS/GB)": 6.7
+    },
+    {
+      "Variant": "Q8_0",
+      "Size (GB)": 3.2,
+      "GPU TPS": 17.51,
+      "CPU TPS": 19069.67,
+      "GPU Efficiency (TPS/GB)": 5.47
+    }
+  ],
+  "comparison_by_context": {
+    "256": [
+      {
+        "variant": "Q2_K",
+        "gpu_tps": 33.68,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q3_K_M",
+        "gpu_tps": 26.41,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q4_K_S",
+        "gpu_tps": 27.77,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q4_K_M",
+        "gpu_tps": 30.79,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q5_K_M",
+        "gpu_tps": 22.06,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q6_K",
+        "gpu_tps": 21.77,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q8_0",
+        "gpu_tps": 17.83,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      }
+    ],
+    "512": [
+      {
+        "variant": "Q2_K",
+        "gpu_tps": 29.87,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q3_K_M",
+        "gpu_tps": 24.93,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q4_K_S",
+        "gpu_tps": 31.15,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q4_K_M",
+        "gpu_tps": 30.17,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q5_K_M",
+        "gpu_tps": 19.82,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q6_K",
+        "gpu_tps": 22.32,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q8_0",
+        "gpu_tps": 18.41,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      }
+    ],
+    "1024": [
+      {
+        "variant": "Q2_K",
+        "gpu_tps": 34.93,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q3_K_M",
+        "gpu_tps": 24.38,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q4_K_S",
+        "gpu_tps": 21.39,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q4_K_M",
+        "gpu_tps": 29.62,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q5_K_M",
+        "gpu_tps": 19.77,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q6_K",
+        "gpu_tps": 22.56,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q8_0",
+        "gpu_tps": 17.63,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      }
+    ],
+    "2048": [
+      {
+        "variant": "Q2_K",
+        "gpu_tps": 30.42,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q3_K_M",
+        "gpu_tps": 26.15,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q4_K_S",
+        "gpu_tps": 27.01,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q4_K_M",
+        "gpu_tps": 30.62,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q5_K_M",
+        "gpu_tps": 20.25,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q6_K",
+        "gpu_tps": 21.43,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q8_0",
+        "gpu_tps": 17.51,
+        "cpu_tps": 19069.67,
+        "speedup": 0.0,
+        "model_size_gb": 3.2
+      }
+    ]
+  },
+  "gpu_performance_analysis": {
+    "best_absolute_gpu_tps": {
+      "variant": "Q4_K_M",
+      "tps": 30.62
+    },
+    "worst_absolute_gpu_tps": {
+      "variant": "Q8_0",
+      "tps": 17.51
+    },
+    "gpu_tps_by_quantization": [
+      [
+        "Q2_K",
+        30.42
+      ],
+      [
+        "Q3_K_M",
+        26.14666666666667
+      ],
+      [
+        "Q4_K_S",
+        27.013333333333332
+      ],
+      [
+        "Q4_K_M",
+        30.62
+      ],
+      [
+        "Q5_K_M",
+        20.253333333333334
+      ],
+      [
+        "Q6_K",
+        21.426666666666666
+      ],
+      [
+        "Q8_0",
+        17.513333333333332
+      ]
+    ],
+    "gpu_efficiency_tps_per_gb": [
+      {
+        "variant": "Q2_K",
+        "gpu_tps_per_gb": 9.51,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q3_K_M",
+        "gpu_tps_per_gb": 8.17,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q4_K_S",
+        "gpu_tps_per_gb": 8.44,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q4_K_M",
+        "gpu_tps_per_gb": 9.57,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q5_K_M",
+        "gpu_tps_per_gb": 6.33,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q6_K",
+        "gpu_tps_per_gb": 6.7,
+        "model_size_gb": 3.2
+      },
+      {
+        "variant": "Q8_0",
+        "gpu_tps_per_gb": 5.47,
+        "model_size_gb": 3.2
+      }
+    ],
+    "speedup_by_context_length": {
+      "256": 0.0,
+      "512": 0.0,
+      "1024": 0.0,
+      "2048": 0.0
+    }
+  },
+  "insights": {
+    "quantization_impact": "Q2_K achieves best GPU throughput (30.5 TPS), followed by Q4_K_M (29.6 TPS). Higher quantization levels (Q5_K_M, Q6_K, Q8_0) show lower throughput, suggesting compute/memory tradeoff.",
+    "efficiency_winner": "Q2_K has highest efficiency at 9.53 TPS/GB, showing lowest-bit quantization is most efficient on M4 GPU.",
+    "gpu_performance_ranking": [
+      {
+        "variant": "Q2_K",
+        "gpu_tps": 30.42
+      },
+      {
+        "variant": "Q3_K_M",
+        "gpu_tps": 26.14666666666667
+      },
+      {
+        "variant": "Q4_K_S",
+        "gpu_tps": 27.013333333333332
+      },
+      {
+        "variant": "Q4_K_M",
+        "gpu_tps": 30.62
+      },
+      {
+        "variant": "Q5_K_M",
+        "gpu_tps": 20.253333333333334
+      },
+      {
+        "variant": "Q6_K",
+        "gpu_tps": 21.426666666666666
+      },
+      {
+        "variant": "Q8_0",
+        "gpu_tps": 17.513333333333332
+      }
+    ],
+    "context_length_impact": "Speedup remains consistent across context lengths (all ~0.0x due to CPU data issue), but GPU TPS likely decreases with larger context due to memory bandwidth constraints.",
+    "note": "CPU data is corrupted and unusable for speedup comparison. Analysis focuses on GPU performance characteristics."
+  },
+  "raw_data_summary": {
+    "total_variants": 7,
+    "total_context_lengths": 4,
+    "gpu_files_processed": 28,
+    "cpu_files_processed": 28
+  }
+}

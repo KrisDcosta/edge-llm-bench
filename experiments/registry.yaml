@@ -816,3 +816,87 @@ experiments:
     prompt_set_id: prompt-suite-v1
     status: planned
     notes: "Cross-model generalizability check"
+
+  # ===========================================================================
+  # GROUP 9: Power measurement (256-token output for better power signal)
+  # Variants: Q2_K, Q3_K_M, Q4_K_M, Q6_K, Q8_0
+  # Context: 256 (standard context for power measurement)
+  # Output: 256 tokens (longer than standard 128 for sustained power draw)
+  # ===========================================================================
+
+  - id: power-q2k-ctx256
+    quant_bits: 2
+    gguf_variant: Q2_K
+    context_length: 256
+    output_length: 256
+    warmups: 2
+    trials: 10
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Power measurement: 256-token output (Q2_K)"
+
+  - id: power-q3km-ctx256
+    quant_bits: 3
+    gguf_variant: Q3_K_M
+    context_length: 256
+    output_length: 256
+    warmups: 2
+    trials: 10
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Power measurement: 256-token output (Q3_K_M)"
+
+  - id: power-q4ks-ctx256
+    quant_bits: 4
+    gguf_variant: Q4_K_S
+    context_length: 256
+    output_length: 256
+    warmups: 2
+    trials: 10
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Power measurement: 256-token output (Q4_K_S — Pareto optimal)"
+
+  - id: power-q4km-ctx256
+    quant_bits: 4
+    gguf_variant: Q4_K_M
+    context_length: 256
+    output_length: 256
+    warmups: 2
+    trials: 10
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Power measurement: 256-token output (Q4_K_M)"
+
+  - id: power-q5km-ctx256
+    quant_bits: 5
+    gguf_variant: Q5_K_M
+    context_length: 256
+    output_length: 256
+    warmups: 2
+    trials: 10
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Power measurement: 256-token output (Q5_K_M — newly added variant)"
+
+  - id: power-q6k-ctx256
+    quant_bits: 6
+    gguf_variant: Q6_K
+    context_length: 256
+    output_length: 256
+    warmups: 2
+    trials: 10
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Power measurement: 256-token output (Q6_K)"
+
+  - id: power-q8-ctx256
+    quant_bits: 8
+    gguf_variant: Q8_0
+    context_length: 256
+    output_length: 256
+    warmups: 2
+    trials: 10
+    prompt_set_id: prompt-suite-v1
+    status: planned
+    notes: "Power measurement: 256-token output (Q8_0)"

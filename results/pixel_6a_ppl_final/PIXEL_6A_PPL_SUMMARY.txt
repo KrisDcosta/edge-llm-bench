@@ -1,0 +1,23 @@
+PIXEL 6A WIKITEXT-2 PPL RESULTS - SNAPSHOT
+===========================================
+Date: 2026-03-18
+Status: Q8 restarted, Q6_K safely backed up
+
+COMPLETED VARIANTS:
+✅ Q6_K - 17K bytes - Full perplexity measured
+
+SAFE BACKUP LOCATION:
+~/291_EAI/results/pixel_6a_ppl_final/ppl_full_Q6_K.txt
+
+FILES IN THIS DIRECTORY:
+$(ls -lh ppl_full_Q6_K.txt 2>/dev/null)
+
+CHECKSUM (for verification):
+$(md5sum ppl_full_Q6_K.txt 2>/dev/null)
+
+NEXT STEPS:
+1. Restart Q8_0 on Pixel device
+2. After Q8_0 completes, pull results
+3. Then run Q4_K_S
+
+DO NOT DELETE FILES IN THIS DIRECTORY - FINAL RESULTS!

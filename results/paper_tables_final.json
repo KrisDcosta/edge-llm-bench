@@ -1,0 +1,188 @@
+{
+  "table1_performance_summary_ctx2048": {
+    "description": "Performance Summary at Context Length 2048",
+    "headers": [
+      "Variant",
+      "Model Size (GB)",
+      "GPU Decode TPS",
+      "CPU Decode TPS",
+      "GPU/CPU Speedup"
+    ],
+    "rows": [
+      {
+        "variant": "Q2_K",
+        "size_gb": 3.2,
+        "gpu_tps": 30.42,
+        "cpu_tps": "N/A",
+        "speedup": "N/A"
+      },
+      {
+        "variant": "Q3_K_M",
+        "size_gb": 3.2,
+        "gpu_tps": 26.15,
+        "cpu_tps": "N/A",
+        "speedup": "N/A"
+      },
+      {
+        "variant": "Q4_K_S",
+        "size_gb": 3.2,
+        "gpu_tps": 27.01,
+        "cpu_tps": "N/A",
+        "speedup": "N/A"
+      },
+      {
+        "variant": "Q4_K_M",
+        "size_gb": 3.2,
+        "gpu_tps": 30.62,
+        "cpu_tps": "N/A",
+        "speedup": "N/A"
+      },
+      {
+        "variant": "Q5_K_M",
+        "size_gb": 3.2,
+        "gpu_tps": 20.25,
+        "cpu_tps": "N/A",
+        "speedup": "N/A"
+      },
+      {
+        "variant": "Q6_K",
+        "size_gb": 3.2,
+        "gpu_tps": 21.43,
+        "cpu_tps": "N/A",
+        "speedup": "N/A"
+      },
+      {
+        "variant": "Q8_0",
+        "size_gb": 3.2,
+        "gpu_tps": 17.51,
+        "cpu_tps": "N/A",
+        "speedup": "N/A"
+      }
+    ]
+  },
+  "table2_context_impact_gpu": {
+    "description": "Context Length Impact on GPU Decode TPS",
+    "headers": [
+      "Variant",
+      "ctx=256",
+      "ctx=512",
+      "ctx=1024",
+      "ctx=2048"
+    ],
+    "rows": [
+      {
+        "variant": "Q2_K",
+        "ctx_256": 33.68,
+        "ctx_512": 29.87,
+        "ctx_1024": 34.93,
+        "ctx_2048": 30.42
+      },
+      {
+        "variant": "Q4_K_M",
+        "ctx_256": 30.79,
+        "ctx_512": 30.17,
+        "ctx_1024": 29.62,
+        "ctx_2048": 30.62
+      },
+      {
+        "variant": "Q6_K",
+        "ctx_256": 21.77,
+        "ctx_512": 22.32,
+        "ctx_1024": 22.56,
+        "ctx_2048": 21.43
+      },
+      {
+        "variant": "Q8_0",
+        "ctx_256": 17.83,
+        "ctx_512": 18.41,
+        "ctx_1024": 17.63,
+        "ctx_2048": 17.51
+      }
+    ]
+  },
+  "table3_statistical_summary_gpu_ctx2048": {
+    "description": "Statistical Summary for GPU at Context Length 2048",
+    "headers": [
+      "Variant",
+      "Mean TPS",
+      "StdDev",
+      "Min",
+      "Max",
+      "95% CI Lower",
+      "95% CI Upper",
+      "N Samples"
+    ],
+    "rows": [
+      {
+        "variant": "Q2_K",
+        "mean_tps": 30.42,
+        "stdev": 0.959,
+        "min": 28.6,
+        "max": 32.2,
+        "ci_lower": 29.93,
+        "ci_upper": 30.91,
+        "n_samples": 15
+      },
+      {
+        "variant": "Q3_K_M",
+        "mean_tps": 26.15,
+        "stdev": 1.514,
+        "min": 21.2,
+        "max": 27.3,
+        "ci_lower": 25.38,
+        "ci_upper": 26.91,
+        "n_samples": 15
+      },
+      {
+        "variant": "Q4_K_S",
+        "mean_tps": 27.01,
+        "stdev": 7.534,
+        "min": 16.4,
+        "max": 36.2,
+        "ci_lower": 23.2,
+        "ci_upper": 30.83,
+        "n_samples": 15
+      },
+      {
+        "variant": "Q4_K_M",
+        "mean_tps": 30.62,
+        "stdev": 1.159,
+        "min": 28.8,
+        "max": 32.3,
+        "ci_lower": 30.03,
+        "ci_upper": 31.21,
+        "n_samples": 15
+      },
+      {
+        "variant": "Q5_K_M",
+        "mean_tps": 20.25,
+        "stdev": 0.766,
+        "min": 18.6,
+        "max": 21.0,
+        "ci_lower": 19.87,
+        "ci_upper": 20.64,
+        "n_samples": 15
+      },
+      {
+        "variant": "Q6_K",
+        "mean_tps": 21.43,
+        "stdev": 0.149,
+        "min": 21.1,
+        "max": 21.6,
+        "ci_lower": 21.35,
+        "ci_upper": 21.5,
+        "n_samples": 15
+      },
+      {
+        "variant": "Q8_0",
+        "mean_tps": 17.51,
+        "stdev": 0.53,
+        "min": 16.9,
+        "max": 18.6,
+        "ci_lower": 17.24,
+        "ci_upper": 17.78,
+        "n_samples": 15
+      }
+    ]
+  }
+}

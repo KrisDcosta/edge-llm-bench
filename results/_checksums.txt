@@ -1,0 +1,6 @@
+dc3bbb0e167ce94a7acb70c99665ad77  ppl_full_Q2_K.txt
+c3530bd2a009016fb13f477a4670d6b0  ppl_full_Q3_K_M.txt
+88a08d06e76d7ec4d1d7efca4046ecdf  ppl_full_Q4_K_M.txt
+f1a88399a545a02bb46fb5df330e11a1  ppl_full_Q4_K_S.txt
+ad0dd82fc940c8c6ace03fcc60ae9c7b  ppl_full_Q5_K_M.txt
+34838867ba1740d8cc8070b4f1da0fbf  ppl_full_Q6_K.txt

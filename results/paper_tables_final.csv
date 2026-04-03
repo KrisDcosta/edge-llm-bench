@@ -1,0 +1,26 @@
+# TABLE 1: Performance Summary (ctx=2048)
+Variant,Model Size (GB),GPU Decode TPS,CPU Decode TPS,GPU/CPU Speedup
+Q2_K,3.2,30.42,N/A,N/A
+Q3_K_M,3.2,26.15,N/A,N/A
+Q4_K_S,3.2,27.01,N/A,N/A
+Q4_K_M,3.2,30.62,N/A,N/A
+Q5_K_M,3.2,20.25,N/A,N/A
+Q6_K,3.2,21.43,N/A,N/A
+Q8_0,3.2,17.51,N/A,N/A
+
+# TABLE 2: Context Length Impact (GPU)
+Variant,ctx=256,ctx=512,ctx=1024,ctx=2048
+Q2_K,33.68,29.87,34.93,30.42
+Q4_K_M,30.79,30.17,29.62,30.62
+Q6_K,21.77,22.32,22.56,21.43
+Q8_0,17.83,18.41,17.63,17.51
+
+# TABLE 3: Statistical Summary (GPU, ctx=2048)
+Variant,Mean TPS,StdDev,Min,Max,95% CI Lower,95% CI Upper,N Samples
+Q2_K,30.42,0.959,28.6,32.2,29.93,30.91,15
+Q3_K_M,26.15,1.514,21.2,27.3,25.38,26.91,15
+Q4_K_S,27.01,7.534,16.4,36.2,23.2,30.83,15
+Q4_K_M,30.62,1.159,28.8,32.3,30.03,31.21,15
+Q5_K_M,20.25,0.766,18.6,21.0,19.87,20.64,15
+Q6_K,21.43,0.149,21.1,21.6,21.35,21.5,15
+Q8_0,17.51,0.53,16.9,18.6,17.24,17.78,15

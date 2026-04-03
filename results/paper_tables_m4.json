@@ -1,0 +1,60 @@
+{
+  "summary": [
+    {
+      "variant": "Q2_K",
+      "count": 60,
+      "avg_tps": 32.23,
+      "stdev": 7.16,
+      "min_tps": 26.4,
+      "max_tps": 63.4
+    },
+    {
+      "variant": "Q3_K_M",
+      "count": 60,
+      "avg_tps": 25.46,
+      "stdev": 2.04,
+      "min_tps": 19.9,
+      "max_tps": 27.5
+    },
+    {
+      "variant": "Q4_K_M",
+      "count": 60,
+      "avg_tps": 30.3,
+      "stdev": 1.01,
+      "min_tps": 28.5,
+      "max_tps": 32.8
+    },
+    {
+      "variant": "Q4_K_S",
+      "count": 60,
+      "avg_tps": 26.83,
+      "stdev": 6.84,
+      "min_tps": 3.2,
+      "max_tps": 36.2
+    },
+    {
+      "variant": "Q5_K_M",
+      "count": 60,
+      "avg_tps": 20.48,
+      "stdev": 1.32,
+      "min_tps": 18.6,
+      "max_tps": 24.5
+    },
+    {
+      "variant": "Q6_K",
+      "count": 60,
+      "avg_tps": 22.02,
+      "stdev": 0.64,
+      "min_tps": 20.8,
+      "max_tps": 23.2
+    },
+    {
+      "variant": "Q8_0",
+      "count": 60,
+      "avg_tps": 17.84,
+      "stdev": 0.52,
+      "min_tps": 16.9,
+      "max_tps": 18.9
+    }
+  ]
+}

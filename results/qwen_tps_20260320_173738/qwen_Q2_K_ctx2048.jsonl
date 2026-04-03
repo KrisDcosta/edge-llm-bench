@@ -1,0 +1,10 @@
+{"variant":"Q2_K","context_length":2048,"trial":1,"decode_tps":39.3,"device":"M4 Mac","backend":"Metal","model":"Qwen2.5-1.5B","timestamp":"2026-03-21T01:52:46Z"}
+{"variant":"Q2_K","context_length":2048,"trial":2,"decode_tps":39.1,"device":"M4 Mac","backend":"Metal","model":"Qwen2.5-1.5B","timestamp":"2026-03-21T01:53:18Z"}
+{"variant":"Q2_K","context_length":2048,"trial":3,"decode_tps":39.5,"device":"M4 Mac","backend":"Metal","model":"Qwen2.5-1.5B","timestamp":"2026-03-21T01:53:51Z"}
+{"variant":"Q2_K","context_length":2048,"trial":4,"decode_tps":40.0,"device":"M4 Mac","backend":"Metal","model":"Qwen2.5-1.5B","timestamp":"2026-03-21T01:54:25Z"}
+{"variant":"Q2_K","context_length":2048,"trial":5,"decode_tps":39.1,"device":"M4 Mac","backend":"Metal","model":"Qwen2.5-1.5B","timestamp":"2026-03-21T01:54:58Z"}
+{"variant":"Q2_K","context_length":2048,"trial":6,"decode_tps":39.3,"device":"M4 Mac","backend":"Metal","model":"Qwen2.5-1.5B","timestamp":"2026-03-21T01:55:30Z"}
+{"variant":"Q2_K","context_length":2048,"trial":7,"decode_tps":40.4,"device":"M4 Mac","backend":"Metal","model":"Qwen2.5-1.5B","timestamp":"2026-03-21T01:56:03Z"}
+{"variant":"Q2_K","context_length":2048,"trial":8,"decode_tps":40.5,"device":"M4 Mac","backend":"Metal","model":"Qwen2.5-1.5B","timestamp":"2026-03-21T01:56:36Z"}
+{"variant":"Q2_K","context_length":2048,"trial":9,"decode_tps":54.2,"device":"M4 Mac","backend":"Metal","model":"Qwen2.5-1.5B","timestamp":"2026-03-21T01:57:10Z"}
+{"variant":"Q2_K","context_length":2048,"trial":10,"decode_tps":40.8,"device":"M4 Mac","backend":"Metal","model":"Qwen2.5-1.5B","timestamp":"2026-03-21T01:57:44Z"}

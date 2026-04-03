@@ -1,0 +1,13 @@
+{"variant":"Q8_0","context":1024,"trial":1,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:11:32Z"}
+{"variant":"Q8_0","context":1024,"trial":2,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:11:37Z"}
+{"variant":"Q8_0","context":1024,"trial":3,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:11:42Z"}
+{"variant":"Q8_0","context":1024,"trial":4,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:11:48Z"}
+{"variant":"Q8_0","context":1024,"trial":5,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:11:53Z"}
+{"variant":"Q8_0","context":1100,"trial":1,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:11:58Z"}
+{"variant":"Q8_0","context":1100,"trial":2,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:12:03Z"}
+{"variant":"Q8_0","context":1100,"trial":3,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:12:08Z"}
+{"variant":"Q8_0","context":1100,"trial":4,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:12:13Z"}
+{"variant":"Q8_0","context":1100,"trial":5,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:12:18Z"}
+{"variant":"Q8_0","context":1200,"trial":1,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:12:23Z"}
+{"variant":"Q8_0","context":1200,"trial":2,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:12:28Z"}
+{"variant":"Q8_0","context":1200,"trial":3,"decode_tps":0,"prefill_tps":0,"device":"M4Mac","backend":"Metal","ngl":99,"ts":"2026-03-23T07:12:34Z"}

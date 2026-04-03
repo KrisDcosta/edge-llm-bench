@@ -1,0 +1,6428 @@
+{
+  "arc_easy_fixed:Q2_K": {
+    "variant": "Q2_K",
+    "tag": "arc_easy_fixed",
+    "status": "success",
+    "accuracy_pct": 76.0,
+    "wilson_ci_95_pct": 8.3,
+    "correct": 76,
+    "total": 100,
+    "per_category": {
+      "arc_easy": {
+        "accuracy_pct": 76.0,
+        "correct": 76,
+        "total": 100
+      }
+    },
+    "per_question": [
+      {
+        "prompt_id": "arc_001",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_002",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_003",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_004",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_005",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_006",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_007",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_008",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_009",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_010",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_011",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_012",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_013",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_014",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_015",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_016",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_017",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_018",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_019",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_020",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_021",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_022",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_023",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_024",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_025",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_026",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_027",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_028",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_029",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_030",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_031",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_032",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_033",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_034",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_035",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_036",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_037",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_038",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_039",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_040",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_041",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_042",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_043",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_044",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_045",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_046",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_047",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_048",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_049",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_050",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_051",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_052",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_053",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_054",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_055",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_056",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_057",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_058",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_059",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_060",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_061",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_062",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_063",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "4",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_064",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_065",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_066",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_067",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_068",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_069",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_070",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_071",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_072",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_073",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_074",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_075",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_076",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_077",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_078",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_079",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_080",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_081",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_082",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_083",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_084",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_085",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_086",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_087",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_088",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_089",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_090",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_091",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_092",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_093",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_094",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_095",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_096",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_097",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_098",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_099",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_100",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      }
+    ]
+  },
+  "arc_easy_fixed:Q3_K_M": {
+    "variant": "Q3_K_M",
+    "tag": "arc_easy_fixed",
+    "status": "success",
+    "accuracy_pct": 78.0,
+    "wilson_ci_95_pct": 8.0,
+    "correct": 78,
+    "total": 100,
+    "per_category": {
+      "arc_easy": {
+        "accuracy_pct": 78.0,
+        "correct": 78,
+        "total": 100
+      }
+    },
+    "per_question": [
+      {
+        "prompt_id": "arc_001",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_002",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_003",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_004",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_005",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_006",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_007",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_008",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_009",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_010",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_011",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_012",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_013",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_014",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_015",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_016",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_017",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_018",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_019",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_020",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_021",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_022",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_023",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_024",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_025",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_026",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_027",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_028",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_029",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_030",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_031",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_032",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_033",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_034",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_035",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_036",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_037",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_038",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_039",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_040",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_041",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_042",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_043",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_044",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_045",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_046",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_047",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_048",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_049",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_050",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_051",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_052",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_053",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_054",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_055",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_056",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_057",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_058",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_059",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_060",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_061",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_062",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_063",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "4",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_064",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_065",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_066",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_067",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_068",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_069",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_070",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_071",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_072",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_073",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_074",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_075",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_076",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_077",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_078",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_079",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_080",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_081",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_082",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_083",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_084",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_085",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_086",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_087",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_088",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_089",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_090",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_091",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_092",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_093",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_094",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_095",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_096",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_097",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_098",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_099",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_100",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      }
+    ]
+  },
+  "arc_easy_fixed:Q4_K_S": {
+    "variant": "Q4_K_S",
+    "tag": "arc_easy_fixed",
+    "status": "success",
+    "accuracy_pct": 81.0,
+    "wilson_ci_95_pct": 7.6,
+    "correct": 81,
+    "total": 100,
+    "per_category": {
+      "arc_easy": {
+        "accuracy_pct": 81.0,
+        "correct": 81,
+        "total": 100
+      }
+    },
+    "per_question": [
+      {
+        "prompt_id": "arc_001",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_002",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_003",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_004",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_005",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_006",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_007",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_008",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_009",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_010",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_011",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_012",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_013",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_014",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_015",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_016",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_017",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_018",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_019",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_020",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_021",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_022",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_023",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_024",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_025",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_026",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_027",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_028",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_029",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_030",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_031",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_032",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_033",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_034",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_035",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_036",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_037",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_038",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_039",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_040",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_041",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_042",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_043",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_044",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_045",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_046",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_047",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_048",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_049",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_050",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_051",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_052",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_053",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_054",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_055",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_056",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_057",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_058",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_059",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_060",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_061",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_062",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_063",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "4",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_064",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_065",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_066",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_067",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_068",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_069",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_070",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_071",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_072",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_073",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_074",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_075",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_076",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_077",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_078",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_079",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_080",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_081",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_082",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_083",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_084",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_085",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_086",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_087",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_088",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_089",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_090",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_091",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_092",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_093",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_094",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_095",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_096",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_097",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_098",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_099",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_100",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      }
+    ]
+  },
+  "arc_easy_fixed:Q4_K_M": {
+    "variant": "Q4_K_M",
+    "tag": "arc_easy_fixed",
+    "status": "success",
+    "accuracy_pct": 82.0,
+    "wilson_ci_95_pct": 7.5,
+    "correct": 82,
+    "total": 100,
+    "per_category": {
+      "arc_easy": {
+        "accuracy_pct": 82.0,
+        "correct": 82,
+        "total": 100
+      }
+    },
+    "per_question": [
+      {
+        "prompt_id": "arc_001",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_002",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_003",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_004",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_005",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_006",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_007",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_008",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_009",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_010",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_011",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_012",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_013",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_014",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_015",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_016",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_017",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_018",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_019",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_020",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_021",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_022",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_023",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_024",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_025",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_026",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_027",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_028",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_029",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_030",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_031",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_032",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_033",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_034",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_035",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_036",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_037",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_038",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_039",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_040",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_041",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_042",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_043",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_044",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_045",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_046",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_047",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_048",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_049",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_050",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_051",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_052",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_053",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_054",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_055",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_056",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_057",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_058",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_059",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_060",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_061",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_062",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_063",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "4",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_064",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_065",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_066",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_067",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_068",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_069",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_070",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_071",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_072",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_073",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_074",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_075",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_076",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_077",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_078",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_079",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_080",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_081",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_082",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_083",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_084",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_085",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_086",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_087",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_088",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_089",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_090",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_091",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_092",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_093",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_094",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_095",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_096",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_097",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_098",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_099",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_100",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      }
+    ]
+  },
+  "arc_easy_fixed:Q5_K_M": {
+    "variant": "Q5_K_M",
+    "tag": "arc_easy_fixed",
+    "status": "success",
+    "accuracy_pct": 81.0,
+    "wilson_ci_95_pct": 7.6,
+    "correct": 81,
+    "total": 100,
+    "per_category": {
+      "arc_easy": {
+        "accuracy_pct": 81.0,
+        "correct": 81,
+        "total": 100
+      }
+    },
+    "per_question": [
+      {
+        "prompt_id": "arc_001",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_002",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_003",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_004",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_005",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_006",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_007",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_008",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_009",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_010",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_011",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_012",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_013",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_014",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_015",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_016",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_017",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_018",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_019",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_020",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_021",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_022",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_023",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_024",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_025",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_026",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_027",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_028",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_029",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_030",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_031",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_032",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_033",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_034",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_035",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_036",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_037",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_038",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_039",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_040",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_041",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_042",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_043",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_044",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_045",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_046",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_047",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_048",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_049",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_050",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_051",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_052",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_053",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_054",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_055",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_056",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_057",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_058",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_059",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_060",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_061",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_062",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_063",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "4",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_064",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_065",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_066",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_067",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_068",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_069",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_070",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_071",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_072",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_073",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_074",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_075",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_076",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_077",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_078",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_079",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_080",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_081",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_082",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_083",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_084",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_085",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_086",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_087",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_088",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_089",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_090",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_091",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_092",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_093",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_094",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_095",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_096",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_097",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_098",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_099",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_100",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      }
+    ]
+  },
+  "arc_easy_fixed:Q6_K": {
+    "variant": "Q6_K",
+    "tag": "arc_easy_fixed",
+    "status": "success",
+    "accuracy_pct": 79.0,
+    "wilson_ci_95_pct": 7.9,
+    "correct": 79,
+    "total": 100,
+    "per_category": {
+      "arc_easy": {
+        "accuracy_pct": 79.0,
+        "correct": 79,
+        "total": 100
+      }
+    },
+    "per_question": [
+      {
+        "prompt_id": "arc_001",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_002",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_003",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_004",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_005",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_006",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_007",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_008",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_009",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_010",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_011",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_012",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_013",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_014",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_015",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_016",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_017",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_018",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_019",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_020",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_021",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_022",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_023",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_024",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_025",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_026",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_027",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_028",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_029",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_030",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_031",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_032",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_033",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_034",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_035",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_036",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_037",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_038",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_039",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_040",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_041",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_042",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_043",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_044",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_045",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_046",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_047",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_048",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_049",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_050",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_051",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_052",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_053",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_054",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_055",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_056",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_057",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_058",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_059",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_060",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_061",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_062",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_063",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "4",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_064",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_065",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_066",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_067",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_068",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_069",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_070",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_071",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_072",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_073",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_074",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_075",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_076",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_077",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_078",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_079",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_080",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_081",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_082",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_083",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_084",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_085",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_086",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_087",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_088",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_089",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_090",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_091",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_092",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_093",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_094",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_095",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_096",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_097",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_098",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_099",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_100",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      }
+    ]
+  },
+  "arc_easy_fixed:Q8_0": {
+    "variant": "Q8_0",
+    "tag": "arc_easy_fixed",
+    "status": "success",
+    "accuracy_pct": 80.0,
+    "wilson_ci_95_pct": 7.8,
+    "correct": 80,
+    "total": 100,
+    "per_category": {
+      "arc_easy": {
+        "accuracy_pct": 80.0,
+        "correct": 80,
+        "total": 100
+      }
+    },
+    "per_question": [
+      {
+        "prompt_id": "arc_001",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_002",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_003",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_004",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_005",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_006",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_007",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_008",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_009",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_010",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_011",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_012",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_013",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_014",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_015",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_016",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_017",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_018",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_019",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_020",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_021",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_022",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_023",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_024",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_025",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_026",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_027",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_028",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_029",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_030",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_031",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_032",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_033",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_034",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_035",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_036",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_037",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_038",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_039",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_040",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_041",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_042",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_043",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_044",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_045",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_046",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_047",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_048",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_049",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_050",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_051",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_052",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_053",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_054",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_055",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_056",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_057",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_058",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_059",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_060",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_061",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "D",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_062",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_063",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "4",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_064",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "2",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_065",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_066",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_067",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_068",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_069",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_070",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_071",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_072",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "A",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_073",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_074",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_075",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_076",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_077",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_078",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_079",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_080",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_081",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "D",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_082",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_083",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_084",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_085",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_086",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_087",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_088",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "No",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_089",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_090",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "D",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_091",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_092",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_093",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "3",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_094",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_095",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "B",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_096",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_097",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "A",
+        "model_output": "A",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_098",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "C",
+        "correct": true,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_099",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "B",
+        "model_output": "C",
+        "correct": false,
+        "status": "success"
+      },
+      {
+        "prompt_id": "arc_100",
+        "category": "arc_easy",
+        "answer_type": "choice",
+        "expected": "C",
+        "model_output": "B",
+        "correct": false,
+        "status": "success"
+      }
+    ]
+  }
+}

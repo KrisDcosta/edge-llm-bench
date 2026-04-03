@@ -62,12 +62,19 @@ hr()  { log "$(printf '=%.0s' $(seq 72))"; }
 
 RESUME=0
 VARIANTS=()
-for arg in "$@"; do
+i=1
+while [ $i -le $# ]; do
+    arg="${!i}"
     case "$arg" in
         --resume) RESUME=1 ;;
+        --trials)
+            i=$(( i + 1 ))
+            NUM_TRIALS="${!i}" ;;
+        --trials=*) NUM_TRIALS="${arg#--trials=}" ;;
         Q2_K|Q3_K_M|Q4_K_S|Q4_K_M|Q5_K_M|Q6_K|Q8_0) VARIANTS+=("$arg") ;;
         *) printf 'Unknown arg: %s\n' "$arg" >&2; exit 1 ;;
     esac
+    i=$(( i + 1 ))
 done
 [ ${#VARIANTS[@]} -eq 0 ] && VARIANTS=("${ALL_VARIANTS[@]}")
 

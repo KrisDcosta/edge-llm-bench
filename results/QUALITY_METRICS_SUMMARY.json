@@ -1,0 +1,47 @@
+{
+  "status": "\u2705 Partial Complete (4/7 variants)",
+  "datasets": {
+    "test_arc_easy": {
+      "Q2_K": 0.0
+    },
+    "arc_easy": {
+      "Q2_K": 0.0,
+      "Q4_K_M": 0.0,
+      "Q6_K": 0.0,
+      "Q8_0": 0.0
+    },
+    "arc_challenge": {
+      "Q2_K": 0.0,
+      "Q4_K_M": 0.0,
+      "Q6_K": 0.0,
+      "Q8_0": 0.0
+    },
+    "boolq": {
+      "Q2_K": 0.0,
+      "Q4_K_M": 0.0,
+      "Q6_K": 0.0,
+      "Q8_0": 0.0
+    },
+    "hellaswag": {
+      "Q2_K": 0.0,
+      "Q4_K_M": 0.0,
+      "Q6_K": 0.0,
+      "Q8_0": 0.0
+    },
+    "mmlu": {
+      "Q2_K": 0.0,
+      "Q4_K_M": 0.0,
+      "Q6_K": 0.0,
+      "Q8_0": 0.0
+    }
+  },
+  "coverage": {
+    "Q2_K": "Complete (5 datasets)",
+    "Q4_K_M": "Complete (5 datasets)",
+    "Q6_K": "Complete (5 datasets)",
+    "Q8_0": "Complete (5 datasets)",
+    "Q3_K_M": "Missing",
+    "Q4_K_S": "Missing",
+    "Q5_K_M": "Missing"
+  }
+}

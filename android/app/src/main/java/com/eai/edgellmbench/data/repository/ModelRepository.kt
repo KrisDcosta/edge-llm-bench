@@ -206,9 +206,11 @@ object ModelRepository {
     val knownVariants = listOf(
         VariantInfo("Q2_K",   2, 1.3f, "Smallest — fastest decode"),
         VariantInfo("Q3_K_M", 3, 1.6f),
-        VariantInfo("Q4_K_M", 4, 2.0f, "Recommended — Pareto optimal"),
+        VariantInfo("Q4_K_S", 4, 1.8f, "Best efficiency — Pareto optimal"),
+        VariantInfo("Q4_K_M", 4, 2.0f, "Balanced quality & speed"),
+        VariantInfo("Q5_K_M", 5, 2.3f, "High quality, moderate size"),
         VariantInfo("Q6_K",   6, 2.7f),
-        VariantInfo("Q8_0",   8, 3.4f, "High quality — 6 GB tight"),
+        VariantInfo("Q8_0",   8, 3.4f, "Near-lossless quality"),
         VariantInfo("F16",   16, 6.4f, "Expected OOM on 6 GB device"),
     )
 }

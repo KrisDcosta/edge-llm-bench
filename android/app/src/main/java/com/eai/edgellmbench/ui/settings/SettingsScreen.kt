@@ -264,40 +264,16 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                 }
             }
 
-            // ── Extensibility stubs ───────────────────────────────────────────
-
-            SettingsSection(title = "Coming Soon") {
-                ComingSoonItem(
-                    "RAG / Document Chat",
-                    "Attach PDFs; inject top-k chunks into system prompt",
-                )
-                HorizontalDivider()
-                ComingSoonItem(
-                    "Voice Input",
-                    "Whisper-based speech-to-text pipeline",
-                )
-                HorizontalDivider()
-                ComingSoonItem(
-                    "Conversation History",
-                    "Browse past chat sessions (benchmark history available in Benchmark tab)",
-                )
-                HorizontalDivider()
-                ComingSoonItem(
-                    "GPU Backend",
-                    "Vulkan compute via llama.cpp ggml-vulkan.so",
-                )
-            }
-
             // ── About ─────────────────────────────────────────────────────────
 
             SettingsSection(title = "About") {
-                AboutRow("App version", "1.0")
+                AboutRow("App version", "1.1")
                 HorizontalDivider()
                 AboutRow("Inference backend", "llama.cpp (NDK arm64-v8a)")
                 HorizontalDivider()
                 AboutRow("Model family", "Llama 3.2 3B Instruct GGUF")
                 HorizontalDivider()
-                AboutRow("Device target", "Pixel 6a · Google Tensor G1 · 6 GB LPDDR5")
+                AboutRow("Device target", "Pixel 6a · Google Tensor (Whitechapel) · 6 GB LPDDR5")
                 HorizontalDivider()
                 AboutRow("Min SDK", "API 33 (Android 13)")
             }
@@ -416,31 +392,6 @@ private fun <T> DropdownSetting(
                 }
             }
         }
-    }
-}
-
-// ── Coming soon item ──────────────────────────────────────────────────────────
-
-@Composable
-private fun ComingSoonItem(title: String, description: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyMedium)
-            Text(
-                description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Text(
-            text = "Soon",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.tertiary,
-        )
     }
 }
 

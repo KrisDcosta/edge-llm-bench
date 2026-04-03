@@ -53,6 +53,11 @@ are sized N-64 tokens so the KV cache is actually saturated. Earlier runs using
 | fig8_latency_distribution | `figures/fig8_latency_distribution.png` | pixel_llama_tps_20260325_120022 |
 | fig9_model_size_vs_decode_tps | `figures/fig9_model_size_vs_decode_tps.png` | pixel_llama_tps_20260325_120022 |
 | fig_kv_cliff | `figures/fig_kv_cliff.png` | pixel_llama_cliff_filled_20260326_132101 |
+| fig_cliff_crossplat | `figures/fig_cliff_crossplat.png` | ARM + Metal 2-panel (old) |
+| fig_cliff_crossplat_sel | `figures/fig_cliff_crossplat_sel.png` | ARM + Metal selected variants 2-panel |
+| **fig_cliff_3plat_sel** | **`figures/fig_cliff_3plat_sel.png`** | **ARM + x86 + Metal 3-panel (current paper figure)** |
+| fig_ppl_vs_accuracy | `figures/fig_ppl_vs_accuracy.png` | quality_scores.json PPL × accuracy scatter |
+| fig_xplat_quality_4bench | `figures/fig_xplat_quality_4bench.png` | cross-platform quality 4-benchmark heatmap |
 
 ### Cross-Device (x86 + M4 Metal) — RQ4 / §5.5
 
@@ -60,13 +65,17 @@ are sized N-64 tokens so the KV cache is actually saturated. Earlier runs using
 |-------|--------|
 | x86 TPS (Q2_K 14.05, Q4_K_S 8.93, Q4_K_M 8.55, Q6_K 6.80 tok/s) | `results/x86_tps_results.json` |
 | x86 filled-context cliff (Q2_K −51% at ctx=2048, cliff ctx=1200–1300) | `results/x86_llama_cliff_20260329_002333/` |
-| x86 quality (BoolQ, ARC-Easy, ARC-Challenge, TruthfulQA) | `results/quality_scores.json` keys `x86_*` |
+| x86 quality — all 6 benchmarks × 7 variants (HellaSwag, MMLU, BoolQ, TruthfulQA, ARC-C, ARC-E) | `results/quality_scores.json` keys `x86_hellaswag:*`, `x86_mmlu:*`, `x86_boolq:*`, `x86_truthfulqa:*`, `x86_arc_challenge:*`, `x86_arc_easy:*` |
 | x86 PPL (Q2_K 11.73, Q4_K_S 9.74, Q4_K_M 9.75, Q8_0 9.71) | `results/x86_perplexity_results.json` |
 | M4 Metal TPS (Q4_K_S 19.9, Q4_K_M 19.2, Q2_K 17.8, Q8_0 6.4 tok/s) | `results/m4_llama_tps_20260326_001546/` |
+| M4 Metal cliff (all 7 variants flat ±2% ctx=1024–2048, no cliff) | `results/m4_metal_cliff_20260323_015934/` |
+| Pixel Qwen TPS (Q2_K=13.9 fastest, Q6_K=7.25 slowest; non-monotonic ordering replication) | `results/pixel_qwen_tps_20260326_033619/` |
+| Pixel Qwen cliff sweep (5 trials, 7 variants × 11 ctx; confirms Q2_K cliff on different model) | `results/pixel_qwen_cliff_filled_20260330_004954/` ⏳ in progress |
 
 **Platform metadata:**
 - x86: Intel i5-1235U, 12th Gen, Windows 11, 6 threads, llama-cli CPU-only (ngl=0)
-- M4: Mac M4, Metal GPU (16-core), llama-bench ngl=99, 10 trials
+- M4: MacBook Air M4, Metal GPU (16-core), llama-bench ngl=99, 10 trials
+- Pixel 6a Qwen: ARM CPU, 4 threads, llama-completion, Qwen 2.5 1.5B Instruct GGUF
 
 ---
 
@@ -80,12 +89,34 @@ These directories exist but are NOT cited in the paper. Kept for audit trail.
 | `pixel_cliff_sweep_20260321_081838/` | ⚠️ Superseded | Early sweep, stale methodology |
 | `pixel_cliff_sweep_20260324_104839/` | ⚠️ Superseded | Pre-filled-context run |
 | `kv_cache_cliff_20260320_021544/` | ⚠️ Superseded | Allocation-only |
-| `m4_llama_cliff_20260325_*/` | 🔵 Exploratory | M4 cliff sweeps; not yet in paper |
-| `m4_metal_cliff_20260321_*/` | 🔵 Exploratory | Early M4 cliff runs |
+| `m4_llama_cliff_20260325_*/` | ⚠️ Superseded | decode_tps=0 (derived metric parsing failure) |
+| `m4_metal_cliff_20260321_*/` | ⚠️ Superseded | Early M4 cliff runs, incomplete |
+| `m4_metal_cliff_20260323_015934/` | ✅ Cited (§5.4 Metal cliff elimination) | Complete: 7 variants × 13 ctx × 5 trials, all valid |
 | `pixel_overnight_20260320_021818/` | 🔵 Exploratory | Overnight sweep, pre-final methodology |
 | `pixel_power_20260320_173728/` | ✅ Cited (fig5) | Battery measurement run |
 | `pixel_6a_ppl_final/` | ✅ Cited (Table 1 PPL) | Full WikiText-2 PPL for Q2_K, Q3_K_M |
 
 ---
 
-*Last updated: 2026-03-27*
+*Last updated: 2026-04-02*
+
+---
+
+## All Runs Complete — No Active Runs
+
+All primary experiments finished as of 2026-04-02.
+
+| Completed Run | Final Status |
+|---------------|-------------|
+| `pixel_qwen_cliff_filled_20260330_235410/` | ✅ 7 variants × 55 rows each; complete |
+| `pixel_llama_cliff_filled_canonical_n10/` | ✅ All 7 variants n=10; Q2_K cliff −48% at ctx≈512 |
+| `m4_metal_cliff_20260323_015934/` | ✅ All 7 variants × 13 ctx × 5 trials; flat ±2%, no cliff |
+| `x86_llama_cliff_20260329_002333/` | ✅ Q2_K −51% at ctx=2048, cliff ctx=1200–1300 |
+
+### Superseded / Abandoned (not cited)
+
+| Directory | Reason |
+|-----------|--------|
+| `pixel_qwen_cliff_filled_20260330_004954/` | Superseded by `20260330_235410/` (orphaned process contamination) |
+| `pixel_llama_cliff_filled_20260330_172822/` | Deleted — contaminated by orphaned llama-perplexity process |
+| `mac_humaneval_*/` | Methodology broken (chat-template incompatibility); archived |

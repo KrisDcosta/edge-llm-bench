@@ -1,0 +1,2 @@
+{"variant":"Q2_K","ppl":null,"ctx_size":512,"corpus":"wikitext2_full","corpus_bytes":1230111,"threads":4,"device":"Pixel6a","model":"Llama-3.2-3B-Instruct-Q2_K","raw_local":"results/pixel_wikitext_ppl_20260330_114005/ppl_raw_Q2_K.txt","n_chunks":0
+0,"ts":"2026-03-30T23:53:30Z"}
