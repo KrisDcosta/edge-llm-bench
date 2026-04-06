@@ -1,47 +1,7 @@
 {
-  "status": "\u2705 Partial Complete (4/7 variants)",
-  "datasets": {
-    "test_arc_easy": {
-      "Q2_K": 0.0
-    },
-    "arc_easy": {
-      "Q2_K": 0.0,
-      "Q4_K_M": 0.0,
-      "Q6_K": 0.0,
-      "Q8_0": 0.0
-    },
-    "arc_challenge": {
-      "Q2_K": 0.0,
-      "Q4_K_M": 0.0,
-      "Q6_K": 0.0,
-      "Q8_0": 0.0
-    },
-    "boolq": {
-      "Q2_K": 0.0,
-      "Q4_K_M": 0.0,
-      "Q6_K": 0.0,
-      "Q8_0": 0.0
-    },
-    "hellaswag": {
-      "Q2_K": 0.0,
-      "Q4_K_M": 0.0,
-      "Q6_K": 0.0,
-      "Q8_0": 0.0
-    },
-    "mmlu": {
-      "Q2_K": 0.0,
-      "Q4_K_M": 0.0,
-      "Q6_K": 0.0,
-      "Q8_0": 0.0
-    }
-  },
-  "coverage": {
-    "Q2_K": "Complete (5 datasets)",
-    "Q4_K_M": "Complete (5 datasets)",
-    "Q6_K": "Complete (5 datasets)",
-    "Q8_0": "Complete (5 datasets)",
-    "Q3_K_M": "Missing",
-    "Q4_K_S": "Missing",
-    "Q5_K_M": "Missing"
-  }
+  "_note": "DEPRECATED — this file contained stale placeholder values (all 0.0) from an incomplete evaluation run. It has been superseded by quality_scores.json which contains the correct validated accuracy values. Do not use this file for any analysis.",
+  "_status": "deprecated",
+  "_superseded_by": "results/quality_scores.json",
+  "_archived_date": "2026-04-06",
+  "_original_problem": "All accuracy_pct values were 0.0 — result of a benchmark script crash before evaluation completed. The values in quality_scores.json (arc_challenge:Q4_K_M=60%, hellaswag:Q4_K_M=43%, mmlu:Q4_K_M=47%, truthfulqa:Q4_K_M=60%) are the correct validated results."
 }

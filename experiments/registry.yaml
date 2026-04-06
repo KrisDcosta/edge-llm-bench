@@ -709,7 +709,9 @@ experiments:
     trials: 15
     prompt_set_id: prompt-suite-v1
     status: complete
-    notes: "Thread sweep: 1 thread baseline"
+    notes: "✅ COMPLETE (2026-04-06, pixel_threads_q4km_20260406_100148). Baseline: 3.38 t/s. Single P-core (Cortex-X1)."
+    data_sources:
+      - results/pixel_threads_q4km_20260406_100148/threads_1.jsonl
 
   - id: q4km-threads-2
     quant_bits: 4
@@ -721,7 +723,9 @@ experiments:
     trials: 15
     prompt_set_id: prompt-suite-v1
     status: complete
-    notes: "Thread sweep: 2 threads"
+    notes: "✅ COMPLETE (2026-04-06, pixel_threads_q4km_20260406_100148). Result: 3.78 t/s, 1.12x speedup. Both P-cores saturated."
+    data_sources:
+      - results/pixel_threads_q4km_20260406_100148/threads_2.jsonl
 
   - id: q4km-threads-4
     quant_bits: 4
@@ -733,7 +737,9 @@ experiments:
     trials: 15
     prompt_set_id: prompt-suite-v1
     status: complete
-    notes: "Thread sweep: 4 threads (default — reference point)"
+    notes: "✅ COMPLETE (2026-04-06, pixel_threads_q4km_20260406_100148). Result: 4.81 t/s, 1.42x speedup. P-cores + 2 E-cores."
+    data_sources:
+      - results/pixel_threads_q4km_20260406_100148/threads_4.jsonl
 
   - id: q4km-threads-8
     quant_bits: 4
@@ -745,7 +751,9 @@ experiments:
     trials: 15
     prompt_set_id: prompt-suite-v1
     status: complete
-    notes: "Thread sweep: 8 threads (all cores including LITTLE cores)"
+    notes: "✅ COMPLETE (2026-04-06, pixel_threads_q4km_20260406_100148). Result: 3.83 t/s, 1.13x speedup (regression). E-core saturation."
+    data_sources:
+      - results/pixel_threads_q4km_20260406_100148/threads_8.jsonl
 
   # ===========================================================================
   # GROUP 7: F16 extended — ctx=256, extended trials for statistical validity

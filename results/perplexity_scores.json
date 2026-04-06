@@ -17,6 +17,18 @@
     "corpus": "wikitext2_sample",
     "corpus_bytes": 12014
   },
+  "Q4_K_S": {
+    "perplexity": null,
+    "perplexity_status": "not_evaluated",
+    "corpus": null,
+    "note": "Q4_K_S perplexity not collected — variant added after initial perplexity sweep. Re-run scheduled."
+  },
+  "Q5_K_M": {
+    "perplexity": null,
+    "perplexity_status": "not_evaluated",
+    "corpus": null,
+    "note": "Q5_K_M perplexity not collected — variant added after initial perplexity sweep. Re-run scheduled."
+  },
   "Q6_K": {
     "perplexity": 9.752,
     "perplexity_status": "success",
