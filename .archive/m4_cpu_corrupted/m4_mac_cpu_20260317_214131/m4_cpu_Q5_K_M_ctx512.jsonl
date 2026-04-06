@@ -1,0 +1,405 @@
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 1,
+  "timestamp": "2026-03-18T07:00:00Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.010 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 2,
+  "timestamp": "2026-03-18T07:00:31Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.010 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 3,
+  "timestamp": "2026-03-18T07:01:01Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.010 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 4,
+  "timestamp": "2026-03-18T07:01:32Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.010 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 5,
+  "timestamp": "2026-03-18T07:02:02Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.011 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 6,
+  "timestamp": "2026-03-18T07:02:32Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.010 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 7,
+  "timestamp": "2026-03-18T07:03:03Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.010 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 8,
+  "timestamp": "2026-03-18T07:03:35Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.010 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 9,
+  "timestamp": "2026-03-18T07:04:06Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.015 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 10,
+  "timestamp": "2026-03-18T07:04:36Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.014 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 11,
+  "timestamp": "2026-03-18T07:05:07Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.010 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 12,
+  "timestamp": "2026-03-18T07:05:37Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.011 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 13,
+  "timestamp": "2026-03-18T07:06:07Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.010 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 14,
+  "timestamp": "2026-03-18T07:06:38Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.010 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}
+{
+  "variant": "Q5_K_M",
+  "context_length": 512,
+  "trial": 15,
+  "timestamp": "2026-03-18T07:07:08Z",
+  "device": "M4 Mac",
+  "backend": "CPU",
+  "model_size_gb": 3.2,
+  "output_tokens": 128,
+  "decode_tps": 19069.67,
+  "raw_output": "ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices"
+"ggml_metal_library_init: using embedded metal library"
+"ggml_metal_library_init: loaded in 0.011 sec"
+"ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)"
+"ggml_metal_device_init: GPU name:   MTL0"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyCommon3 (3003)"
+"ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)"
+"ggml_metal_device_init: simdgroup reduction   = true"
+"ggml_metal_device_init: simdgroup matrix mul. = true"
+"ggml_metal_device_init: has unified memory    = true"
+"ggml_metal_device_init: has bfloat            = true"
+"ggml_metal_device_init: has tensor            = false"
+"ggml_metal_device_init: use residency sets    = true"
+"ggml_metal_device_init: use shared buffers    = true"
+"ggml_metal_device_init: recommendedMaxWorkingSetSize  = 19069.67 MB"
+}

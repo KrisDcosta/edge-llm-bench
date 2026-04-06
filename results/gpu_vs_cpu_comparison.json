@@ -19,9 +19,11 @@
     ],
     "generated_at": "2026-03-17",
     "data_quality": {
-      "status": "CPU data corrupted",
-      "issue": "All CPU decode_tps values are 19069.67 (extracted from GPU memory spec). CPU benchmarks cannot be reliably compared.",
-      "gpu_data_status": "Valid - GPU metrics are reliable"
+      "status": "CPU data corrupted — DO NOT USE CPU columns",
+      "issue": "All CPU decode_tps values are 19069.67 — this is recommendedMaxWorkingSetSize (GPU memory spec in MB) incorrectly parsed as tokens/sec. M4 CPU data archived to .archive/m4_cpu_corrupted/. CPU columns in this file are invalid.",
+      "gpu_data_status": "Valid — GPU (Metal) metrics are reliable and usable",
+      "valid_columns": ["Variant", "Size (GB)", "GPU TPS", "GPU Efficiency (TPS/GB)"],
+      "invalid_columns": ["CPU TPS"]
     }
   },
   "main_comparison_ctx2048": [
