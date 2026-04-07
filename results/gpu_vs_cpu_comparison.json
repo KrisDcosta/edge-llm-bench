@@ -1,7 +1,7 @@
 {
   "metadata": {
     "gpu_directory": "/Users/krisdcosta/291_EAI/results/m4_mac_metal_20260317_035638",
-    "cpu_directory": "/Users/krisdcosta/291_EAI/results/m4_mac_cpu_20260317_214131",
+    "cpu_directory": "/Users/krisdcosta/291_EAI/results/m4_cpu_tps_20260406_203938",
     "variants": [
       "Q2_K",
       "Q3_K_M",
@@ -17,64 +17,85 @@
       1024,
       2048
     ],
-    "generated_at": "2026-03-17",
+    "generated_at": "2026-04-06",
     "data_quality": {
-      "status": "CPU data corrupted — DO NOT USE CPU columns",
-      "issue": "All CPU decode_tps values are 19069.67 — this is recommendedMaxWorkingSetSize (GPU memory spec in MB) incorrectly parsed as tokens/sec. M4 CPU data archived to .archive/m4_cpu_corrupted/. CPU columns in this file are invalid.",
-      "gpu_data_status": "Valid — GPU (Metal) metrics are reliable and usable",
-      "valid_columns": ["Variant", "Size (GB)", "GPU TPS", "GPU Efficiency (TPS/GB)"],
-      "invalid_columns": ["CPU TPS"]
+      "status": "VALID \u2014 both GPU and CPU data verified clean",
+      "gpu_data_status": "Valid \u2014 GPU (Metal) metrics from m4_llama_tps_20260326_001546 (n=10)",
+      "cpu_data_status": "Valid \u2014 M4 CPU metrics from m4_cpu_tps_20260406_203938 (n=10, llama-bench -ngl 0)",
+      "valid_columns": [
+        "Variant",
+        "Size (GB)",
+        "GPU TPS",
+        "CPU TPS",
+        "GPU Efficiency (TPS/GB)",
+        "GPU/CPU Ratio"
+      ],
+      "previously_corrupted": "Old m4_mac_cpu_20260317_* data archived to .archive/m4_cpu_corrupted/ \u2014 decode_tps=19069.67 was GPU memory spec, not throughput"
     }
   },
   "main_comparison_ctx2048": [
     {
       "Variant": "Q2_K",
-      "Size (GB)": 3.2,
-      "GPU TPS": 30.42,
-      "CPU TPS": 19069.67,
-      "GPU Efficiency (TPS/GB)": 9.51
+      "Size (GB)": 1.3,
+      "GPU TPS": 17.79,
+      "CPU TPS": 12.31,
+      "CPU TPS std": 0.34,
+      "GPU/CPU Ratio": 1.45,
+      "GPU Efficiency (TPS/GB)": 5.56
     },
     {
       "Variant": "Q3_K_M",
-      "Size (GB)": 3.2,
-      "GPU TPS": 26.15,
-      "CPU TPS": 19069.67,
-      "GPU Efficiency (TPS/GB)": 8.17
+      "Size (GB)": 1.6,
+      "GPU TPS": 15.6,
+      "CPU TPS": 11.48,
+      "CPU TPS std": 0.2,
+      "GPU/CPU Ratio": 1.36,
+      "GPU Efficiency (TPS/GB)": 4.88
     },
     {
       "Variant": "Q4_K_S",
-      "Size (GB)": 3.2,
-      "GPU TPS": 27.01,
-      "CPU TPS": 19069.67,
-      "GPU Efficiency (TPS/GB)": 8.44
+      "Size (GB)": 1.56,
+      "GPU TPS": 19.88,
+      "CPU TPS": 13.16,
+      "CPU TPS std": 0.29,
+      "GPU/CPU Ratio": 1.51,
+      "GPU Efficiency (TPS/GB)": 6.21
     },
     {
       "Variant": "Q4_K_M",
-      "Size (GB)": 3.2,
-      "GPU TPS": 30.62,
-      "CPU TPS": 19069.67,
-      "GPU Efficiency (TPS/GB)": 9.57
+      "Size (GB)": 2.0,
+      "GPU TPS": 19.22,
+      "CPU TPS": 12.51,
+      "CPU TPS std": 0.61,
+      "GPU/CPU Ratio": 1.54,
+      "GPU Efficiency (TPS/GB)": 6.01
     },
     {
       "Variant": "Q5_K_M",
-      "Size (GB)": 3.2,
-      "GPU TPS": 20.25,
-      "CPU TPS": 19069.67,
-      "GPU Efficiency (TPS/GB)": 6.33
+      "Size (GB)": 2.3,
+      "GPU TPS": 13.35,
+      "CPU TPS": 10.59,
+      "CPU TPS std": 0.16,
+      "GPU/CPU Ratio": 1.26,
+      "GPU Efficiency (TPS/GB)": 4.17
     },
     {
       "Variant": "Q6_K",
-      "Size (GB)": 3.2,
-      "GPU TPS": 21.43,
-      "CPU TPS": 19069.67,
-      "GPU Efficiency (TPS/GB)": 6.7
+      "Size (GB)": 2.7,
+      "GPU TPS": 7.02,
+      "CPU TPS": 9.29,
+      "CPU TPS std": 0.15,
+      "GPU/CPU Ratio": 0.76,
+      "GPU Efficiency (TPS/GB)": 2.19
     },
     {
       "Variant": "Q8_0",
-      "Size (GB)": 3.2,
-      "GPU TPS": 17.51,
-      "CPU TPS": 19069.67,
-      "GPU Efficiency (TPS/GB)": 5.47
+      "Size (GB)": 3.4,
+      "GPU TPS": 6.39,
+      "CPU TPS": 12.6,
+      "CPU TPS std": 0.12,
+      "GPU/CPU Ratio": 0.51,
+      "GPU Efficiency (TPS/GB)": 2.0
     }
   ],
   "comparison_by_context": {
@@ -407,5 +428,46 @@
     "total_context_lengths": 4,
     "gpu_files_processed": 28,
     "cpu_files_processed": 28
+  },
+  "gpu_cpu_analysis": {
+    "note": "M4 CPU (ngl=0) vs M4 Metal GPU comparison. Collected 2026-04-06 with corrected m4_cpu_tps.sh script.",
+    "key_finding": "Metal REVERSES ordering vs CPU: Q4_K_S leads on both Metal and M4 CPU, but Q8_0 rank flips from CPU=2 to Metal=7 (GPU/CPU=0.51x). Q6_K also slower on Metal than CPU (0.76x).",
+    "m4_cpu_ordering": [
+      "Q4_K_S",
+      "Q8_0",
+      "Q4_K_M",
+      "Q2_K",
+      "Q3_K_M",
+      "Q5_K_M",
+      "Q6_K"
+    ],
+    "m4_metal_ordering": [
+      "Q4_K_S",
+      "Q4_K_M",
+      "Q2_K",
+      "Q3_K_M",
+      "Q5_K_M",
+      "Q6_K",
+      "Q8_0"
+    ],
+    "gpu_slower_than_cpu": {
+      "Q8_0": {
+        "gpu_tps": 6.39,
+        "cpu_tps": 12.6,
+        "ratio": 0.51,
+        "note": "Metal has no optimized Q8_0 kernel; trivial CPU unpack faster than GPU dispatch overhead"
+      },
+      "Q6_K": {
+        "gpu_tps": 7.02,
+        "cpu_tps": 9.29,
+        "ratio": 0.76,
+        "note": "Q6_K complex bit-packing provides no GPU kernel advantage over CPU"
+      }
+    },
+    "m4_cpu_vs_arm_pixel6a": {
+      "note": "M4 CPU is 1.4-2.7x faster than Pixel 6a ARM despite same 4-thread config \u2014 reflects M4 higher IPC and memory bandwidth",
+      "Q2_K_ratio": 1.64,
+      "Q6_K_ratio": 2.63
+    }
   }
 }

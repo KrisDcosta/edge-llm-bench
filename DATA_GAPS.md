@@ -1,5 +1,5 @@
 # Data Gaps — Required Re-runs Before Publication
-Last updated: 2026-04-06 (GAP-1, GAP-2, GAP-thread-sweep COMPLETE ✅; GAP-7 script ready)
+Last updated: 2026-04-06 (GAP-1, GAP-2, GAP-thread-sweep, GAP-7 COMPLETE ✅; GAP-5/6 scripts ready)
 
 All entries represent experiments that must be completed and validated
 before any downstream analysis, figures, or paper sections that depend
@@ -76,35 +76,38 @@ on incomplete data.
 ## MEDIUM PRIORITY — Strengthens paper
 
 ### GAP-5: x86 cliff sweep with filled-context methodology (n=5)
-- **What:** Validate KV-cache cliff formula on x86 (predicted cliff_ctx ~1280 tokens,
-  1.25 MB L2 / 1024 = 1220 within 2.4%)
-- **Current state:** x86 results exist but methodology (fresh vs filled) unconfirmed
-- **Script:** `scripts/bench/x86_llama_cliff.py`
-- **Device:** x86 laptop (Intel i5-1235U) — not Pixel
-- **Blocks:** Cross-platform cliff table in §8
+- **What:** Increase x86 cliff trials from n=3 to n=5 for publishable CI.
+  Validate KV-cache cliff formula (predicted cliff_ctx ~1280 tokens, i5-1235U 1.25 MB L2).
+- **Current state:** n=3 data confirmed filled-context (`methodology: "filled_context"` in records).
+  Ordering confirmed in existing n=3 data (table in §8). Needs n≥5 for CI.
+- **Script:** `scripts/bench/x86_llama_cliff.py` — add `--trials 5` flag
+- **Command:** `py -3 scripts/bench/x86_llama_cliff.py --trials 5 --resume`
+  *(need to add `--trials` CLI flag to script, currently hardcoded NUM_TRIALS=3)*
+- **Device:** x86 laptop (Intel i5-1235U, Windows/Linux)
+- **Blocks:** Publishable CIs for cross-platform cliff table (currently n=3 "indicative only")
+- **Est. runtime:** ~2 h (7 variants × 11 ctx × 5 trials)
 
 ### GAP-6: imatrix calibration quality delta (n >= 3 per benchmark)
-- **What:** BoolQ/TruthfulQA delta with vs without imatrix for Q2_K and Q3_K_M.
-  Currently: Q2_K -5%, Q3_K_M -8% — from single eval pass (n=1, not publishable).
-- **Blocks:** §7 imatrix subsection
+- **What:** BoolQ accuracy delta with vs without imatrix for Q2_K and Q3_K_M.
+  Prior data: Q2_K -5pp, Q3_K_M -8pp — from single eval pass (n=1, not publishable).
+  Confirms (or refutes) that HellaSwag collapse is a regime failure, not weight-precision issue.
+- **Script:** `scripts/bench/pixel_imatrix_quality.sh` (NEW — template with eval loop stub)
+  Requires: (1) imatrix-quantized models uploaded to device, (2) BoolQ eval loop from pixel_quality.sh integrated
+- **Command:** `bash scripts/bench/pixel_imatrix_quality.sh`
+- **Device:** Pixel 6a
+- **Blocks:** §7 imatrix subsection CI validity
+- **Est. runtime:** ~3-4 h once imatrix models prepared
 
 ### GAP-7: M4 Mac CPU baseline TPS (all 7 variants, corrected)
 - **What:** Baseline decode TPS sweep for M4 Mac CPU backend (ngl=0). 4 context lengths, 10 trials.
-  Fills the "CPU TPS" column in gpu_vs_cpu_comparison.json (currently corrupted/invalid).
-  Enables M4 GPU vs CPU comparison for §8 cross-platform analysis.
-- **Why missing:** All previous data corrupted — script parsed `recommendedMaxWorkingSetSize = 19069.67 MB`
-  (ggml_metal_device_init GPU init log) as decode_tps. Additionally files were pretty-printed
-  multi-line JSON, not valid JSONL. Archived to `.archive/m4_cpu_corrupted/`.
-- **Script:** `scripts/bench/m4_cpu_tps.sh` (NEW — corrected, uses llama-bench -ngl 0)
-- **Command:** `bash scripts/bench/m4_cpu_tps.sh`
-- **Est. runtime:** ~90-120 min (7 variants × 4 ctx × 10 trials, CPU without Metal)
-- **Device:** M4 Mac — reconnect and run when available
-- **Integration after completion:**
-  1. Verify all tg128 values in range 3-25 tok/s; no value equals 19069.67
-  2. Verify ordering: Q2_K fastest, Q6_K slowest (matches ARM/x86 non-monotonic pattern)
-  3. Update `results/gpu_vs_cpu_comparison.json` CPU columns with real values
-  4. Add M4 CPU column to cross-platform table in `report/report.tex` §8
-  5. Update registry `m4-cpu-tps-all-variants` → complete
+- ✅ **COMPLETE** — 2026-04-06 (77m 13s, results: `results/m4_cpu_tps_20260406_203938`)
+- **Key findings:**
+  - All values clean (no 19069.67); n=10 per configuration; backend=CPU confirmed
+  - Q4_K_S fastest on M4 CPU (13.16 t/s), Q6_K slowest (9.29 t/s) — non-monotonic, matches CPU pattern
+  - Q8_0 on Metal (6.39) is **0.51× SLOWER than M4 CPU** (12.60) — Metal hurts Q8_0
+  - Q6_K on Metal (7.02) is **0.76× SLOWER than M4 CPU** (9.29)
+  - M4 CPU is 1.4–2.6× faster than Pixel 6a ARM (same 4-thread config)
+- **Integrated:** `gpu_vs_cpu_comparison.json` updated; cross-platform table in §8 extended to 4 columns
 
 ---
 
@@ -128,6 +131,6 @@ on incomplete data.
 | GAP-2       | CRITICAL | ✅ COMPLETE n=10              | Device session      | 2026-04-06 03:08 |
 | GAP-thread  | HIGH     | ✅ COMPLETE (threads sweep)   | Device session      | 2026-04-06 10:29 |
 | GAP-4       | HIGH     | 🗃️  ARCHIVED (re-run later)   | Future device sess  | Script fixed, needs validation |
-| GAP-5       | MEDIUM   | Not started                   | Next laptop session | — |
-| GAP-6       | MEDIUM   | Not started                   | Next laptop session | — |
-| GAP-7       | MEDIUM   | ⏳ Script ready, needs Mac session | Next Mac session | Script: m4_cpu_tps.sh |
+| GAP-5       | MEDIUM   | ⏳ n=3 confirmed filled; needs n=5 | Next laptop session | Script: x86_llama_cliff.py --trials 5 |
+| GAP-6       | MEDIUM   | ⏳ Script ready (template)    | Next Pixel session  | Script: pixel_imatrix_quality.sh |
+| GAP-7       | MEDIUM   | ✅ COMPLETE                   | 2026-04-06 21:56    | results/m4_cpu_tps_20260406_203938 |

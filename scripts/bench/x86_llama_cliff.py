@@ -45,7 +45,7 @@ MODELS_DIR = Path("C:/temp/llama3_2_3b_gguf")
 
 ALL_VARIANTS   = ["Q2_K", "Q3_K_M", "Q4_K_S", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0"]
 CTX_SIZES      = [256, 512, 768, 1024, 1200, 1300, 1400, 1500, 1600, 1800, 2048]
-NUM_TRIALS     = 3
+NUM_TRIALS     = 5  # Default n=5 for publishable CIs (GAP-5 upgrade from n=3)
 OUTPUT_TOKENS  = 64
 DEFAULT_THREADS = max(1, os.cpu_count() // 2)
 
@@ -330,6 +330,8 @@ def parse_args():
                    help="Skip variants whose output file already has all rows")
     p.add_argument("--ctx-sizes", nargs="+", type=int, default=None,
                    help="Override context sizes (e.g. --ctx-sizes 256 512 1024 2048)")
+    p.add_argument("--trials",   type=int, default=None,
+                   help=f"Number of trials per (variant, context) cell (default: {NUM_TRIALS})")
     return p.parse_args()
 
 
@@ -353,6 +355,10 @@ def main():
     if args.ctx_sizes:
         global CTX_SIZES
         CTX_SIZES = sorted(args.ctx_sizes)
+
+    if args.trials:
+        global NUM_TRIALS
+        NUM_TRIALS = args.trials
 
     results_dir = run_sweep(variants, args.threads, args.resume)
     print_summary(results_dir, variants)

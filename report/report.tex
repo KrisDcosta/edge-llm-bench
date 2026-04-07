@@ -49,8 +49,11 @@ requiring $\approx$26 NEON operations per 256-weight superblock to reconstruct
 6-bit values---nearly \textbf{3$\times$ the instruction count and data bandwidth}
 of Q2\_K's simple 2-bit masking ($\approx$10 ops, 84~bytes/block).
 This SIMD dequantization overhead creates a \textbf{CPU/GPU divide}:
-only Apple Metal---with dedicated 4-bit kernel paths---reverses the ordering
-(Q4\_K\_S leads at 19.9~tok/s; Q8\_0 is slowest at 6.4~tok/s).
+the non-monotonic ordering with Q6\_K slowest holds on all three CPU backends tested
+(ARM, x86 AVX2, M4 CPU-only).
+Only Apple Metal---with dedicated 4-bit kernel paths---reverses the ordering
+(Q4\_K\_S leads at 19.9~tok/s; Q8\_0 is slowest at 6.4~tok/s---even $1.97\times$ slower
+than the same chip running CPU-only inference).
 We further discover that KV-cache context sensitivity is also non-monotonic:
 Q2\_K degrades $-48\%$ on ARM (cliff at ctx=512, matching the $L2/1024$ formula exactly)
 and $-51\%$ on x86 (cliff at ctx=1200--1300), while Q3\_K\_M varies $<\pm11\%$ on both.
@@ -60,7 +63,7 @@ from the i5-1235U's 1.25~MB L2 cache capacity alone.
 Finally, we show that WikiText-2 perplexity is monotonic with bit-width yet fails
 to predict task accuracy: Q5\_K\_M through Q8\_0 differ by only 0.035 PPL nats
 but span 10+ percentage-point accuracy gaps on BoolQ and TruthfulQA.
-All 700+ measurements, benchmark scripts, and figures are publicly available.
+All 800+ measurements across four platforms, benchmark scripts, and figures are publicly available.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -1112,32 +1115,33 @@ Results are shown in Table~\ref{tab:crossdevice}.
 
 \begin{table}[h]
 \centering
-\caption{Decode throughput (tok/s) across three platforms.
+\caption{Decode throughput (tok/s) across four platforms.
 ARM: Pixel~6a CPU-only, 4 threads, ctx=256.
 x86: Intel i5-1235U CPU-only, 6 threads, ctx=256.
-M4: Mac M4 Metal GPU, ctx=256.
+M4 CPU: Mac M4 CPU-only, 4 threads, \texttt{-ngl~0}, $n{=}10$.
+M4 Metal: Mac M4 Metal GPU, \texttt{ngl=99}, $n{=}10$.
 Rank = ordering position (1 = fastest).
 \textbf{Bold} = fastest/slowest per platform.
-ARM and x86 share the same ordering (Q2\_K fastest, Q6\_K slowest);
-Metal reverses completely.}
+$\dagger$~= Metal \emph{slower} than M4 CPU (GPU dispatch overhead exceeds simple CPU unpack).}
 \label{tab:crossdevice}
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{lrrrrrrr}
+\begin{tabular}{lrrrrrrrrrr}
 \toprule
 \textbf{Variant} & \textbf{bpw} &
 \multicolumn{2}{c}{\textbf{Pixel 6a (ARM)}} &
 \multicolumn{2}{c}{\textbf{x86 AVX2}} &
-\multicolumn{2}{c}{\textbf{Mac M4 (Metal)}} \\
-\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
- & & tok/s & Rank & tok/s & Rank & tok/s & Rank \\
+\multicolumn{2}{c}{\textbf{M4 CPU}} &
+\multicolumn{2}{c}{\textbf{M4 Metal}} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+ & & tok/s & Rk & tok/s & Rk & tok/s & Rk & tok/s & Rk \\
 \midrule
-Q2\_K    & 3.40 & \textbf{7.49} & \textbf{1} & \textbf{14.05} & \textbf{1} & 17.79 & 3 \\
-Q3\_K\_M & 4.20 & 4.68 & 4 & 8.38 & 4 & 15.60 & 4 \\
-Q4\_K\_S & 4.85 & 5.01 & 2 & 8.93 & 2 & \textbf{19.88} & \textbf{1} \\
-Q4\_K\_M & 5.09 & 4.78 & 3 & 8.55 & 3 & 19.22 & 2 \\
-Q5\_K\_M & 5.57 & 3.75 & 6 & 7.31 & 6 & 13.35 & 5 \\
-Q6\_K    & 6.59 & \textbf{3.53} & \textbf{7} & \textbf{6.80} & \textbf{7} & 7.02  & 6 \\
-Q8\_0    & 8.50 & 4.52 & 5 & 7.43 & 5 & \textbf{6.39}  & \textbf{7} \\
+Q2\_K    & 3.40 & \textbf{7.49} & \textbf{1} & \textbf{14.05} & \textbf{1} & 12.31 & 4 & 17.79 & 3 \\
+Q3\_K\_M & 4.20 & 4.68 & 4 & 8.38 & 4 & 11.48 & 5 & 15.60 & 4 \\
+Q4\_K\_S & 4.85 & 5.01 & 2 & 8.93 & 2 & \textbf{13.16} & \textbf{1} & \textbf{19.88} & \textbf{1} \\
+Q4\_K\_M & 5.09 & 4.78 & 3 & 8.55 & 3 & 12.51 & 3 & 19.22 & 2 \\
+Q5\_K\_M & 5.57 & 3.75 & 6 & 7.31 & 6 & 10.59 & 6 & 13.35 & 5 \\
+Q6\_K    & 6.59 & \textbf{3.53} & \textbf{7} & \textbf{6.80} & \textbf{7} & 9.29 & 7 & 7.02$^\dagger$ & 6 \\
+Q8\_0    & 8.50 & 4.52 & 5 & 7.43 & 5 & 12.60 & 2 & \textbf{6.39}$^\dagger$ & \textbf{7} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1246,15 +1250,24 @@ Taken together, the x86 quality results confirm that quantization-induced failur
 modes are \textbf{runtime-independent} and can be characterized once and applied
 across CPU architectures.
 
-\textbf{Metal reverses the ordering entirely.}
-Q4\_K\_S leads at 19.9~tok/s and Q4\_K\_M at 19.2~tok/s;
-Q8\_0 (6.4~tok/s) and Q6\_K (7.0~tok/s) are slowest---opposite of both
-CPU backends. Metal has dedicated 4-bit dequantization kernel paths;
-Q8\_0, which is trivially simple on CPU, becomes the worst-performing
-variant on Metal because it lacks GPU-side kernel advantages.
-Q2\_K, dominant on CPU, falls to rank~3 on Metal (17.8~tok/s).
+\textbf{M4 CPU is a third data point: non-monotonic, but different from ARM.}
+Running llama-bench with \texttt{-ngl~0} (CPU-only, no Metal offload) on the same M4 Mac
+reveals a third non-monotonic ordering: Q4\_K\_S leads at 13.2~tok/s, followed by
+Q8\_0 (12.6~tok/s) and Q4\_K\_M (12.5~tok/s); Q6\_K is again slowest at 9.3~tok/s.
+M4 CPU is 1.4--2.6$\times$ faster than Pixel~6a CPU (same 4-thread config), reflecting
+the M4's higher IPC and memory bandwidth.
+Q6\_K is slowest on \emph{all three} CPU backends (ARM, x86, M4)---confirming the
+SIMD dequantization overhead mechanism is not architecture-specific.
 
-The throughput ratio ARM$\to$Metal (Q4\_K\_M: $19.22 / 4.80 = 4.0\times$)
+\textbf{Metal reverses the ordering---and is slower than M4 CPU for Q8\_0 and Q6\_K.}
+Q4\_K\_S leads at 19.9~tok/s and Q4\_K\_M at 19.2~tok/s on Metal;
+Q8\_0 (6.4~tok/s) and Q6\_K (7.0~tok/s) are slowest---opposite of M4 CPU.
+Crucially, Metal is \textbf{slower than M4 CPU} for both variants:
+Q8\_0 GPU/CPU = $6.39/12.60 = 0.51\times$ and Q6\_K GPU/CPU = $7.02/9.29 = 0.76\times$.
+Metal has dedicated 4-bit kernel paths that accelerate Q4\_K\_S ($1.51\times$ GPU vs.\ CPU);
+Q8\_0 requires only trivial byte-unpack on CPU, making GPU dispatch overhead \emph{net negative}.
+Q2\_K, dominant on CPU backends, falls to rank~3 on Metal (17.8~tok/s, $1.45\times$ GPU/CPU).
+The throughput ratio ARM$\to$Metal (Q4\_K\_M: $19.22 / 4.78 = 4.0\times$)
 matches the T4 GPU reference baseline in Table~\ref{tab:gpu_baseline},
 confirming Metal performance is quantitatively comparable to a shared T4.
 
@@ -1276,14 +1289,15 @@ the same cache-overflow mechanism that degrades CPU inference by 40--51\%
 has zero effect on Metal inference.
 
 \textbf{Unified interpretation.}
-These three platforms establish a clean \textbf{CPU/GPU divide}:
-\emph{all CPU backends} (ARM NEON, x86 AVX2) share the non-monotonic ordering
-driven by SIMD dequantization overhead.
-Only GPU backends with dedicated quantized-format dispatch paths (Metal, CUDA)
-reverse the ordering toward 4-bit dominance.
-Practitioners targeting CPU inference---whether ARM mobile or x86 desktop---should
-expect Q2\_K to lead on throughput and Q6\_K to underperform relative to Q4\_K\_M;
-those targeting Metal (iOS, macOS) should use Q4\_K\_S or Q4\_K\_M.
+Four platforms establish a clean \textbf{CPU/GPU divide}:
+\emph{all CPU backends} (ARM NEON, x86 AVX2, M4 CPU) share non-monotonic ordering
+driven by SIMD dequantization overhead, with Q6\_K slowest on every CPU.
+Only Metal GPU (with dedicated quantized-format dispatch paths) reverses toward 4-bit dominance.
+The GPU/CPU comparison further sharpens the picture: Metal provides meaningful speedup
+only for 4-bit variants ($1.5\times$); for Q8\_0 it is actively harmful ($0.51\times$).
+Practitioners targeting CPU inference---whether ARM mobile, x86 desktop, or Apple Silicon CPU-only---should
+expect Q6\_K to underperform; those targeting Metal (iOS, macOS) should use Q4\_K\_S or Q4\_K\_M
+and \emph{avoid} Q8\_0, which loses $1.97\times$ to its CPU-only equivalent on the same hardware.
 
 \textbf{Generalizability: Qwen 2.5 1.5B replicates the non-monotonic ordering.}
 To test whether the non-monotonic CPU throughput ordering is Llama-specific, we ran
