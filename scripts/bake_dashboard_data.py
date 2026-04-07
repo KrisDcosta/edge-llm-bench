@@ -467,7 +467,15 @@ def bake_raw_table():
     # Replace NaN strings
     combined = combined.where(pd.notna(combined), other=None)
 
-    records = combined.to_dict(orient="records")
+    # Convert any remaining NaN floats to None (pandas NaN bypasses _SafeEncoder
+    # for nested dict values because C-level JSON encoding skips the Python hook)
+    def _clean(v):
+        if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+            return None
+        return v
+
+    records = [{k: _clean(v) for k, v in row.items()}
+               for row in combined.to_dict(orient="records")]
 
     # Metadata for JS filters
     result = {
