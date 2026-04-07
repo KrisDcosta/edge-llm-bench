@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://krisdcosta.github.io/291_EAI/sitemap.xml

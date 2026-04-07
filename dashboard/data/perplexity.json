@@ -1,0 +1,70 @@
+{
+  "variants": [
+    "Q2_K",
+    "Q3_K_M",
+    "Q4_K_S",
+    "Q4_K_M",
+    "Q5_K_M",
+    "Q6_K",
+    "Q8_0"
+  ],
+  "data": [
+    {
+      "variant": "Q2_K",
+      "perplexity": 13.2885,
+      "status": "success",
+      "corpus": "wikitext2_full",
+      "tokens_approx": 285000,
+      "note": null
+    },
+    {
+      "variant": "Q3_K_M",
+      "perplexity": 11.0832,
+      "status": "success",
+      "corpus": "wikitext2_full",
+      "tokens_approx": 285000,
+      "note": null
+    },
+    {
+      "variant": "Q4_K_S",
+      "perplexity": null,
+      "status": "not_evaluated",
+      "corpus": null,
+      "tokens_approx": null,
+      "note": "Q4_K_S perplexity not collected \u2014 variant added after initial perplexity sweep. Re-run scheduled."
+    },
+    {
+      "variant": "Q4_K_M",
+      "perplexity": 9.7553,
+      "status": "success",
+      "corpus": "wikitext2_sample",
+      "tokens_approx": null,
+      "note": null
+    },
+    {
+      "variant": "Q5_K_M",
+      "perplexity": null,
+      "status": "not_evaluated",
+      "corpus": null,
+      "tokens_approx": null,
+      "note": "Q5_K_M perplexity not collected \u2014 variant added after initial perplexity sweep. Re-run scheduled."
+    },
+    {
+      "variant": "Q6_K",
+      "perplexity": 9.752,
+      "status": "success",
+      "corpus": "wikitext2_sample",
+      "tokens_approx": null,
+      "note": null
+    },
+    {
+      "variant": "Q8_0",
+      "perplexity": 9.7044,
+      "status": "success",
+      "corpus": "wikitext2_sample",
+      "tokens_approx": null,
+      "note": null
+    }
+  ],
+  "corpus_warning": "Q2_K and Q3_K_M evaluated on full WikiText-2 (~285K tokens). Q4_K_M, Q6_K, Q8_0 evaluated on a 12K-token sample. Do not compare across groups without accounting for corpus size."
+}

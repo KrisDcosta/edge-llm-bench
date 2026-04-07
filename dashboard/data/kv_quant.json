@@ -1,0 +1,307 @@
+{
+  "series": {
+    "Q2_K": [
+      {
+        "context": 256,
+        "kv_quant": "default",
+        "mean": 5.769,
+        "std": 1.8504,
+        "min": 3.99,
+        "max": 8.19,
+        "n": 10
+      },
+      {
+        "context": 512,
+        "kv_quant": "default",
+        "mean": 4.959,
+        "std": 0.9819,
+        "min": 4.01,
+        "max": 6.2,
+        "n": 10
+      },
+      {
+        "context": 768,
+        "kv_quant": "default",
+        "mean": 4.412,
+        "std": 0.3803,
+        "min": 4.0,
+        "max": 4.96,
+        "n": 10
+      },
+      {
+        "context": 1024,
+        "kv_quant": "default",
+        "mean": 4.192,
+        "std": 0.2055,
+        "min": 3.91,
+        "max": 4.46,
+        "n": 10
+      },
+      {
+        "context": 1200,
+        "kv_quant": "default",
+        "mean": 4.105,
+        "std": 0.1058,
+        "min": 3.95,
+        "max": 4.28,
+        "n": 10
+      },
+      {
+        "context": 1300,
+        "kv_quant": "default",
+        "mean": 3.99,
+        "std": 0.1274,
+        "min": 3.76,
+        "max": 4.19,
+        "n": 10
+      },
+      {
+        "context": 1400,
+        "kv_quant": "default",
+        "mean": 3.877,
+        "std": 0.142,
+        "min": 3.69,
+        "max": 4.03,
+        "n": 10
+      },
+      {
+        "context": 1500,
+        "kv_quant": "default",
+        "mean": 3.844,
+        "std": 0.1619,
+        "min": 3.65,
+        "max": 4.0,
+        "n": 10
+      },
+      {
+        "context": 1600,
+        "kv_quant": "default",
+        "mean": 3.85,
+        "std": 0.153,
+        "min": 3.63,
+        "max": 4.01,
+        "n": 10
+      },
+      {
+        "context": 1800,
+        "kv_quant": "default",
+        "mean": 3.8256,
+        "std": 0.1458,
+        "min": 3.66,
+        "max": 3.98,
+        "n": 9
+      },
+      {
+        "context": 2048,
+        "kv_quant": "default",
+        "mean": 3.811,
+        "std": 0.1271,
+        "min": 3.67,
+        "max": 3.95,
+        "n": 10
+      }
+    ],
+    "Q3_K_M": [
+      {
+        "context": 256,
+        "kv_quant": "default",
+        "mean": 4.078,
+        "std": 0.0533,
+        "min": 4.0,
+        "max": 4.18,
+        "n": 10
+      },
+      {
+        "context": 512,
+        "kv_quant": "default",
+        "mean": 4.1211,
+        "std": 0.067,
+        "min": 4.03,
+        "max": 4.2,
+        "n": 9
+      },
+      {
+        "context": 768,
+        "kv_quant": "default",
+        "mean": 4.0667,
+        "std": 0.0675,
+        "min": 3.98,
+        "max": 4.18,
+        "n": 9
+      },
+      {
+        "context": 1024,
+        "kv_quant": "default",
+        "mean": 3.9533,
+        "std": 0.0505,
+        "min": 3.87,
+        "max": 4.02,
+        "n": 9
+      },
+      {
+        "context": 1200,
+        "kv_quant": "default",
+        "mean": 3.901,
+        "std": 0.1338,
+        "min": 3.7,
+        "max": 4.11,
+        "n": 10
+      },
+      {
+        "context": 1300,
+        "kv_quant": "default",
+        "mean": 3.816,
+        "std": 0.1751,
+        "min": 3.57,
+        "max": 4.02,
+        "n": 10
+      },
+      {
+        "context": 1400,
+        "kv_quant": "default",
+        "mean": 3.8189,
+        "std": 0.1485,
+        "min": 3.6,
+        "max": 3.96,
+        "n": 9
+      },
+      {
+        "context": 1500,
+        "kv_quant": "default",
+        "mean": 3.822,
+        "std": 0.1959,
+        "min": 3.59,
+        "max": 4.03,
+        "n": 10
+      },
+      {
+        "context": 1600,
+        "kv_quant": "default",
+        "mean": 3.807,
+        "std": 0.1735,
+        "min": 3.59,
+        "max": 4.04,
+        "n": 10
+      },
+      {
+        "context": 1800,
+        "kv_quant": "default",
+        "mean": 3.745,
+        "std": 0.1848,
+        "min": 3.53,
+        "max": 4.03,
+        "n": 10
+      },
+      {
+        "context": 2048,
+        "kv_quant": "default",
+        "mean": 3.752,
+        "std": 0.1552,
+        "min": 3.58,
+        "max": 3.92,
+        "n": 10
+      }
+    ],
+    "Q4_K_M": [
+      {
+        "context": 256,
+        "kv_quant": "default",
+        "mean": 4.7111,
+        "std": 0.0501,
+        "min": 4.64,
+        "max": 4.8,
+        "n": 9
+      },
+      {
+        "context": 512,
+        "kv_quant": "default",
+        "mean": 4.699,
+        "std": 0.0774,
+        "min": 4.62,
+        "max": 4.88,
+        "n": 10
+      },
+      {
+        "context": 768,
+        "kv_quant": "default",
+        "mean": 4.676,
+        "std": 0.0995,
+        "min": 4.55,
+        "max": 4.86,
+        "n": 10
+      },
+      {
+        "context": 1024,
+        "kv_quant": "default",
+        "mean": 4.591,
+        "std": 0.0996,
+        "min": 4.42,
+        "max": 4.73,
+        "n": 10
+      },
+      {
+        "context": 1200,
+        "kv_quant": "default",
+        "mean": 4.486,
+        "std": 0.2497,
+        "min": 4.19,
+        "max": 4.77,
+        "n": 10
+      },
+      {
+        "context": 1300,
+        "kv_quant": "default",
+        "mean": 4.429,
+        "std": 0.193,
+        "min": 4.06,
+        "max": 4.61,
+        "n": 10
+      },
+      {
+        "context": 1400,
+        "kv_quant": "default",
+        "mean": 4.398,
+        "std": 0.2075,
+        "min": 4.08,
+        "max": 4.66,
+        "n": 10
+      },
+      {
+        "context": 1500,
+        "kv_quant": "default",
+        "mean": 4.402,
+        "std": 0.2329,
+        "min": 4.08,
+        "max": 4.67,
+        "n": 10
+      },
+      {
+        "context": 1600,
+        "kv_quant": "default",
+        "mean": 4.357,
+        "std": 0.2589,
+        "min": 4.04,
+        "max": 4.68,
+        "n": 10
+      },
+      {
+        "context": 1800,
+        "kv_quant": "default",
+        "mean": 4.33,
+        "std": 0.1678,
+        "min": 4.09,
+        "max": 4.53,
+        "n": 10
+      },
+      {
+        "context": 2048,
+        "kv_quant": "default",
+        "mean": 4.3256,
+        "std": 0.1544,
+        "min": 4.08,
+        "max": 4.5,
+        "n": 9
+      }
+    ]
+  }
+}
