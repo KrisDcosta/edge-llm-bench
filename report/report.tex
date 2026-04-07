@@ -40,8 +40,8 @@ Deploying quantized LLMs on CPU requires choosing among GGUF K-quant variants
 higher throughput---is \emph{wrong} on CPU.
 We present the first mechanistic, cross-platform study explaining why.
 On ARM (Pixel~6a, Cortex-X1) and x86 (Intel i5-1235U, AVX2), decode throughput
-is \emph{non-monotonic} with bit-width: Q2\_K leads at 5.11~tok/s (ARM) and
-14.1~tok/s (x86), while Q6\_K is slowest (3.52 and 6.8~tok/s respectively)---
+is \emph{non-monotonic} with bit-width: Q2\_K leads at 7.49~tok/s (ARM) and
+14.1~tok/s (x86), while Q6\_K is slowest (3.53 and 6.8~tok/s respectively)---
 \emph{regardless of platform}.
 Direct inspection of llama.cpp's NEON and AVX2 kernels explains the mechanism:
 Q6\_K stores weights split across two arrays (\texttt{ql[128]} + \texttt{qh[64]}),
@@ -87,7 +87,7 @@ This overhead dominates the per-token decode budget on both ARM NEON and x86 AVX
 \subsection{Key Findings at a Glance}
 
 \begin{itemize}
-  \item \textbf{Non-monotonic throughput:} Q2\_K is fastest on both ARM (5.11~tok/s) and x86 (14.1~tok/s); Q6\_K is slowest (3.52 and 6.8~tok/s)---the same rank ordering on both ISAs.
+  \item \textbf{Non-monotonic throughput:} Q2\_K is fastest on both ARM (7.49~tok/s) and x86 (14.1~tok/s); Q6\_K is slowest (3.53 and 6.8~tok/s)---the same rank ordering on both ISAs.
   \item \textbf{CPU/GPU divide:} Mac M4 Metal \emph{reverses} the ordering (Q4\_K\_S leads at 19.9~tok/s; Q8\_0 slowest at 6.4~tok/s), demonstrating that the anomaly is a CPU property, not a model property.
   \item \textbf{KV-cache cliff with L2-derivable thresholds:} Q2\_K throughput drops $-48\%$ on ARM (cliff at ctx=512, matching $L2/1024 = 512$~KB$/$1024~$=$~512 tokens \emph{exactly}) and $-51\%$ on x86 (cliff at ctx=1200--1300). Both thresholds are predicted within 5\% by $L2_\text{cache}/1024$---the point where the per-layer combined K+V cache overflows L2.
   \item \textbf{Q3\_K\_M cliff immunity:} Q3\_K\_M varies $<\pm5\%$ across all contexts on both platforms, not because its KV cache is smaller (it is identical---same fp16 format, same architecture), but because its higher FFN compute cost makes the relative attention overhead smaller.
@@ -395,20 +395,20 @@ cores: 2$\times$ X1 + 2$\times$ A76) unless otherwise stated.
 
 Table~\ref{tab:main_results} presents the core benchmark results. The primary
 finding is that decode throughput is \textbf{non-monotonic} with quantization
-bit-width. Q2\_K achieves the highest decode rate at $5.11 \pm 0.72$ tokens/s,
-while Q6\_K is the slowest practical variant at $3.52 \pm 0.32$ tokens/s---27\%
-slower than Q4\_K\_M (4.80 tokens/s) and 22\% slower than Q8\_0 (4.54 tokens/s),
+bit-width. Q2\_K achieves the highest decode rate at $7.49 \pm 0.41$ tokens/s,
+while Q6\_K is the slowest practical variant at $3.53 \pm 0.04$ tokens/s---26\%
+slower than Q4\_K\_M (4.78 tokens/s) and 22\% slower than Q8\_0 (4.52 tokens/s),
 despite having fewer bits per weight than both. The ordering is:
 {\footnotesize%
 \begin{align*}
-  &\text{Q2\_K} > \text{Q4\_K\_M} \approx \text{Q4\_K\_S} > \\
-  &\quad \text{Q8\_0} \approx \text{Q3\_K\_M} \gg \text{Q6\_K} \gg \text{F16}
+  &\text{Q2\_K} \gg \text{Q4\_K\_S} > \text{Q4\_K\_M} \approx \text{Q3\_K\_M} > \\
+  &\quad \text{Q8\_0} > \text{Q5\_K\_M} > \text{Q6\_K} \gg \text{F16}
 \end{align*}}
 
 \begin{table*}[t]
 \centering
 \caption{Benchmark Results for Llama 3.2 3B Instruct GGUF Variants on Google Pixel 6a (Tensor G1).
-All throughput figures use 256-token context except Q4\_K\_M (512-token). PPL = WikiText-2 perplexity (lower = better).}
+All throughput figures use 256-token filled context ($n$=10 trials per variant). PPL = WikiText-2 perplexity (lower = better).}
 \label{tab:main_results}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{lrrrrrrrr}
@@ -416,19 +416,19 @@ All throughput figures use 256-token context except Q4\_K\_M (512-token). PPL = 
 \textbf{Var.} & \textbf{GB} & \textbf{Decode TPS} &
 \textbf{Prefill} & \textbf{TTFT} & \textbf{E2E} & \textbf{BoolQ} & \textbf{CI} & \textbf{PPL$\downarrow$} \\
 \midrule
-Q2\_K    & 1.3 & $5.11 \pm 0.72$ & 7.59  & 3.81  & 26.62  & 69.0  & [59--77] & 13.29 \\
-Q3\_K\_M & 1.6 & $4.91 \pm 0.40$ & 6.29  & 4.50  & 30.57  & 69.0  & [59--77] & 11.08 \\
-Q4\_K\_S & 1.56 & ${\approx}4.8^{\S}$ & --- & --- & --- & 74.0 & [64--82] & 10.70 \\
-Q4\_K\_M & 2.0 & $4.80 \pm 0.52$ & 7.09  & 3.98  & 28.11  & 72.0  & [63--80] & 10.71 \\
+Q2\_K    & 1.3 & $7.49 \pm 0.41$ & 7.59  & 3.81  & 26.62  & 69.0  & [59--77] & 13.29 \\
+Q3\_K\_M & 1.6 & $4.68 \pm 0.13$ & 6.29  & 4.50  & 30.57  & 69.0  & [59--77] & 11.08 \\
+Q4\_K\_S & 1.56 & $5.01 \pm 0.08$ & 6.26 & --- & --- & 74.0 & [64--82] & 10.70 \\
+Q4\_K\_M & 2.0 & $4.78 \pm 0.07$ & 7.09  & 3.98  & 28.11  & 72.0  & [63--80] & 10.71 \\
 Q5\_K\_M & 2.3 & $3.75 \pm 0.04$ & 4.57  & ---   & ---    & 67.0  & [57--76] & 10.62 \\
-Q6\_K    & 2.7 & $3.52 \pm 0.32$ & 4.90  & 5.71  & 29.33  & 65.0  & [55--74] & 10.58 \\
-Q8\_0    & 3.4 & $4.54 \pm 0.59$ & 7.14  & 3.95  & 23.21  & 68.0  & [58--76] & 10.59 \\
+Q6\_K    & 2.7 & $3.53 \pm 0.04$ & 4.90  & 5.71  & 29.33  & 65.0  & [55--74] & 10.58 \\
+Q8\_0    & 3.4 & $4.52 \pm 0.71$ & 7.14  & 3.95  & 23.21  & 68.0  & [58--76] & 10.59 \\
 F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & 68.0  & [58--76] & \multicolumn{1}{l}{---} \\
 \midrule
 \multicolumn{9}{l}{\small BoolQ: yes/no reading comprehension accuracy on 100-question SuperGLUE validation subset; 95\% Wilson CI ($n{=}100$).}\\
 \multicolumn{9}{l}{\small ARC-E (not shown): 76--82\%; Q4\_K\_M leads at 82\%, Q2\_K lowest at 76\%.}\\
 \multicolumn{9}{l}{\small PPL: WikiText-2 full corpus, 568 chunks (\texttt{llama-perplexity}, Pixel~6a). All 7 variants.}\\
-\multicolumn{9}{l}{\small $^{\S}$Q4\_K\_S TPS interpolated; prefill/TTFT/E2E not measured.}\\
+\multicolumn{9}{l}{\small Q4\_K\_S TTFT/E2E not measured; decode and prefill TPS from canonical $n$=10 run.}\\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -586,10 +586,10 @@ benefit compared to improvements in decode throughput.
   \caption{Efficiency--accuracy Pareto frontier: BoolQ accuracy (\%)
   vs.\ decode throughput (tokens/s) for all seven variants (including F16).
   Dotted iso-efficiency contours show equal TPS$\times$accuracy product (E).
-  Q4\_K\_S (74\%, 4.8~tok/s) is accuracy-dominant; Q2\_K (69\%, 5.11~tok/s) is speed-dominant;
+  Q4\_K\_S (74\%, 5.01~tok/s) is accuracy-dominant; Q2\_K (69\%, 7.49~tok/s) is speed-dominant;
   the grey shaded region is dominated.
-  Q6\_K (65\%, 3.52~tok/s) is strictly dominated on \emph{both} axes.
-  Q8\_0 (68\%, 4.54~tok/s) is dominated by Q4\_K\_M on both axes.}
+  Q6\_K (65\%, 3.53~tok/s) is strictly dominated on \emph{both} axes.
+  Q8\_0 (68\%, 4.52~tok/s) is dominated by Q4\_K\_M on both axes.}
   \label{fig:pareto}
 \end{figure}
 
@@ -634,17 +634,17 @@ tool-use with lettered options) should treat Q2\_K as unsafe regardless of
 throughput advantages.
 
 Figure~\ref{fig:pareto} plots the Pareto frontier for all variants.
-Q4\_K\_S (74\%, 4.8~tok/s) achieves the highest BoolQ accuracy of any variant,
-while Q2\_K (69\%, 5.11~tok/s) leads on raw decode throughput.
-Q4\_K\_M (72\%, 4.80~tok/s) provides a stable middle ground with the lowest
+Q4\_K\_S (74\%, 5.01~tok/s) achieves the highest BoolQ accuracy of any variant,
+while Q2\_K (69\%, 7.49~tok/s) leads on raw decode throughput.
+Q4\_K\_M (72\%, 4.78~tok/s) provides a stable middle ground with the lowest
 context-length sensitivity.
 Q6\_K is strictly dominated on every metric: slower than Q4\_K\_M,
 less accurate than Q4\_K\_S, and no more context-stable.
 Notably, \textbf{Q8\_0 is no longer Pareto-optimal under BoolQ}: it scores 68\%
-accuracy at 4.54~tokens/s, dominated by Q4\_K\_M which achieves both higher
-accuracy \emph{and} higher throughput. Q3\_K\_M (69\%, 4.91~tokens/s) is also
+accuracy at 4.52~tokens/s, dominated by Q4\_K\_M which achieves both higher
+accuracy \emph{and} higher throughput. Q3\_K\_M (69\%, 4.68~tokens/s) is also
 dominated by Q4\_K\_M on BoolQ vs.\ throughput, though Q3\_K\_M leads on
-context stability and TruthfulQA (see below). \textbf{Q6\_K (65\%, 3.52~tokens/s) is
+context stability and TruthfulQA (see below). \textbf{Q6\_K (65\%, 3.53~tokens/s) is
 strictly dominated on both dimensions}---simultaneously the lowest-scoring and
 slowest practical variant.
 
@@ -764,16 +764,17 @@ practical task performance. Task-specific evaluation remains essential for varia
 \end{figure}
 
 \textbf{Thread-count scaling.} We measured Q4\_K\_M decode throughput at 1, 2, 4,
-and 8 threads (256-token context, 3 trials per count). Results are:
-1 thread: 2.8~tokens/s;
-2 threads: 4.1~tokens/s;
-4 threads: 5.0~tokens/s (peak);
-8 threads: 4.0~tokens/s.
+and 8 threads (256-token context, filled-context methodology, $n$=15 trials per count). Results are:
+1 thread: 3.38~tokens/s;
+2 threads: 3.78~tokens/s (1.12$\times$);
+4 threads: 4.81~tokens/s (peak, 1.42$\times$);
+8 threads: 3.83~tokens/s (1.13$\times$).
 
-The Tensor G1's Cortex-X1 and A76 cores (4 total) drive the 4-thread peak.
+The Tensor G1's Cortex-X1 P-cores drive the single-thread baseline; two P-cores yield
+only modest 12\% gains (memory-bandwidth-bound, not compute-bound). At 4 threads,
+P-cores plus two A76 E-cores push throughput to the 4.81~tokens/s peak.
 At 8 threads, the 4 Cortex-A55 little cores are recruited, but their lower
-clock speed and memory bandwidth share introduces load imbalance---the fast
-big cores are often blocked waiting for little-core results---resulting in
+clock speed and memory bandwidth share introduces load imbalance---resulting in
 a 20\% throughput \textit{regression} from 4 to 8 threads. This result
 confirms that on heterogeneous ARM clusters, practitioners should not blindly
 use all available cores; instead, thread count should match the number of
@@ -782,21 +783,21 @@ performance cores.
 \textbf{Deployment feasibility by variant.}
 Q2\_K (1.3~GB) and Q3\_K\_M (1.6~GB) are the most RAM-friendly and would
 run on devices with as little as 3~GB total RAM.
-Q2\_K is the pure throughput choice (5.11~tokens/s), but exhibits
+Q2\_K is the pure throughput choice (7.49~tokens/s), but exhibits
 instruction-following collapse on MCQ tasks (19\% HellaSwag),
 collapses to near-chance on TruthfulQA (50\%), and degrades $-48\%$
 at long context (cliff at ctx=512).
-Q3\_K\_M (4.91~tokens/s, 69\% BoolQ, 68\% TruthfulQA) matches Q2\_K on
+Q3\_K\_M (4.68~tokens/s, 69\% BoolQ, 68\% TruthfulQA) matches Q2\_K on
 BoolQ, leads on factual consistency, and is context-stable ($<\pm5\%$).
 \textbf{Q3\_K\_M is the recommended choice at the 3~GB memory tier}
 for any workload beyond short-context throughput-only use cases.
 Q4\_K\_S (1.56~GB) and Q4\_K\_M (2.0~GB) comfortably fit any device $\geq$ 4~GB.
 Q4\_K\_S achieves the highest BoolQ accuracy (74\%) among all variants; Q4\_K\_M
-(72\%, 4.80~tokens/s) offers the most context-stable performance profile.
-Q6\_K (2.7~GB) and Q8\_0 (3.4~GB) require $\geq$ 6~GB. Q8\_0 (68\%, 4.54~tokens/s)
+(72\%, 4.78~tokens/s) offers the most context-stable performance profile.
+Q6\_K (2.7~GB) and Q8\_0 (3.4~GB) require $\geq$ 6~GB. Q8\_0 (68\%, 4.52~tokens/s)
 is viable but dominated by Q4\_K\_M on both axes under BoolQ evaluation.
 Q6\_K is the weakest operating point: at 65\% BoolQ accuracy and
-only 3.52~tokens/s it is strictly dominated---prefer Q8\_0 or Q4\_K\_M on 6~GB
+only 3.53~tokens/s it is strictly dominated---prefer Q8\_0 or Q4\_K\_M on 6~GB
 devices instead.
 F16 (6.4~GB) is not viable on any consumer device $\leq$ 8~GB.
 
@@ -938,8 +939,8 @@ baseline compute cost per token.
 
 \subsection{Deployment Recommendations}
 
-\textbf{Default recommendation: Q4\_K\_M.} At 4.80 tokens/s, 2.0~GB, and 72\%
-BoolQ accuracy with low variance (std~0.52) and the lowest context-length sensitivity,
+\textbf{Default recommendation: Q4\_K\_M.} At 4.78 tokens/s, 2.0~GB, and 72\%
+BoolQ accuracy with low variance (std~0.07) and the lowest context-length sensitivity,
 Q4\_K\_M provides the best overall operating point for 6~GB devices.
 It simultaneously outperforms Q8\_0 and Q3\_K\_M on both accuracy and throughput.
 Q4\_K\_M's performance stability and broad community ecosystem support further
@@ -949,7 +950,7 @@ reinforce it as the pragmatic default.
 Q4\_K\_S achieves the highest task accuracy of any variant at negligible size cost vs.\ Q4\_K\_M.
 It is the best choice for deployments where task accuracy is the primary constraint.
 
-\textbf{Speed-critical deployments: Q2\_K.} At 5.11~tokens/s and only 1.3~GB,
+\textbf{Speed-critical deployments: Q2\_K.} At 7.49~tokens/s and only 1.3~GB,
 Q2\_K is the fastest practical option (69\% BoolQ, speed-dominant).
 It is the best choice when throughput matters most and RAM is limited to 2~GB,
 \emph{provided} the target task does not involve structured multi-choice prompts
@@ -962,9 +963,9 @@ and is context-stable through ctx=2048. Q2\_K is the right choice \emph{only}
 when short-context throughput is the sole constraint and MCQ/truthfulness tasks are absent.
 
 \textbf{Avoid Q6\_K on CPU backends.} Q6\_K is strictly dominated in both
-BoolQ accuracy (65\% vs.\ 69--74\% for all others) and throughput (3.52~tokens/s,
+BoolQ accuracy (65\% vs.\ 69--74\% for all others) and throughput (3.53~tokens/s,
 the slowest practical variant). Q4\_K\_M is faster, smaller, and 7\% more accurate;
-Q8\_0 is more accurate and nearly 29\% faster. This recommendation may not apply
+Q8\_0 is more accurate and 28\% faster. This recommendation may not apply
 to GPU-accelerated backends where the Q6\_K de-quantization overhead differs.
 
 \textbf{Use 4 threads on heterogeneous ARM.} On the Tensor G1 (and similar
@@ -1129,20 +1130,20 @@ Metal reverses completely.}
 \cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
  & & tok/s & Rank & tok/s & Rank & tok/s & Rank \\
 \midrule
-Q2\_K    & 3.40 & \textbf{5.11} & \textbf{1} & \textbf{14.05} & \textbf{1} & 17.79 & 3 \\
-Q3\_K\_M & 4.20 & 4.91 & 2 & 8.38 & 4 & 15.60 & 4 \\
-Q4\_K\_S & 4.85 & 4.80 & 4 & 8.93 & 2 & \textbf{19.88} & \textbf{1} \\
-Q4\_K\_M & 5.09 & 4.80 & 4 & 8.55 & 3 & 19.22 & 2 \\
+Q2\_K    & 3.40 & \textbf{7.49} & \textbf{1} & \textbf{14.05} & \textbf{1} & 17.79 & 3 \\
+Q3\_K\_M & 4.20 & 4.68 & 4 & 8.38 & 4 & 15.60 & 4 \\
+Q4\_K\_S & 4.85 & 5.01 & 2 & 8.93 & 2 & \textbf{19.88} & \textbf{1} \\
+Q4\_K\_M & 5.09 & 4.78 & 3 & 8.55 & 3 & 19.22 & 2 \\
 Q5\_K\_M & 5.57 & 3.75 & 6 & 7.31 & 6 & 13.35 & 5 \\
-Q6\_K    & 6.59 & \textbf{3.52} & \textbf{7} & \textbf{6.80} & \textbf{7} & 7.02  & 6 \\
-Q8\_0    & 8.50 & 4.54 & 5 & 7.43 & 5 & \textbf{6.39}  & \textbf{7} \\
+Q6\_K    & 6.59 & \textbf{3.53} & \textbf{7} & \textbf{6.80} & \textbf{7} & 7.02  & 6 \\
+Q8\_0    & 8.50 & 4.52 & 5 & 7.43 & 5 & \textbf{6.39}  & \textbf{7} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \textbf{The x86 result is the most informative.}
-The ARM non-monotonic ordering---Q2\_K fastest (5.11~tok/s), Q6\_K slowest
-(3.52~tok/s)---\emph{replicates exactly} on x86 AVX2: Q2\_K leads at
+The ARM non-monotonic ordering---Q2\_K fastest (7.49~tok/s), Q6\_K slowest
+(3.53~tok/s)---\emph{replicates exactly} on x86 AVX2: Q2\_K leads at
 14.1~tok/s and Q6\_K is slowest at 6.8~tok/s (rank~7 on both platforms).
 This rules out ARM-specific microarchitecture as the cause.
 The mechanism is \textbf{CPU-general}: SIMD dequantization overhead is
@@ -1150,8 +1151,8 @@ bottleneck-defining on both ARM NEON and x86 AVX2.
 Low-bpw formats (Q2\_K) have compact tables that fit in L1/L2 and dequantize
 cheaply per SIMD lane; Q6\_K's larger tables and more complex shuffle patterns
 overflow cache and dominate dispatch time on any CPU.
-The 2.75$\times$ absolute speedup on x86 vs.\ ARM reflects the i5-1235U's
-higher single-core frequency and AVX2 lane width, not an ordering difference.
+The 1.88$\times$ absolute speedup on x86 vs.\ ARM (Q2\_K: 14.05 vs.\ 7.49~tok/s)
+reflects the i5-1235U's higher single-core frequency and AVX2 lane width, not an ordering difference.
 
 \textbf{The x86 context cliff is more severe but L2-delayed.}
 Using the same filled-context methodology (prompts sized $N{-}64$ tokens),
@@ -1523,7 +1524,7 @@ Our primary empirical findings are:
 
 \begin{enumerate}
   \item \textbf{Non-monotonic throughput}: Q6\_K (6-bit, 2.7~GB) delivers
-        3.52~tokens/s---slower than Q4\_K\_M (4.80~tokens/s) and Q8\_0 (4.54~tokens/s)
+        3.53~tokens/s---slower than Q4\_K\_M (4.78~tokens/s) and Q8\_0 (4.52~tokens/s)
         due to kernel de-quantization overhead on ARM NEON.
   \item \textbf{Context sensitivity is non-monotonic with bit-width}:
         Q3\_K\_M is the most context-stable variant ($<\pm5\%$ across 256--2048~tokens).
@@ -1548,9 +1549,9 @@ Our primary empirical findings are:
         Q6\_K is strictly dominated on both BoolQ accuracy and throughput,
         confirming it as the weakest deployment choice.
   \item \textbf{Q4\_K\_S leads on accuracy; Q4\_K\_M recommended as default}:
-        Q4\_K\_S (74\%, 4.8~tokens/s) achieves the highest BoolQ accuracy of any
-        variant. Q4\_K\_M (72\%, 4.80~tokens/s) offers the most context-stable
-        operating point and is the recommended default. Q2\_K (69\%, 5.11~tokens/s)
+        Q4\_K\_S (74\%, 5.01~tokens/s) achieves the highest BoolQ accuracy of any
+        variant. Q4\_K\_M (72\%, 4.78~tokens/s) offers the most context-stable
+        operating point and is the recommended default. Q2\_K (69\%, 7.49~tokens/s)
         is the speed-dominant choice for throughput-critical deployments, subject to
         the HellaSwag instruction-following collapse caveat.
         Q8\_0 is dominated by Q4\_K\_M on both accuracy and throughput axes.
@@ -1560,7 +1561,7 @@ Our primary empirical findings are:
 These findings provide actionable guidance: use Q4\_K\_S when task accuracy is
 paramount (highest BoolQ at 74\%); use Q4\_K\_M as the default
 (context-stable, 72\% BoolQ, best overall balance); use Q2\_K for
-latency-constrained or RAM-limited deployments (fastest at 5.11~tok/s,
+latency-constrained or RAM-limited deployments (fastest at 7.49~tok/s,
 69\% BoolQ, but unsafe for structured MCQ tasks); use 4 threads on big.LITTLE ARM;
 and avoid Q6\_K on CPU backends entirely---it is strictly dominated on both
 BoolQ accuracy and throughput, and catastrophically slow at ctx=2048. As on-device AI
