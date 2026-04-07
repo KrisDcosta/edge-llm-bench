@@ -298,13 +298,40 @@ html:not(.dark) .stat-card,
 html:not(.dark) .controls-bar { background: #FFFFFF; border-color: #E5E7EB; }
 html:not(.dark) .btn-group { background: #F3F4F6; border-color: #E5E7EB; }
 html:not(.dark) .btn-toggle { color: #6B7280; }
-html:not(.dark) .btn-toggle.active { background: #E5E7EB; }
+html:not(.dark) .btn-toggle.active { background: #E5E7EB; color: #059669; }
 html:not(.dark) .select-control { background: #F9FAFB; border-color: #D1D5DB; color: #111827; }
 html:not(.dark) .section-title { color: #111827; }
+html:not(.dark) .section-sub { color: #4B5563; }
 html:not(.dark) .stat-card { background: #FFFFFF; border-color: #E5E7EB; }
+html:not(.dark) .stat-label { color: #4B5563; }
+html:not(.dark) .chart-note { color: #6B7280; }
+html:not(.dark) .control-label { color: #4B5563; }
 html:not(.dark) nav { background: rgba(249,250,251,0.9); border-color: #E5E7EB; }
+html:not(.dark) nav a { color: #374151; }
+html:not(.dark) nav a:hover { color: #111827; }
+html:not(.dark) nav .text-white { color: #111827; }
+html:not(.dark) .nav-link { color: #4B5563; }
+/* Table text */
+html:not(.dark) #table-body td { color: #374151; }
+html:not(.dark) #table-body tr { border-bottom-color: #E5E7EB; }
 html:not(.dark) #table-body tr:hover { background: #F3F4F6; }
-html:not(.dark) #heatmap-table td { border-bottom-color: #F3F4F6; }
+html:not(.dark) .th { color: #374151; border-bottom-color: #E5E7EB; }
+/* Heatmap */
+html:not(.dark) #heatmap-table th { color: #4B5563; border-bottom-color: #E5E7EB; }
+html:not(.dark) #heatmap-table td { border-bottom-color: #F3F4F6; color: #374151; }
+html:not(.dark) #heatmap-table td:first-child { color: #111827; }
+/* Variant pills */
+html:not(.dark) .variant-checkbox-label { color: #4B5563; border-color: #D1D5DB; }
+html:not(.dark) .variant-checkbox-label:hover { color: #111827; border-color: #9CA3AF; }
+html:not(.dark) .variant-checkbox-label.checked { color: #059669; }
+/* Buttons */
+html:not(.dark) .btn-secondary { border-color: #D1D5DB; color: #4B5563; }
+html:not(.dark) .btn-secondary:hover { border-color: #059669; color: #059669; }
+/* Footer */
+html:not(.dark) footer { border-color: #E5E7EB; }
+html:not(.dark) footer .text-white { color: #111827; }
+html:not(.dark) .footer-link { color: #4B5563; }
+html:not(.dark) .footer-link:hover { color: #059669; }
 
 /* ── Scrollbar ─────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
