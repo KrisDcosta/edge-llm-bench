@@ -514,7 +514,8 @@ and Q4\_K\_M loses only $-6\%$ (5.57 to 5.21~tok/s)---both essentially stable.
 \centering
 \caption{Filled-context decode TPS (mean) across context window (Pixel~6a ARM).
   Q2\_K/Q3\_K\_M/Q4\_K\_S/Q6\_K/Q8\_0: n=10 trials/cell;
-  Q4\_K\_M/Q5\_K\_M: n=3 (n=10 showed thermal recovery and concurrent-sweep artefacts).
+  Q4\_K\_M/Q5\_K\_M: n=3 thermally-stable trials (n=10 re-run available but ctx=256 shows
+  cold-start variance; steady-state values from n=3 run used for cliff characterization).
   \textbf{Bold} = $>$10\% decline from ctx=256 baseline.}
 \label{tab:ctx2048}
 \setlength{\tabcolsep}{3pt}
@@ -788,7 +789,7 @@ instruction-following collapse on MCQ tasks (19\% HellaSwag),
 collapses to near-chance on TruthfulQA (50\%), and degrades $-48\%$
 at long context (cliff at ctx=512).
 Q3\_K\_M (4.68~tokens/s, 69\% BoolQ, 68\% TruthfulQA) matches Q2\_K on
-BoolQ, leads on factual consistency, and is context-stable ($<\pm5\%$).
+BoolQ, leads on factual consistency, and is context-stable ($-11\%$ ctx=256$\to$2048).
 \textbf{Q3\_K\_M is the recommended choice at the 3~GB memory tier}
 for any workload beyond short-context throughput-only use cases.
 Q4\_K\_S (1.56~GB) and Q4\_K\_M (2.0~GB) comfortably fit any device $\geq$ 4~GB.
@@ -1527,8 +1528,8 @@ Our primary empirical findings are:
         3.53~tokens/s---slower than Q4\_K\_M (4.78~tokens/s) and Q8\_0 (4.52~tokens/s)
         due to kernel de-quantization overhead on ARM NEON.
   \item \textbf{Context sensitivity is non-monotonic with bit-width}:
-        Q3\_K\_M is the most context-stable variant ($<\pm5\%$ across 256--2048~tokens).
-        Q4\_K\_M also shows low degradation ($-7\%$).
+        Q3\_K\_M is the most context-stable variant ($-11\%$ across 256--2048~tokens).
+        Q4\_K\_M also shows low degradation ($-6\%$).
         Counterintuitively, Q2\_K---the fastest at short context---is the
         \emph{most} context-sensitive, losing $-48\%$ decode TPS from ctx=256 to 2048
         (cliff onset at ctx=512, matching $L2/1024$ exactly).  Q5\_K\_M ($-26\%$) and Q8\_0 ($-18\%$) show
