@@ -50,3 +50,6 @@ vendor/
 
 # Archive directory (kept locally, not tracked)
 archive/
+
+# Claude Code worktrees (local only, not for CI)
+.claude/worktrees/
