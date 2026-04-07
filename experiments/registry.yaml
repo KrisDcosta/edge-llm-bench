@@ -908,3 +908,35 @@ experiments:
     prompt_set_id: prompt-suite-v1
     status: planned
     notes: "Power measurement: 256-token output (Q8_0)"
+
+  # ===========================================================================
+  # GROUP 9: M4 Mac CPU re-run (corrected)
+  # Replaces corrupted m4_mac_cpu_* data (archived .archive/m4_cpu_corrupted/).
+  # Root cause: old script parsed ggml_metal_device_init log line
+  # (recommendedMaxWorkingSetSize = 19069.67 MB) as decode_tps.
+  # Fix: use llama-bench -ngl 0 (CPU only) — clean JSON output, no log scraping.
+  # ===========================================================================
+
+  - id: m4-cpu-tps-all-variants
+    device: "M4Mac"
+    backend: "CPU"
+    model_name: "Llama-3.2-3B-Instruct"
+    variants: [Q2_K, Q3_K_M, Q4_K_S, Q4_K_M, Q5_K_M, Q6_K, Q8_0]
+    context_lengths: [256, 512, 1024, 2048]
+    output_length: 128
+    trials: 10
+    ngl: 0
+    threads: 4
+    status: blocked
+    notes: |
+      ⏳ BLOCKED — needs Mac device session.
+      Previous data CORRUPTED (archived to .archive/m4_cpu_corrupted/).
+      Script: scripts/bench/m4_cpu_tps.sh
+      Command: bash scripts/bench/m4_cpu_tps.sh
+      Est. runtime: ~90-120 min (7 variants × CPU is slow without Metal)
+      After completion:
+        1. Verify all tg128 TPS values in range 3-25 tok/s (no 19069.67)
+        2. Verify ordering: Q2_K fastest, Q6_K slowest (matches ARM/x86)
+        3. Update gpu_vs_cpu_comparison.json with real CPU column values
+        4. Update cross-platform table in report/report.tex §8
+        5. Change status to complete
