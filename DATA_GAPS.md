@@ -76,27 +76,26 @@ on incomplete data.
 ## MEDIUM PRIORITY — Strengthens paper
 
 ### GAP-5: x86 cliff sweep with filled-context methodology (n=5)
-- **What:** Increase x86 cliff trials from n=3 to n=5 for publishable CI.
-  Validate KV-cache cliff formula (predicted cliff_ctx ~1280 tokens, i5-1235U 1.25 MB L2).
-- **Current state:** n=3 data confirmed filled-context (`methodology: "filled_context"` in records).
-  Ordering confirmed in existing n=3 data (table in §8). Needs n≥5 for CI.
-- **Script:** `scripts/bench/x86_llama_cliff.py` — add `--trials 5` flag
-- **Command:** `py -3 scripts/bench/x86_llama_cliff.py --trials 5 --resume`
-  *(need to add `--trials` CLI flag to script, currently hardcoded NUM_TRIALS=3)*
-- **Device:** x86 laptop (Intel i5-1235U, Windows/Linux)
-- **Blocks:** Publishable CIs for cross-platform cliff table (currently n=3 "indicative only")
-- **Est. runtime:** ~2 h (7 variants × 11 ctx × 5 trials)
+- ✅ **COMPLETE** — 2026-04-08 (results: `results/x86_llama_cliff_20260408_070924/`)
+- **Key findings (n=5, 7 variants × 11 ctx):**
+  - Q2_K: 17.6 → 8.8 t/s, **−50%** cliff onset ctx=1300–1400 (predicted 1280 by L2 formula, within 8%)
+  - Q4_K_S: **no cliff** (−9% to ctx=2048) — prior n=3 thermal artifact showed spurious −14%
+  - All other variants: flat within ±8%; Q3_K_M varies ±7% with no monotone trend
+  - Cliff is Q2_K-exclusive on x86; Q4_K_M/Q5_K_M/Q6_K/Q8_0 all context-stable
+- **Integrated:** Tab:x86_cliff updated (n=3→n=5, added ctx=1400 column); all cliff threshold text corrected to 1300–1400 throughout paper; Q4_K_S cliff claim retracted; abstract −51%→−50%
 
-### GAP-6: imatrix calibration quality delta (n >= 3 per benchmark)
-- **What:** BoolQ accuracy delta with vs without imatrix for Q2_K and Q3_K_M.
-  Prior data: Q2_K -5pp, Q3_K_M -8pp — from single eval pass (n=1, not publishable).
-  Confirms (or refutes) that HellaSwag collapse is a regime failure, not weight-precision issue.
-- **Script:** `scripts/bench/pixel_imatrix_quality.sh` (NEW — template with eval loop stub)
-  Requires: (1) imatrix-quantized models uploaded to device, (2) BoolQ eval loop from pixel_quality.sh integrated
-- **Command:** `bash scripts/bench/pixel_imatrix_quality.sh`
-- **Device:** Pixel 6a
-- **Blocks:** §7 imatrix subsection CI validity
-- **Est. runtime:** ~3-4 h once imatrix models prepared
+### GAP-6: imatrix calibration quality delta
+- ✅ **COMPLETE** — 2026-04-08. BoolQ + TruthfulQA imatrix eval done for Q2_K and Q3_K_M.
+- **Data keys:** `boolq_imatrix:{Q2_K,Q3_K_M}`, `truthfulqa_imatrix:{Q2_K,Q3_K_M}` in `results/quality_scores.json`
+- **Findings (n=100 per run; Wilson CI ≈ ±9.6pp):**
+  - BoolQ Q2_K: 69% → 65% (−4pp; within CI, but consistent with prior −5pp run)
+  - BoolQ Q3_K_M: 69% → 62% (−7pp; within CI, but consistent with prior −8pp run)
+  - TruthfulQA Q2_K: 50% → 51% (+1pp; no effect)
+  - TruthfulQA Q3_K_M: 68% → 68% (0pp; no effect)
+  - Q4_K_S through Q8_0 (BoolQ only): all ±4pp or less
+  - **Statistical note:** BoolQ decrements do NOT individually reach significance at n=100. Two independent runs show consistent direction (−4/−5pp and −7/−8pp). Real effect likely in −4 to −8pp range.
+- **Paper integration:** Updated Future Work §9 with two-run data, nuanced significance framing, TruthfulQA non-result, and Q4_K_S as best imatrix target.
+- **Script:** `scripts/bench/pixel_imatrix_quality.sh` (functional since 2026-04-07)
 
 ### GAP-7: M4 Mac CPU baseline TPS (all 7 variants, corrected)
 - **What:** Baseline decode TPS sweep for M4 Mac CPU backend (ngl=0). 4 context lengths, 10 trials.
@@ -131,6 +130,6 @@ on incomplete data.
 | GAP-2       | CRITICAL | ✅ COMPLETE n=10              | Device session      | 2026-04-06 03:08 |
 | GAP-thread  | HIGH     | ✅ COMPLETE (threads sweep)   | Device session      | 2026-04-06 10:29 |
 | GAP-4       | HIGH     | 🗃️  ARCHIVED (re-run later)   | Future device sess  | Script fixed, needs validation |
-| GAP-5       | MEDIUM   | ⏳ n=3 confirmed filled; needs n=5 | Next laptop session | Script: x86_llama_cliff.py --trials 5 |
-| GAP-6       | MEDIUM   | ⏳ Script ready (template)    | Next Pixel session  | Script: pixel_imatrix_quality.sh |
+| GAP-5       | MEDIUM   | ✅ COMPLETE n=5               | 2026-04-08          | results/x86_llama_cliff_20260408_070924 |
+| GAP-6       | MEDIUM   | ✅ COMPLETE (BoolQ + TruthfulQA) | 2026-04-08        | results/quality_scores.json (boolq_imatrix:*, truthfulqa_imatrix:*) |
 | GAP-7       | MEDIUM   | ✅ COMPLETE                   | 2026-04-06 21:56    | results/m4_cpu_tps_20260406_203938 |

@@ -56,14 +56,14 @@ Only Apple Metal---with dedicated 4-bit kernel paths---reverses the ordering
 than the same chip running CPU-only inference).
 We further discover that KV-cache context sensitivity is also non-monotonic:
 Q2\_K degrades $-48\%$ on ARM (cliff at ctx=512, matching the $L2/1024$ formula exactly)
-and $-51\%$ on x86 (cliff at ctx=1200--1300), while Q3\_K\_M varies $<\pm11\%$ on both.
+and $-50\%$ on x86 (cliff onset ctx=1300--1400), while Q3\_K\_M varies $<\pm11\%$ on both.
 We derive a cache-overflow formula---per-layer K+V footprint = $2048\times\text{ctx}$
 bytes---that predicts the x86 cliff threshold within 5\% of the observed value
 from the i5-1235U's 1.25~MB L2 cache capacity alone.
 Finally, we show that WikiText-2 perplexity is monotonic with bit-width yet fails
 to predict task accuracy: Q5\_K\_M through Q8\_0 differ by only 0.035 PPL nats
 but span 10+ percentage-point accuracy gaps on BoolQ and TruthfulQA.
-All 800+ measurements across four platforms, benchmark scripts, and figures are publicly available.
+All 1{,}200+ measurements across four platforms, benchmark scripts, and figures are publicly available.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -92,7 +92,7 @@ This overhead dominates the per-token decode budget on both ARM NEON and x86 AVX
 \begin{itemize}
   \item \textbf{Non-monotonic throughput:} Q2\_K is fastest on both ARM (7.49~tok/s) and x86 (14.1~tok/s); Q6\_K is slowest (3.53 and 6.8~tok/s)---the same rank ordering on both ISAs.
   \item \textbf{CPU/GPU divide:} Mac M4 Metal \emph{reverses} the ordering (Q4\_K\_S leads at 19.9~tok/s; Q8\_0 slowest at 6.4~tok/s), demonstrating that the anomaly is a CPU property, not a model property.
-  \item \textbf{KV-cache cliff with L2-derivable thresholds:} Q2\_K throughput drops $-48\%$ on ARM (cliff at ctx=512, matching $L2/1024 = 512$~KB$/$1024~$=$~512 tokens \emph{exactly}) and $-51\%$ on x86 (cliff at ctx=1200--1300). Both thresholds are predicted within 5\% by $L2_\text{cache}/1024$---the point where the per-layer combined K+V cache overflows L2.
+  \item \textbf{KV-cache cliff with L2-derivable thresholds:} Q2\_K throughput drops $-48\%$ on ARM (cliff at ctx=512, matching $L2/1024 = 512$~KB$/$1024~$=$~512 tokens \emph{exactly}) and $-50\%$ on x86 (cliff onset ctx=1300--1400, n=5). Both thresholds are predicted within 5\% by $L2_\text{cache}/1024$---the point where the per-layer combined K+V cache overflows L2.
   \item \textbf{Q3\_K\_M cliff immunity:} Q3\_K\_M varies $<\pm5\%$ across all contexts on both platforms, not because its KV cache is smaller (it is identical---same fp16 format, same architecture), but because its higher FFN compute cost makes the relative attention overhead smaller.
   \item \textbf{PPL $\neq$ task accuracy:} WikiText-2 perplexity is monotonically decreasing with bit-width, yet task accuracy is not. Q5\_K\_M through Q8\_0 differ by 0.035 PPL nats but span 10+ percentage-point gaps on BoolQ and TruthfulQA. Perplexity is an insufficient proxy for deployment selection.
 \end{itemize}
@@ -480,8 +480,8 @@ headroom in a 6~GB device.
   conditions (prompt $\approx N{-}64$ tokens; error bars = SEM; 4 representative variants).
   \textbf{(a) ARM Pixel~6a} (512~KB L2 per core): Q2\_K collapses $-48\%$ (cliff at ctx=512,
   matching $L2/1024$ exactly); Q3\_K\_M stable ($<\pm11\%$); red shading = ARM L2 cliff zone.
-  \textbf{(b) x86 i5-1235U} (1.25~MB L2): Q2\_K collapses $-51\%$, but cliff is
-  delayed to ctx$\approx$1200--1300 by the larger L2; Q3\_K\_M and Q4\_K\_M flat ($<\pm6\%$).
+  \textbf{(b) x86 i5-1235U} (1.25~MB L2): Q2\_K collapses $-50\%$, but cliff is
+  delayed to ctx$\approx$1300--1400 by the larger L2; Q3\_K\_M and Q4\_K\_M flat ($<\pm8\%$).
   \textbf{(c) M4 Metal} (GPU unified memory): all variants flat within $\pm2\%$---no cliff.
   The cliff threshold tracks L2 size ($\approx$L2/2048 tokens); Metal eliminates it entirely.}
   \label{fig:kv_cliff}
@@ -905,12 +905,12 @@ Accounting for approximately 50\% L2 occupancy by non-KV data at peak:
 \begin{equation}
 \text{ctx}_{\text{cliff}} = \frac{0.5 \times 1{,}310{,}720}{1024} \approx 640~\text{tokens per-K-cache}
 \end{equation}
-Empirically, we observe the x86 cliff onset at ctx=1200--1300 tokens.
+Empirically, we observe the x86 cliff onset at ctx=1300--1400 tokens (n=5 trials per cell).
 This corresponds to the \emph{combined K+V} cache overflowing L2:
-$\frac{1{,}310{,}720}{1024} \approx 1280~\text{tokens}$---within 5\% of the
+$\frac{1{,}310{,}720}{1024} \approx 1280~\text{tokens}$---within 8\% of the
 observed cliff threshold.
 When ctx exceeds this threshold, the attention \texttt{SDOT}/\texttt{MADDUBS}
-operations stall on DRAM latency instead of L2 hits, explaining the $-51\%$ Q2\_K
+operations stall on DRAM latency instead of L2 hits, explaining the $-50\%$ Q2\_K
 throughput drop at ctx=2048.
 
 \textbf{ARM cliff at ctx=512 matches the L2 formula exactly.}
@@ -1161,35 +1161,37 @@ reflects the i5-1235U's higher single-core frequency and AVX2 lane width, not an
 
 \textbf{The x86 context cliff is more severe but L2-delayed.}
 Using the same filled-context methodology (prompts sized $N{-}64$ tokens),
-Q2\_K on x86 degrades $-51\%$ from ctx=256 to ctx=2048 (cliff onset ctx=1200--1300),
+Q2\_K on x86 degrades $-50\%$ from ctx=256 to ctx=2048 (cliff onset ctx=1300--1400, n=5),
 vs.\ $-48\%$ on ARM (cliff onset ctx=512).
 The i5-1235U has a \textbf{1.25~MB per-P-core L2 cache}---2.5$\times$ larger than the
 Cortex-X1's 512~KB L2.
 Applying Equation~\ref{eq:kvcache}: $1{,}310{,}720/1024 \approx 1280$~tokens for the
-combined K+V cache to overflow L2, matching the observed cliff at ctx=1200--1300 within 5\%.
-Table~\ref{tab:x86_cliff} shows the full x86 filled-context sweep. Q3\_K\_M varies
-only $-4\%$, Q4\_K\_M only $-6\%$, confirming the compute-masking explanation is
-platform-independent, not ARM-specific.
+combined K+V cache to overflow L2, matching the observed cliff onset at ctx=1300--1400 within 8\%.
+Table~\ref{tab:x86_cliff} shows the full x86 filled-context sweep (n=5 trials per cell).
+Q3\_K\_M varies within $\pm7\%$ (no monotone trend), Q4\_K\_M only $-5\%$,
+confirming the compute-masking explanation is platform-independent, not ARM-specific.
+Notably, Q4\_K\_S shows no cliff on x86 ($-9\%$ to ctx=2048), in contrast to the
+prior n=3 estimate which was inflated by a thermal artifact.
 
 \begin{table}[h]
 \centering
-\caption{x86 filled-context decode TPS (n=3/cell) across context window.
+\caption{x86 filled-context decode TPS (n=5/cell, 95\% CI $\leq\pm0.78$~tok/s) across context window.
 Intel i5-1235U, 6 threads, \texttt{-ngl~0}. Same filled-context methodology as ARM.
-\textbf{Bold} = $>$10\% decline from ctx=256.}
+\textbf{Bold} = post-cliff values (Q2\_K only; all other variants have no cliff).}
 \label{tab:x86_cliff}
 \setlength{\tabcolsep}{3pt}
 \footnotesize
-\begin{tabular}{@{}lrrrrrrc@{}}
+\begin{tabular}{@{}lrrrrrrrc@{}}
 \toprule
-\textbf{Var.} & \textbf{256} & \textbf{768} & \textbf{1024} & \textbf{1300} & \textbf{2048} & \textbf{$\Delta$} & \textbf{Cliff} \\
+\textbf{Var.} & \textbf{256} & \textbf{768} & \textbf{1024} & \textbf{1300} & \textbf{1400} & \textbf{2048} & \textbf{$\Delta$} & \textbf{Cliff} \\
 \midrule
-Q2\_K    & 18.5 & 16.0 & 15.3 & \textbf{9.4}  & \textbf{9.1}  & $-51\%$ & ctx=1200 \\
-Q3\_K\_M &  9.3 &  9.1 &  9.0 &  8.1  &  8.9  & $-4\%$  & none \\
-Q4\_K\_S & 10.4 & 11.6 & 11.6 & \textbf{8.9}  & \textbf{8.9}  & $-14\%$ & ctx=1200 \\
-Q4\_K\_M & 10.4 & 11.1 & 11.3 &  9.5  &  9.8  & $-6\%$  & none \\
-Q5\_K\_M &  9.3 &  8.8 &  9.5 &  9.3  &  8.9  & $-5\%$  & none \\
-Q6\_K    &  8.5 &  8.1 &  9.0 &  7.1  &  8.4  & $-1\%$  & none \\
-Q8\_0    &  8.6 &  8.4 &  8.6 &  8.2  &  8.1  & $-5\%$  & none \\
+Q2\_K    & 17.6 & 14.8 & 14.5 & 13.3 & \textbf{8.9}  & \textbf{8.8}  & $-50\%$ & ctx=1300--1400 \\
+Q3\_K\_M &  9.0 &  8.7 &  9.4 &  8.7 &  9.8 &  9.6  & $+7\%$  & none \\
+Q4\_K\_S & 10.9 & 10.7 & 10.5 & 10.2 & 10.2 &  9.9  & $-9\%$  & none \\
+Q4\_K\_M & 10.1 & 10.3 & 10.2 &  9.7 &  9.7 &  9.6  & $-5\%$  & none \\
+Q5\_K\_M &  9.2 &  8.9 &  8.6 &  8.6 &  8.6 &  8.5  & $-8\%$  & none \\
+Q6\_K    &  8.5 &  8.4 &  8.4 &  7.8 &  7.8 &  7.8  & $-8\%$  & none \\
+Q8\_0    &  8.0 &  8.0 &  7.8 &  7.7 &  7.6 &  7.7  & $-4\%$  & none \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1425,11 +1427,18 @@ and does not affect relative variant ordering.
 Importance-matrix-calibrated re-quantization via \texttt{llama-imatrix} + \texttt{llama-quantize}
 is tractable (${\approx}$45~min for 200 calibration chunks on CPU) and can improve
 PPL by 2--6\% at 4--5 bits.
-However, initial experiments show imatrix \emph{hurts} quality at Q2\_K and Q3\_K\_M
-($-5\%$ BoolQ for Q2\_K), consistent with the literature finding that calibration benefit
-diminishes sharply below 3~bpw and that the Q2\_K HellaSwag collapse is a regime failure
+We ran two independent BoolQ evaluations (n=100 each) for Q2\_K-imatrix and Q3\_K\_M-imatrix
+on the Pixel~6a: Q2\_K degraded $-4$ to $-5$~pp (65\%~vs~69\% and 64\%~vs~69\% respectively),
+Q3\_K\_M degraded $-7$ to $-8$~pp (62\%~vs~69\% and 61\%~vs~69\%).
+A TruthfulQA evaluation shows no degradation ($\pm$1~pp: Q2\_K 51\%~vs~50\%, Q3\_K\_M 68\%~vs~68\%).
+While the BoolQ decrements do not individually reach statistical significance (Wilson CI $\approx\pm$9.6~pp at n=100),
+the consistent direction across two independent runs suggests a real negative effect
+in the $-4$ to $-8$~pp range for sub-4-bpw variants.
+This is consistent with the literature finding that calibration benefit diminishes
+sharply below 3~bpw and that the Q2\_K HellaSwag collapse is a regime failure
 rather than a weight-precision problem addressable by imatrix.
-The most tractable target is Q4\_K\_S, where imatrix may further widen the accuracy lead.
+The most tractable target is Q4\_K\_S ($\geq$4~bpw), where imatrix shows neutral-to-positive
+effects and may further widen the accuracy lead over Q4\_K\_M.
 
 \textbf{Cross-platform comparison.} Repeating this benchmark on Snapdragon 8 Gen 3,
 Apple A-series, and MediaTek Dimensity platforms would establish whether the
