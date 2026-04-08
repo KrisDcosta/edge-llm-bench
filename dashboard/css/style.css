@@ -333,6 +333,24 @@ html:not(.dark) footer .text-white { color: #111827; }
 html:not(.dark) .footer-link { color: #4B5563; }
 html:not(.dark) .footer-link:hover { color: #059669; }
 
+/* Body and headings */
+html:not(.dark) h1,
+html:not(.dark) h2,
+html:not(.dark) h3 { color: #111827; }
+html:not(.dark) p  { color: #374151; }
+/* Stat numbers keep accent green */
+html:not(.dark) .stat-num { color: #059669; }
+/* Finding pills */
+html:not(.dark) .finding-pill { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.25); }
+html:not(.dark) .finding-pill .text-gray-400 { color: #4B5563; }
+/* Heatmap text */
+html:not(.dark) #heatmap-tbody td { color: #1F2937; }
+/* Table header background */
+html:not(.dark) .bg-gray-900 { background: #F3F4F6; }
+html:not(.dark) thead.bg-gray-900 th { color: #374151; }
+/* Section alt background */
+html:not(.dark) .section-alt { background: #F0F4F8; }
+
 /* ── Scrollbar ─────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -343,3 +361,15 @@ html:not(.dark) .footer-link:hover { color: #059669; }
 * { transition-property: background-color, border-color, color;
     transition-duration: 0.15s; }
 canvas { transition: none !important; }
+
+/* ── Responsive chart heights ─────────────────────────────────────────────── */
+.chart-card { position: relative; }
+.chart-card canvas { height: 300px; width: 100%; }
+#chart-threads { height: 200px; }
+#chart-ppl    { height: 240px; }
+
+@media (max-width: 768px) {
+  .chart-card canvas { height: 200px; }
+  #chart-threads      { height: 150px; }
+  #chart-ppl          { height: 170px; }
+}

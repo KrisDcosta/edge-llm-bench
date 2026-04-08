@@ -243,12 +243,15 @@ def bake_quality_scores():
     q["benchmark_clean"] = q["benchmark"].str.replace("x86_", "", regex=False)
 
     # Prefer arc_easy_fixed over arc_easy where both exist
-    arc_easy_fixed = set(
+    arc_easy_fixed_variants = set(
         q[q["benchmark_clean"] == "arc_easy_fixed"]["variant"].unique()
     )
+    # Only suppress old arc_easy for Pixel6a (where arc_easy_fixed was collected).
+    # x86 has no arc_easy_fixed — keep its arc_easy rows.
     q = q[~(
         (q["benchmark_clean"] == "arc_easy") &
-        (q["variant"].isin(arc_easy_fixed))
+        (q["device_resolved"] == "Pixel6a") &
+        (q["variant"].isin(arc_easy_fixed_variants))
     )]
     q["benchmark_clean"] = q["benchmark_clean"].replace(
         "arc_easy_fixed", "arc_easy"
@@ -310,13 +313,14 @@ def bake_cross_device():
         "context_lens": [int(c) for c in all_contexts],
         "models": ["Llama", "Qwen"],
         # x86 has no context_len — supply as a flat lookup
-        "x86_tps": {},
+        "x86_tps": {"Llama": {}, "Qwen": {}},
         "data": {},  # keyed by model → context_len → device → variant → {mean, n}
     }
 
-    # x86 flat
+    # x86 per model (Qwen data absent — will show — in heatmap)
     for _, row in x86.iterrows():
-        result["x86_tps"][row["variant"]] = safe_float(row["decode_tps"])
+        model_label = "Llama" if row["model"] == MODEL_LLAMA else "Qwen"
+        result["x86_tps"][model_label][row["variant"]] = safe_float(row["decode_tps"])
 
     for model_label, pixel_src, m4_src in [
         ("Llama", pixel_cliff, m4_cliff),

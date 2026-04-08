@@ -169,7 +169,7 @@
       </div>
 
       <div class="chart-card">
-        <canvas id="chart-tps" height="320"></canvas>
+        <canvas id="chart-tps"></canvas>
       </div>
 
       <p class="chart-note">
@@ -217,7 +217,7 @@
       </div>
 
       <div class="chart-card">
-        <canvas id="chart-cliff" height="360"></canvas>
+        <canvas id="chart-cliff"></canvas>
       </div>
 
       <p class="chart-note">
@@ -269,7 +269,7 @@
       </div>
 
       <div class="chart-card">
-        <canvas id="chart-quality" height="300"></canvas>
+        <canvas id="chart-quality"></canvas>
       </div>
 
       <p class="chart-note">
@@ -322,6 +322,7 @@
           <span>Faster</span>
           <span class="ml-4 text-gray-600">— = no data at this context</span>
         </div>
+        <p class="text-xs text-gray-500 mt-2">x86: single context-independent measurement — slider does not affect x86 column.</p>
       </div>
 
       <!-- Thread sweep mini-chart -->
@@ -333,7 +334,7 @@
         8 threads regresses due to E-core saturation.
       </p>
       <div class="chart-card" style="max-width:480px">
-        <canvas id="chart-threads" height="220"></canvas>
+        <canvas id="chart-threads"></canvas>
       </div>
     </div>
   </section>
@@ -349,7 +350,7 @@
         </div>
       </div>
       <div class="chart-card" style="max-width:640px">
-        <canvas id="chart-ppl" height="260"></canvas>
+        <canvas id="chart-ppl"></canvas>
       </div>
       <div class="mt-3 p-3 rounded-lg bg-yellow-900/20 border border-yellow-800/40 text-xs text-yellow-300 max-w-2xl">
         ⚠ Q2_K and Q3_K_M evaluated on full corpus (~285K tokens).
@@ -466,7 +467,7 @@
         <div>
           <div class="text-xs text-gray-500 uppercase tracking-widest mb-3">About</div>
           <p class="text-sm text-gray-500 leading-relaxed">
-            700+ controlled inference runs across Pixel 6a, Apple M4, and x86.
+            3,900+ inference records across 2 models, 7 GGUF variants and 3 devices.
             All data, scripts, and methodology are open-source.
           </p>
         </div>
@@ -474,7 +475,7 @@
 
       <div class="mt-10 pt-6 border-t border-gray-800 flex flex-wrap items-center justify-between gap-4 text-xs text-gray-600">
         <span>Dataset: CC BY 4.0 · Code: Apache 2.0</span>
-        <span>Model: Llama 3.2 3B Instruct (Meta) · Framework: llama.cpp</span>
+        <span>Models: Llama 3.2 3B (Meta) · Qwen 2.5 1.5B (Alibaba) · Framework: llama.cpp</span>
       </div>
     </div>
   </footer>

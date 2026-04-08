@@ -23,7 +23,7 @@ function gridColor() {
 }
 
 function tickColor() {
-  return document.documentElement.classList.contains('dark') ? '#6B7280' : '#9CA3AF';
+  return document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#374151';
 }
 
 function tooltipDefaults() {
@@ -99,7 +99,7 @@ function renderTpsChart() {
     data: { labels: VARIANT_ORDER, datasets },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       animation: { duration: 300 },
       onClick(event, elements) {
         if (!elements.length) { State.clear(); return; }
@@ -154,9 +154,9 @@ function renderTpsChart() {
 
             c.save();
             c.beginPath();
-            c.strokeStyle = '#fff';
+            c.strokeStyle = document.documentElement.classList.contains('dark') ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.45)';
             c.lineWidth   = 1.5;
-            c.globalAlpha = 0.6;
+            c.globalAlpha = 1;
             // Vertical line
             c.moveTo(cx, yTop); c.lineTo(cx, yBot);
             // Top cap
@@ -326,7 +326,7 @@ function renderCliffChart() {
     data: { datasets },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       animation: { duration: 250 },
       parsing: false,
       onClick(event, elements) {
@@ -456,7 +456,7 @@ function renderQualityChart() {
     data: { labels: VARIANT_ORDER, datasets },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       animation: { duration: 300 },
       onClick(event, elements) {
         if (!elements.length) { State.clear(); return; }
@@ -549,7 +549,7 @@ function renderHeatmap() {
   const ctxKey  = String(ctx);
   const modelData = _heatmapData.data[model] || {};
   const ctxData   = modelData[ctxKey] || {};
-  const x86Tps    = _heatmapData.x86_tps || {};
+  const x86Tps    = _heatmapData.x86_tps?.[model] || {};
 
   // Update slider label
   const label = document.getElementById('heatmap-ctx-label');
@@ -669,7 +669,7 @@ function initThreadChart(data) {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       animation: { duration: 300 },
       plugins: {
         legend: { display: false },
@@ -707,7 +707,7 @@ function initThreadChart(data) {
           const yBot = y.getPixelForValue(Math.max(0, mean - std));
           c.save();
           c.beginPath();
-          c.strokeStyle = '#fff'; c.lineWidth = 1.5; c.globalAlpha = 0.6;
+          c.strokeStyle = document.documentElement.classList.contains('dark') ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.45)'; c.lineWidth = 1.5; c.globalAlpha = 1;
           c.moveTo(cx, yTop); c.lineTo(cx, yBot);
           c.moveTo(cx - 4, yTop); c.lineTo(cx + 4, yTop);
           c.moveTo(cx - 4, yBot); c.lineTo(cx + 4, yBot);
@@ -749,7 +749,7 @@ function initPplChart(data) {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       animation: { duration: 300 },
       plugins: {
         legend: { display: false },

@@ -311,7 +311,43 @@
     },
     "x86": {
       "standard": {
-        "arc_easy": {},
+        "arc_easy": {
+          "Q2_K": {
+            "accuracy": 77.0,
+            "correct": 77,
+            "total": 100
+          },
+          "Q3_K_M": {
+            "accuracy": 69.0,
+            "correct": 69,
+            "total": 100
+          },
+          "Q4_K_M": {
+            "accuracy": 79.0,
+            "correct": 79,
+            "total": 100
+          },
+          "Q4_K_S": {
+            "accuracy": 78.0,
+            "correct": 78,
+            "total": 100
+          },
+          "Q5_K_M": {
+            "accuracy": 70.0,
+            "correct": 70,
+            "total": 100
+          },
+          "Q6_K": {
+            "accuracy": 70.0,
+            "correct": 70,
+            "total": 100
+          },
+          "Q8_0": {
+            "accuracy": 71.0,
+            "correct": 71,
+            "total": 100
+          }
+        },
         "arc_challenge": {
           "Q2_K": {
             "accuracy": 50.0,
