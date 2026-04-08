@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//usr/local/**)",
+      "Read(//c/Users/Kris/llama.cpp/build/**)",
+      "Read(//c/Users/Kris/**)",
+      "Bash(find C:/Users/Kris/291_EAI -name *.gguf)",
+      "Bash(find /c/Users/Kris -name *.gguf)",
+      "Bash(where llama-bench:*)",
+      "Bash(where llama-cli:*)",
+      "Bash(where llama-perplexity:*)",
+      "Read(//c/Users/Kris/291_EAI/$USERPROFILE/**)",
+      "Read(//c//**)",
+      "Bash(find /c/Users/Kris -maxdepth 4 -name llama-bench*)",
+      "Bash(find /c/Users/Kris -maxdepth 4 -name *.gguf)",
+      "Bash(find /c/temp/llama.cpp/models -name *.gguf)",
+      "Bash(find /c/Users/Kris/Downloads -name *.gguf)",
+      "Bash(find /c/Users/Kris/Desktop -name *.gguf)",
+      "Bash(python3:*)",
+      "Bash(py -3 -c \"import ast; ast.parse\\(open\\(''C:/Users/Kris/291_EAI/scripts/run_x86_benchmark.py''\\).read\\(\\)\\); print\\(''run_x86_benchmark.py: OK''\\)\")",
+      "Bash(py -3 -c \"import ast; ast.parse\\(open\\(''C:/Users/Kris/291_EAI/scripts/quality_eval.py''\\).read\\(\\)\\); print\\(''quality_eval.py: OK''\\)\")",
+      "Bash(py -3 scripts/run_x86_benchmark.py --tps --dry-run)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(k, d[''''results''''][k].get\\(''''decode_tps''''\\), ''''decode t/s''''\\) for k in d[''''results'''']]\")",
+      "Bash(py -3 -c \"import json,sys; d=json.load\\(open\\(''''C:/Users/Kris/291_EAI/results/x86_tps_results.json''''\\)\\); [print\\(k, d[''''results''''][k]\\) for k in d[''''results'''']]\")",
+      "Bash(C:/temp/llama.cpp/build/bin/Release/llama-completion.exe --help)",
+      "Bash(py:*)",
+      "Bash(xxd)",
+      "Bash(grep -rn:*)",
+      "Bash(ls C:/Users/Kris/291_EAI/data/hellaswag* C:/Users/Kris/291_EAI/data/mmlu*)",
+      "Bash(tasklist /FI 'IMAGENAME eq python.exe')",
+      "Bash(tasklist /FI 'IMAGENAME eq py.exe')",
+      "Bash(tasklist)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c \"taskkill /F /IM python.exe\")",
+      "Bash(cmd /c \"tasklist | findstr python\")"
+    ]
+  }
+}
