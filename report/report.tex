@@ -166,7 +166,7 @@ empirical studies. We organize the discussion around five themes.
 \toprule
 \textbf{Work} & \textbf{Platform} & \textbf{Non-mono.} & \textbf{KV cliff} & \textbf{Mech.} & \textbf{CPU/GPU} \\
 \midrule
-MELTing Point~\cite{meltingpoint}    & Mobile ARM/iOS & $\circ$ & --         & --         & --         \\
+MELTing Point~\cite{meltingpoint}    & Mobile ARM/iOS & $\circ$$^a$ & --      & --         & --         \\
 Xiao et al.~\cite{xiao_mobile}       & Mobile SoC     & $\circ$ & --         & --         & $\circ$    \\
 MLC-LLM~\cite{mlcllm}               & Mobile GPU     & --      & --         & --         & $\circ$    \\
 Na et al.~\cite{na_cpu_perf}         & Server CPU     & --      & --         & \checkmark & --         \\
@@ -174,6 +174,7 @@ He et al.~\cite{he_cpu_inference}    & x86 CPU        & --      & --         & \
 Gope et al.~\cite{gope_arm_kernels}  & ARM CPU        & --      & --         & \checkmark & --         \\
 \textbf{This work}                   & ARM+x86+M4     & \checkmark & \checkmark & \checkmark & \checkmark \\
 \bottomrule
+\multicolumn{6}{l}{\footnotesize $^a$3-bit $<$ 4-bit throughput observed~\cite{meltingpoint}; coarser bitwidth tiers, not GGUF K-quant variants.}\\
 \end{tabular}
 \end{table}
 
@@ -196,13 +197,14 @@ Our evaluation confirms the literature finding~\cite{dettmers_kbit} that calibra
 benefit diminishes sharply below 3~bpw: BoolQ accuracy \emph{degrades} $-4$ to $-8$~pp
 for Q2\_K-imatrix and Q3\_K\_M-imatrix, while 4-bit variants are unaffected.
 
-A recent evaluation~\cite{tang_eval} found significant accuracy gaps even at 4-bit
-precision across a range of tasks. Dutta et al.~\cite{dutta_accuracy} showed that
-perplexity-equivalent compressed models produce measurably divergent task behavior.
+Li et al.~\cite{li_eval} found significant accuracy gaps even at 4-bit
+precision across a range of tasks, and showed that GGUF K-quant accuracy is
+non-monotonic with bit-width on several benchmarks.
+Dutta et al.~\cite{dutta_accuracy} demonstrated that perplexity-equivalent compressed
+models produce measurably divergent task behavior.
 Both findings support our conclusion that WikiText-2 perplexity is an insufficient
 proxy: Q5\_K\_M through Q8\_0 differ by only 0.035 PPL nats yet span 10+ percentage
-points on BoolQ and TruthfulQA. Pythia~\cite{pythia} showed the same PPL--task
-decoupling across training checkpoints; we show it across quantization levels.
+points on BoolQ and TruthfulQA.
 
 \subsection{CPU Inference Systems and SIMD Optimization}
 
@@ -239,19 +241,20 @@ in server-scale work; the underlying mechanism is the same.
 
 \subsection{Mobile and Edge LLM Inference}
 
-\textbf{MELTing Point}~\cite{meltingpoint} (Laskaridis et al., MobiSys 2024) is the
+\textbf{MELTing Point}~\cite{meltingpoint} (Laskaridis et al., MobiCom 2024) is the
 closest related work, benchmarking LLM inference on consumer mobile devices across
-ARM/iOS/Android hardware. They observe non-monotonic quantization throughput ordering
-but do not explain it mechanistically, do not report context-length sensitivity,
-and do not establish the CPU/GPU divide.
+ARM/iOS/Android hardware. They find that 3-bit quantization achieves 24.77\% \emph{lower}
+throughput than 4-bit on mobile hardware, observing throughput non-monotonicity across
+bitwidth tiers but attributing it only broadly to dequantization overhead and cache
+alignment without a kernel-level mechanistic analysis, and without reporting
+context-length sensitivity or establishing the CPU/GPU divide.
 Our work provides (1) the SIMD kernel explanation for the ordering, (2) the
 filled-context cliff analysis, (3) cross-ISA validation, and (4) the
 Metal CPU/GPU comparison that shows the ordering inversion is a CPU property.
 
 Xiao et al.~\cite{xiao_mobile} conducted a comprehensive measurement study of LLM
 inference across mobile SoCs, observing throughput variation across quantization formats
-but attributing it primarily to memory bandwidth without analyzing intra-format
-dequantization cost.
+without analyzing intra-format dequantization cost as the causal mechanism.
 MLC-LLM~\cite{mlcllm} demonstrated competitive mobile GPU inference via ML compilation;
 their results differ fundamentally from the CPU path because Metal/Vulkan kernel
 fusion eliminates the dequantization bottleneck entirely.
@@ -280,11 +283,10 @@ reduction from thermal throttling on Raspberry Pi 4B (Cortex-A72) under sustaine
 inference---providing the foundational empirical baseline for our Pixel~6a
 thermal characterization.
 
-Laskaridis et al.~\cite{laskaridis_energy} measured energy consumption of edge LLMs,
-confirming memory access dominates over computation for small models.
 MobileLLM~\cite{mobilellm} studies architecture choices for sub-billion parameter
-on-device models, including GQA which determines the KV-cache footprint formula
-we derive and validate.
+on-device models. Our KV-cache formula is derived from Llama~3.2~3B's Grouped
+Query Attention (GQA) configuration~\cite{llama32,gqa}; the formula generalizes
+directly from the GQA architecture's number of KV heads.
 EdgeMoE~\cite{edgeMoE} and PowerInfer~\cite{powerinfer} target MoE and CPU/GPU split
 execution respectively; both require architectural modifications not applicable to
 standard dense Llama/Qwen models.
@@ -1586,7 +1588,7 @@ whether the Q2\_K HellaSwag collapse (near-random on MCQ) extends to open-ended
 generation, where degenerate output modes may be harder to detect.
 Based on the observed Q2\_K TruthfulQA failure (50\% on yes/no questions = chance)
 and HellaSwag collapse (19\%, below chance), we hypothesize that Q2\_K will
-show severe degradation on GSM8K and HumanEval as well~\cite{tang_eval}.
+show severe degradation on GSM8K and HumanEval as well~\cite{li_eval}.
 Preliminary on-device evaluation was attempted but revealed a binary interaction
 issue between \texttt{llama-completion}'s interactive mode and file-based prompt
 input; results from this attempt are excluded.
@@ -1705,13 +1707,10 @@ in \textit{Proc. SOSP}, 2024.
 Meta AI, ``ExecuTorch: On-Device AI across Mobile, Embedded, and Edge for PyTorch,''
 GitHub Repository, 2024. [Online]. Available: \url{https://github.com/pytorch/executorch}
 
-\bibitem{llama3}
-AI@Meta, ``Llama 3 Model Card,''
-GitHub, 2024. [Online]. Available: \url{https://github.com/meta-llama/llama3}
-
-\bibitem{ggml}
-G. Gerganov, ``GGML: Tensor Library for Machine Learning,''
-GitHub Repository, 2023--2025. [Online]. Available: \url{https://github.com/ggerganov/ggml}
+\bibitem{gqa}
+J. Ainslie, J. Lee-Thorp, M. de Jong, Y. Zemlyanskiy, F. Lebr{\'o}n, and S. Sanghai,
+``GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints,''
+in \textit{Proc. EMNLP}, 2023.
 
 \bibitem{boolq}
 C. Clark, K. Lee, M.-W. Chang, T. Kwiatkowski, M. Collins, and K. Toutanova,
@@ -1733,20 +1732,18 @@ C. Hooper, S. Kim, H. Mohammadzadeh, M. W. Mahoney, Y. S. Shao, K. Keutzer, and 
 ``KVQuant: Towards 10 Million Context Length LLM Inference with KV Cache Quantization,''
 arXiv preprint arXiv:2401.18079, 2024.
 
-\bibitem{tang_eval}
-Y. Tang et al.,
+\bibitem{li_eval}
+S. Li, X. Ning, L. Wang, T. Liu, X. Shi, S. Yan, G. Dai, H. Yang, and Y. Wang,
 ``Evaluating Quantized Large Language Models,''
-arXiv preprint arXiv:2402.18158, 2024.
+in \textit{Proc. ICML}, 2024. arXiv:2402.18158.
 
-\bibitem{laskaridis_energy}
-S. Laskaridis, A. Mehrotra, and I. Venieris,
-``On the Energy Consumption of Large Language Models at the Edge,''
-arXiv preprint arXiv:2403.06928, Samsung AI Research, 2024.
+% laskaridis_energy removed — arXiv:2403.06928 is an exoplanet atmospheres paper;
+% no matching Laskaridis energy paper could be verified. Citation deleted.
 
 \bibitem{meltingpoint}
 S. Laskaridis, A. Antonini, A. Katsianos, N.~D. Lane, and S.~I. Venieris,
 ``MELTing Point: Mobile Evaluation of Language Transformers,''
-in \textit{Proc. MobiSys}, 2024.
+in \textit{Proc. MobiCom}, 2024.
 
 \bibitem{spqr}
 T. Dettmers, R. Svirschevski, V. Egiazarian, D. Kuznedelev, E. Frantar,
@@ -1790,7 +1787,7 @@ in \textit{Proc. SC}, 2022.
 K. Alizadeh, I. Mirzadeh, D. Belenko, K. Carpenter, S. Ghodrati, V. Bhatt,
 A. Mishra, M. Rastegari, and M. Farajtabar,
 ``LLM in a Flash: Efficient Large Language Model Inference with Limited Memory,''
-in \textit{Proc. CVPR}, 2024.
+in \textit{Proc. ACL}, 2024.
 
 \bibitem{dettmers_int8}
 T. Dettmers, M. Lewis, Y. Belkada, and L. Zettlemoyer,
@@ -1822,8 +1819,6 @@ in \textit{Proc. SOSP}, 2023.
 S. Williams, A. Waterman, and D. Patterson,
 ``Roofline: An Insightful Visual Performance Model for Multicore Architectures,''
 \textit{Commun. ACM}, vol.~52, no.~4, pp.~65--76, 2009.
-
-% (pope_efficiently_scaling defined above)
 
 \bibitem{hellaswag}
 R. Zellers, A. Holtzman, Y. Bisk, A. Farhadi, and Y. Choi,
@@ -1881,12 +1876,13 @@ arXiv preprint arXiv:2603.23640, 2026.
 \bibitem{gope_arm_kernels}
 D. Gope, D. Mansell, D. Loh, and I. Bratt,
 ``Highly Optimized Kernels and Fine-Grained Codebooks for LLM Inference on Arm CPUs,''
-arXiv preprint arXiv:2501.00032, 2024.
+arXiv preprint arXiv:2501.00032, 2025.
 
 \bibitem{shen_llm_cpu}
 H. Shen, H. Chang, B. Dong, Y. Luo, and H. Meng,
 ``Efficient LLM Inference on CPUs,''
-in \textit{Proc. NeurIPS}, 2023.
+in \textit{NeurIPS 2023 Workshop on Efficient Natural Language and Speech Processing},
+arXiv:2311.00502, 2023.
 
 \bibitem{he_cpu_inference}
 P. He, S. Zhou, W. Huang et al.,
@@ -1926,7 +1922,7 @@ L. Chen, D. Feng, E. Feng et al.,
 arXiv preprint arXiv:2501.14794, 2025.
 
 \bibitem{benoit_thermal}
-T. Benoit-Cattin and D. Velasco-Montero,
+T. Benoit-Cattin, D. Velasco-Montero, and J. Fern{\'a}ndez-Berni,
 ``Impact of Thermal Throttling on Long-Term Visual Inference in a CPU-based Edge Device,''
 \textit{Electronics}, vol.~9, no.~12, p.~2106, 2020.
 
