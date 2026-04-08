@@ -197,27 +197,33 @@ def bake_cliff_curves():
         "curves": {},
     }
 
+    x86_cliff_df = x86[
+        (x86["model"] == MODEL_LLAMA) &
+        (x86["experiment_type"] == "cliff_sweep")
+    ]
+
     sources = {
-        "Pixel6a_Llama": (pixel_cliff, MODEL_LLAMA),
-        "Pixel6a_Qwen":  (pixel[
+        "Pixel6a_Llama": pixel_cliff,
+        "Pixel6a_Qwen":  pixel[
             (pixel["model"] == MODEL_QWEN) &
             (pixel["experiment_type"] == "cliff_sweep")
-        ], MODEL_QWEN),
-        "M4Mac_Llama":   (m4_cliff, MODEL_LLAMA),
-        "M4Mac_Qwen":    (m4[
+        ],
+        "M4Mac_Llama":   m4_cliff,
+        "M4Mac_Qwen":    m4[
             (m4["model"] == MODEL_QWEN) &
             (m4["experiment_type"] == "cliff_sweep")
-        ], MODEL_QWEN),
+        ],
+        "x86_Llama":     x86_cliff_df,
     }
 
-    for label, (df, _) in sources.items():
+    for label, df in sources.items():
         if df.empty:
             continue
         series = {}
         for variant in ordered_variants(df["variant"].unique()):
             v_df = df[df["variant"] == variant]
             points = []
-            for ctx in sorted(v_df["context_len"].unique()):
+            for ctx in sorted(v_df["context_len"].dropna().unique()):
                 g = v_df[v_df["context_len"] == ctx]["decode_tps"]
                 stats = agg(g)
                 if stats["mean"] is not None:
@@ -301,10 +307,20 @@ def bake_quality_scores():
 # ══════════════════════════════════════════════════════════════════════════════
 
 def bake_cross_device():
-    # All context lengths that appear in either Pixel or M4 cliff data
+    x86_cliff_llama = x86[
+        (x86["model"] == MODEL_LLAMA) &
+        (x86["experiment_type"] == "cliff_sweep")
+    ]
+    x86_ref_llama = x86[
+        (x86["model"] == MODEL_LLAMA) &
+        (x86["experiment_type"] == "standard_sweep")
+    ]
+
+    # All context lengths: Pixel + M4 cliff, plus x86 cliff contexts
     all_contexts = sorted(set(
         list(pixel_cliff["context_len"].unique()) +
-        list(m4_cliff["context_len"].unique())
+        list(m4_cliff["context_len"].unique()) +
+        list(x86_cliff_llama["context_len"].dropna().unique())
     ))
 
     result = {
@@ -312,15 +328,22 @@ def bake_cross_device():
         "devices":  DEVICE_ORDER,
         "context_lens": [int(c) for c in all_contexts],
         "models": ["Llama", "Qwen"],
-        # x86 has no context_len — supply as a flat lookup
+        # x86 flat reference (ctx=256 single-run) for legacy fallback
         "x86_tps": {"Llama": {}, "Qwen": {}},
-        "data": {},  # keyed by model → context_len → device → variant → {mean, n}
+        "data": {},
     }
 
-    # x86 per model (Qwen data absent — will show — in heatmap)
-    for _, row in x86.iterrows():
-        model_label = "Llama" if row["model"] == MODEL_LLAMA else "Qwen"
-        result["x86_tps"][model_label][row["variant"]] = safe_float(row["decode_tps"])
+    # x86 flat reference — use ctx=256 n=5 cliff means where available,
+    # else fall back to the single-run standard_sweep values
+    x86_ref_ctx256 = x86_cliff_llama[x86_cliff_llama["context_len"] == 256]
+    for v in VARIANT_ORDER:
+        g = x86_ref_ctx256[x86_ref_ctx256["variant"] == v]["decode_tps"]
+        if not g.empty:
+            result["x86_tps"]["Llama"][v] = safe_float(g.mean())
+        else:
+            row = x86_ref_llama[x86_ref_llama["variant"] == v]
+            if not row.empty:
+                result["x86_tps"]["Llama"][v] = safe_float(row.iloc[0]["decode_tps"])
 
     for model_label, pixel_src, m4_src in [
         ("Llama", pixel_cliff, m4_cliff),
@@ -328,11 +351,14 @@ def bake_cross_device():
          pixel[(pixel["model"] == MODEL_QWEN) & (pixel["experiment_type"] == "cliff_sweep")],
          m4[(m4["model"] == MODEL_QWEN) & (m4["experiment_type"] == "cliff_sweep")]),
     ]:
+        x86_src = x86_cliff_llama if model_label == "Llama" else pd.DataFrame()
+
         ctx_data = {}
         for ctx in all_contexts:
             ctx_key = str(int(ctx))
             cell = {"Pixel6a": {}, "M4Mac": {}, "x86": None}
 
+            x86_at_ctx = {}
             for v in VARIANT_ORDER:
                 # Pixel
                 g = pixel_src[
@@ -348,6 +374,16 @@ def bake_cross_device():
                 ]["decode_tps"]
                 cell["M4Mac"][v] = agg(g) if not g.empty else None
 
+                # x86 cliff — only where we have real measurements
+                if not x86_src.empty:
+                    g = x86_src[
+                        (x86_src["variant"] == v) &
+                        (x86_src["context_len"] == ctx)
+                    ]["decode_tps"]
+                    if not g.empty:
+                        x86_at_ctx[v] = agg(g)
+
+            cell["x86"] = x86_at_ctx if x86_at_ctx else None
             ctx_data[ctx_key] = cell
         result["data"][model_label] = ctx_data
 
