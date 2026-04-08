@@ -269,13 +269,13 @@
         "arc_challenge": {},
         "boolq": {
           "Q2_K": {
-            "accuracy": 64.0,
-            "correct": 64,
+            "accuracy": 65.0,
+            "correct": 65,
             "total": 100
           },
           "Q3_K_M": {
-            "accuracy": 61.0,
-            "correct": 61,
+            "accuracy": 62.0,
+            "correct": 62,
             "total": 100
           },
           "Q4_K_S": {
@@ -306,7 +306,18 @@
         },
         "hellaswag": {},
         "mmlu": {},
-        "truthfulqa": {}
+        "truthfulqa": {
+          "Q2_K": {
+            "accuracy": 51.0,
+            "correct": 51,
+            "total": 100
+          },
+          "Q3_K_M": {
+            "accuracy": 68.0,
+            "correct": 68,
+            "total": 100
+          }
+        }
       }
     },
     "x86": {

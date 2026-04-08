@@ -345,11 +345,14 @@ def collect_quality(results: Path) -> list[dict]:
             benchmark = "custom_qa"
             variant   = key
 
-        # imatrix entries have "imatrix" in the benchmark prefix
+        # imatrix entries have "imatrix" in the benchmark prefix or suffix
         calibration = "imatrix" if "imatrix" in benchmark.lower() else "standard"
-        # Normalise imatrix benchmark name
+        # Normalise imatrix benchmark name — strip all imatrix decorators
         if calibration == "imatrix":
-            benchmark = benchmark.replace("imatrix_", "").replace("_all7_imatrix", "")
+            benchmark = (benchmark
+                         .replace("imatrix_", "")      # imatrix_boolq_all7_imatrix → boolq_all7_imatrix
+                         .replace("_all7_imatrix", "")  # boolq_all7_imatrix → boolq
+                         .replace("_imatrix", ""))      # boolq_imatrix → boolq, truthfulqa_imatrix → truthfulqa
 
         rows.append({
             "benchmark":   benchmark,
@@ -362,7 +365,15 @@ def collect_quality(results: Path) -> list[dict]:
             "total":       entry.get("total"),
             "status":      entry.get("status", "success"),
         })
-    return rows
+
+    # Deduplicate: keep the last (most recent) entry per (benchmark, variant, calibration).
+    # When the same benchmark+variant was re-run, the newer key appears later in the JSON,
+    # so last-write-wins preserves the most up-to-date measurement.
+    seen: dict = {}
+    for row in rows:
+        key = (row["benchmark"], row["variant"], row["calibration"])
+        seen[key] = row
+    return list(seen.values())
 
 
 def collect_perplexity(results: Path) -> list[dict]:
