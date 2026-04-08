@@ -414,7 +414,16 @@ function renderQualityChart() {
   const dev   = getToggleValue('quality-device-toggle') || 'Pixel6a';
   const calib = getToggleValue('quality-calib-toggle')  || 'standard';
 
-  const devData = _qualityData.data[dev] || {};
+  // M4 quality is hardware-independent — use Pixel6a data and show note
+  const isM4 = dev === 'M4Mac';
+  const dataKey = isM4 ? 'Pixel6a' : dev;
+  document.getElementById('quality-m4-note')?.classList.toggle('hidden', !isM4);
+
+  // Show imatrix partial note when imatrix selected (only BoolQ has data)
+  const showImatrixNote = (calib === 'imatrix' || calib === 'both') && bm !== 'boolq';
+  document.getElementById('quality-imatrix-note')?.classList.toggle('hidden', !showImatrixNote);
+
+  const devData = _qualityData.data[dataKey] || {};
   const datasets = [];
 
   if (calib === 'both') {
@@ -446,7 +455,8 @@ function renderQualityChart() {
     });
   }
 
-  const bmLabel = _qualityData.benchmark_labels?.[bm] || bm;
+  const bmLabel = (_qualityData.benchmark_labels?.[bm] || bm) +
+    (isM4 ? '  (Pixel 6a values — hardware-independent)' : '');
   const ctx = document.getElementById('chart-quality');
   if (!ctx) return;
   if (_qualityChart) _qualityChart.destroy();

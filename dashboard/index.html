@@ -255,6 +255,7 @@
           <span class="control-label">Device</span>
           <div class="btn-group" id="quality-device-toggle">
             <button class="btn-toggle active" data-value="Pixel6a">Pixel 6a</button>
+            <button class="btn-toggle" data-value="M4Mac">M4 Mac</button>
             <button class="btn-toggle" data-value="x86">x86</button>
           </div>
         </div>
@@ -276,6 +277,17 @@
         100-question samples from official benchmark test sets. Exact-match scoring.
         imatrix = importance-weighted quantization calibration.
       </p>
+
+      <!-- M4 quality note -->
+      <div id="quality-m4-note" class="hidden mt-3 p-3 rounded-lg bg-blue-900/20 border border-blue-800/40 text-xs text-blue-300 max-w-2xl">
+        ℹ M4 Mac quality benchmarks are not separately shown — accuracy is determined by model weights, not hardware.
+        The same GGUF files run on M4 Mac produce identical token outputs, so Pixel 6a scores apply to all devices.
+      </div>
+
+      <!-- Imatrix partial note -->
+      <div id="quality-imatrix-note" class="hidden mt-3 p-3 rounded-lg bg-amber-900/20 border border-amber-800/40 text-xs text-amber-300 max-w-2xl">
+        ⚠ imatrix calibration data was only collected for BoolQ (all 7 variants). Other benchmarks show no bars under imatrix — switch to Standard for full coverage.
+      </div>
     </div>
   </section>
 
