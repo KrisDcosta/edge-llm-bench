@@ -378,6 +378,12 @@ html:not(.dark) .footer-link:hover { color: #059669; }
 html:not(.dark) nav .border-gray-700 { border-color: #D1D5DB; color: #4B5563; }
 html:not(.dark) nav .border-gray-700:hover { border-color: #059669; color: #059669; }
 
+/* — Warning/note boxes light mode — */
+.ppl-warning-note { color: #A16207; }
+html.dark .ppl-warning-note { color: #FDE047; }
+.imatrix-note { color: #92400E; }
+html.dark .imatrix-note { color: #FCD34D; }
+
 /* ── Scrollbar ─────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

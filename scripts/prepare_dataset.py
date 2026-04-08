@@ -249,38 +249,73 @@ def collect_m4(results: Path, verbose: bool) -> list[dict]:
 
 def collect_x86(results: Path) -> list[dict]:
     rows = []
-    path = results / "x86_tps_results.json"
-    if not path.exists():
-        print("  [warn] x86_tps_results.json not found — skipping x86 split")
-        return rows
 
-    data = load_json(path)
-    meta = data.get("meta", {})
-    for variant, result in data.get("results", {}).items():
-        if result.get("status") != "ok":
-            continue
-        decode = result.get("decode_tps")
-        if not decode or decode <= 0:
-            continue
-        rows.append({
-            "device":          "x86",
-            "backend":         "CPU",
-            "model":           MODEL_LLAMA,
-            "variant":         variant,
-            "context_len":     None,
-            "trial":           1,
-            "threads":         meta.get("threads"),
-            "decode_tps":      decode,
-            "prefill_tps":     result.get("prefill_tps"),
-            "ttft_s":          None,
-            "e2e_s":           None,
-            "n_output_tokens": None,
-            "experiment_type": "standard_sweep",
-            "kv_quant":        None,
-            "ngl":             None,
-            "ts":              meta.get("timestamp"),
-            "source_file":     "x86_tps_results.json",
-        })
+    # 1. Single-context TPS reference run (n=1 per variant, ctx unrecorded)
+    tps_path = results / "x86_tps_results.json"
+    if tps_path.exists():
+        data = load_json(tps_path)
+        meta = data.get("meta", {})
+        for variant, result in data.get("results", {}).items():
+            if result.get("status") != "ok":
+                continue
+            decode = result.get("decode_tps")
+            if not decode or decode <= 0:
+                continue
+            rows.append({
+                "device":          "x86",
+                "backend":         "CPU",
+                "model":           MODEL_LLAMA,
+                "variant":         variant,
+                "context_len":     256,
+                "trial":           1,
+                "threads":         meta.get("threads"),
+                "decode_tps":      decode,
+                "prefill_tps":     result.get("prefill_tps"),
+                "ttft_s":          None,
+                "e2e_s":           None,
+                "n_output_tokens": None,
+                "experiment_type": "standard_sweep",
+                "kv_quant":        None,
+                "ngl":             None,
+                "ts":              meta.get("timestamp"),
+                "source_file":     "x86_tps_results.json",
+            })
+    else:
+        print("  [warn] x86_tps_results.json not found — skipping single-run x86 data")
+
+    # 2. GAP-5 cliff sweep (n=5 per variant × 11 context sizes, filled-context methodology)
+    cliff_dir = results / "x86_llama_cliff_20260408_070924"
+    if cliff_dir.exists():
+        for f in sorted(cliff_dir.glob("cliff_filled_*.jsonl")):
+            for rec in load_jsonl(f):
+                decode = rec.get("decode_tps")
+                if not decode or decode <= 0:
+                    continue
+                variant = rec.get("variant")
+                if not variant:
+                    continue
+                rows.append({
+                    "device":          "x86",
+                    "backend":         "CPU",
+                    "model":           MODEL_LLAMA,
+                    "variant":         variant,
+                    "context_len":     rec.get("context"),
+                    "trial":           rec.get("trial"),
+                    "threads":         rec.get("threads"),
+                    "decode_tps":      decode,
+                    "prefill_tps":     rec.get("prefill_tps"),
+                    "ttft_s":          None,
+                    "e2e_s":           None,
+                    "n_output_tokens": rec.get("n_output_tokens"),
+                    "experiment_type": "cliff_sweep",
+                    "kv_quant":        None,
+                    "ngl":             None,
+                    "ts":              rec.get("ts"),
+                    "source_file":     f.name,
+                })
+    else:
+        print("  [warn] x86_llama_cliff_20260408_070924/ not found — GAP-5 cliff data missing")
+
     return rows
 
 
