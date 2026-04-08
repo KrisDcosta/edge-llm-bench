@@ -1,4 +1,4 @@
-/* Edge LLM Bench — Custom styles (Tailwind handles the rest) — v3 */
+/* Edge LLM Bench — Custom styles (Tailwind handles the rest) — v4 */
 
 /* ── Device badges ─────────────────────────────────────────────────────── */
 .device-badge {
@@ -291,65 +291,92 @@
 .footer-link:hover { color: #10B981; }
 
 /* ── Light mode overrides ──────────────────────────────────────────────── */
-html:not(.dark) body { background: #F9FAFB; color: #111827; }
-html:not(.dark) .section-alt { background: #F3F4F6; }
+
+/* — Global text colour fixes (Tailwind utilities → readable light-mode values) — */
+html:not(.dark) .text-white   { color: #111827; }
+html:not(.dark) .text-gray-100,
+html:not(.dark) .text-gray-200,
+html:not(.dark) .text-gray-300 { color: #374151; }
+html:not(.dark) .text-gray-400 { color: #4B5563; }
+html:not(.dark) .text-gray-500 { color: #6B7280; }
+html:not(.dark) .text-gray-600 { color: #4B5563; }
+
+/* — Global border fixes — */
+html:not(.dark) .border-gray-800,
+html:not(.dark) .border-gray-900 { border-color: #E5E7EB; }
+html:not(.dark) .border-gray-700 { border-color: #D1D5DB; }
+html:not(.dark) .border-t        { border-color: #E5E7EB; }
+html:not(.dark) .border-b        { border-color: #E5E7EB; }
+
+/* — Backgrounds — */
+html:not(.dark) body            { background: #F9FAFB; color: #111827; }
+html:not(.dark) .section-alt    { background: #F0F4F8; }
 html:not(.dark) .chart-card,
 html:not(.dark) .stat-card,
-html:not(.dark) .controls-bar { background: #FFFFFF; border-color: #E5E7EB; }
-html:not(.dark) .btn-group { background: #F3F4F6; border-color: #E5E7EB; }
-html:not(.dark) .btn-toggle { color: #6B7280; }
+html:not(.dark) .controls-bar   { background: #FFFFFF; border-color: #E5E7EB; }
+html:not(.dark) .bg-gray-900    { background: #F3F4F6; }
+html:not(.dark) thead.bg-gray-900 th { color: #374151; border-color: #E5E7EB; }
+
+/* — Navbar — */
+html:not(.dark) nav             { background: rgba(249,250,251,0.95); border-color: #E5E7EB; }
+html:not(.dark) nav a           { color: #374151; }
+html:not(.dark) nav a:hover     { color: #111827; }
+html:not(.dark) .nav-link       { color: #4B5563; }
+
+/* — Toggle buttons — */
+html:not(.dark) .btn-group      { background: #F3F4F6; border-color: #E5E7EB; }
+html:not(.dark) .btn-toggle     { color: #6B7280; }
+html:not(.dark) .btn-toggle:hover { color: #111827; }
 html:not(.dark) .btn-toggle.active { background: #E5E7EB; color: #059669; }
 html:not(.dark) .select-control { background: #F9FAFB; border-color: #D1D5DB; color: #111827; }
-html:not(.dark) .section-title { color: #111827; }
-html:not(.dark) .section-sub { color: #4B5563; }
-html:not(.dark) .stat-card { background: #FFFFFF; border-color: #E5E7EB; }
-html:not(.dark) .stat-label { color: #4B5563; }
-html:not(.dark) .chart-note { color: #6B7280; }
-html:not(.dark) .control-label { color: #4B5563; }
-html:not(.dark) nav { background: rgba(249,250,251,0.9); border-color: #E5E7EB; }
-html:not(.dark) nav a { color: #374151; }
-html:not(.dark) nav a:hover { color: #111827; }
-html:not(.dark) nav .text-white { color: #111827; }
-html:not(.dark) .nav-link { color: #4B5563; }
-/* Table text */
-html:not(.dark) #table-body td { color: #374151; }
-html:not(.dark) #table-body tr { border-bottom-color: #E5E7EB; }
-html:not(.dark) #table-body tr:hover { background: #F3F4F6; }
-html:not(.dark) .th { color: #374151; border-bottom-color: #E5E7EB; }
-/* Heatmap */
-html:not(.dark) #heatmap-table th { color: #4B5563; border-bottom-color: #E5E7EB; }
-html:not(.dark) #heatmap-table td { border-bottom-color: #F3F4F6; color: #374151; }
-html:not(.dark) #heatmap-table td:first-child { color: #111827; }
-/* Variant pills */
-html:not(.dark) .variant-checkbox-label { color: #4B5563; border-color: #D1D5DB; }
-html:not(.dark) .variant-checkbox-label:hover { color: #111827; border-color: #9CA3AF; }
-html:not(.dark) .variant-checkbox-label.checked { color: #059669; }
-/* Buttons */
-html:not(.dark) .btn-secondary { border-color: #D1D5DB; color: #4B5563; }
-html:not(.dark) .btn-secondary:hover { border-color: #059669; color: #059669; }
-/* Footer */
-html:not(.dark) footer { border-color: #E5E7EB; }
-html:not(.dark) footer .text-white { color: #111827; }
-html:not(.dark) .footer-link { color: #4B5563; }
-html:not(.dark) .footer-link:hover { color: #059669; }
 
-/* Body and headings */
+/* — Typography — */
 html:not(.dark) h1,
 html:not(.dark) h2,
-html:not(.dark) h3 { color: #111827; }
-html:not(.dark) p  { color: #374151; }
-/* Stat numbers keep accent green */
-html:not(.dark) .stat-num { color: #059669; }
-/* Finding pills */
-html:not(.dark) .finding-pill { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.25); }
-html:not(.dark) .finding-pill .text-gray-400 { color: #4B5563; }
-/* Heatmap text */
-html:not(.dark) #heatmap-tbody td { color: #1F2937; }
-/* Table header background */
-html:not(.dark) .bg-gray-900 { background: #F3F4F6; }
-html:not(.dark) thead.bg-gray-900 th { color: #374151; }
-/* Section alt background */
-html:not(.dark) .section-alt { background: #F0F4F8; }
+html:not(.dark) h3  { color: #111827; }
+html:not(.dark) p   { color: #374151; }
+html:not(.dark) .section-title { color: #111827; }
+html:not(.dark) .section-sub   { color: #4B5563; }
+html:not(.dark) .stat-label    { color: #4B5563; }
+html:not(.dark) .chart-note    { color: #6B7280; }
+html:not(.dark) .control-label { color: #4B5563; }
+html:not(.dark) .stat-num      { color: #059669; }
+html:not(.dark) .stat-card     { background: #FFFFFF; border-color: #E5E7EB; }
+
+/* — Table — */
+html:not(.dark) #table-body td           { color: #374151; }
+html:not(.dark) #table-body tr           { border-bottom-color: #E5E7EB; }
+html:not(.dark) #table-body tr:hover     { background: #F3F4F6; }
+html:not(.dark) .th                      { color: #374151; border-bottom-color: #E5E7EB; }
+html:not(.dark) .overflow-x-auto.rounded-xl { border-color: #E5E7EB; }
+
+/* — Heatmap — */
+html:not(.dark) #heatmap-table th        { color: #4B5563; border-bottom-color: #E5E7EB; }
+html:not(.dark) #heatmap-table td        { border-bottom-color: #F3F4F6; color: #374151; }
+html:not(.dark) #heatmap-table td:first-child { color: #111827; }
+html:not(.dark) #heatmap-tbody td        { color: #1F2937; }
+
+/* — Variant pills — */
+html:not(.dark) .variant-checkbox-label         { color: #4B5563; border-color: #D1D5DB; }
+html:not(.dark) .variant-checkbox-label:hover   { color: #111827; border-color: #9CA3AF; }
+html:not(.dark) .variant-checkbox-label.checked { color: #059669; }
+
+/* — Finding pills — */
+html:not(.dark) .finding-pill                 { background: rgba(5,150,105,0.06); border-color: rgba(5,150,105,0.25); }
+html:not(.dark) .finding-pill .text-gray-400  { color: #4B5563; }
+
+/* — Buttons — */
+html:not(.dark) .btn-secondary        { border-color: #D1D5DB; color: #4B5563; }
+html:not(.dark) .btn-secondary:hover  { border-color: #059669; color: #059669; }
+
+/* — Footer — */
+html:not(.dark) footer        { border-color: #E5E7EB; }
+html:not(.dark) .footer-link  { color: #4B5563; }
+html:not(.dark) .footer-link:hover { color: #059669; }
+
+/* — HuggingFace pill in nav — */
+html:not(.dark) nav .border-gray-700 { border-color: #D1D5DB; color: #4B5563; }
+html:not(.dark) nav .border-gray-700:hover { border-color: #059669; color: #059669; }
 
 /* ── Scrollbar ─────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
