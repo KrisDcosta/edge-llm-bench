@@ -210,8 +210,8 @@ points on BoolQ and TruthfulQA.
 
 The roofline model~\cite{williams_roofline} predicts that single-batch LLM decode is
 memory-bandwidth-limited, since each token requires loading all weight matrices once.
-Na et al.~\cite{na_cpu_perf} confirmed this for server CPUs, characterizing the
-decode bottleneck as L3 bandwidth saturation.
+Na et al.~\cite{na_cpu_perf} confirmed this memory-bandwidth-limited regime for
+server CPUs, profiling the LLM decode bottleneck across cache levels.
 Pope et al.~\cite{pope_efficiently_scaling} and DeepSpeed-Inference~\cite{deepspeed}
 established the same regime on GPU.
 Our work extends this picture: \emph{within} GGUF K-quants, dequantization instruction
@@ -229,9 +229,12 @@ He et al.~\cite{he_cpu_inference} extended this with distributed INT8/INT4 infer
 and KV cache quantization on Intel Xeon.
 Most directly relevant to our mechanistic analysis, Gope et al.~\cite{gope_arm_kernels}
 (Arm Ltd.) characterize dequantization overhead in group-quantized LLM kernels for
-ARM CPUs, demonstrating 2--3$\times$ speedup over llama.cpp baselines via weight layout
-interleaving---confirming that the K-quant superblock layout is the primary
-performance determinant, not bit-width.
+ARM CPUs, reporting $3$--$3.2\times$ improvements in prompt processing and
+${\approx}2\times$ in autoregressive decoding over llama.cpp baselines,
+achieved through a combination of optimized SIMD kernels, SIMD-aware weight packing,
+fast decompression-path optimizations, and broader MMLA vector utilization---
+directly confirming that superblock layout and dequantization path are primary
+performance determinants, independent of bit-width.
 
 Zhang et al.~\cite{nomad_attention} showed that at long contexts (16k tokens),
 attention memory access becomes the dominant CPU bottleneck and is amenable
@@ -1687,8 +1690,9 @@ G. Xiao, J. Lin, M. Seznec, H. Wu, J. Demouth, and S. Han,
 in \textit{Proc. ICML}, 2023.
 
 \bibitem{mlcllm}
-T. Chen et al., ``MLC-LLM: Universal LLM Deployment Engine with ML Compilation,''
-arXiv preprint arXiv:2404.01373, 2024.
+MLC-AI Team, ``MLC-LLM: Universal LLM Deployment Engine with ML Compilation,''
+GitHub Repository and Technical Blog, 2024. [Online]. Available:
+\url{https://github.com/mlc-ai/mlc-llm}
 
 \bibitem{qualcomm_llm}
 Qualcomm Technologies, Inc., ``On-Device AI: Large Language Models on Snapdragon,''
@@ -1730,7 +1734,7 @@ in \textit{Proc. ICML}, 2023. arXiv:2211.17192.
 \bibitem{kvquant}
 C. Hooper, S. Kim, H. Mohammadzadeh, M. W. Mahoney, Y. S. Shao, K. Keutzer, and A. Gholami,
 ``KVQuant: Towards 10 Million Context Length LLM Inference with KV Cache Quantization,''
-arXiv preprint arXiv:2401.18079, 2024.
+in \textit{Proc. NeurIPS}, 2024. arXiv:2401.18079.
 
 \bibitem{li_eval}
 S. Li, X. Ning, L. Wang, T. Liu, X. Shi, S. Yan, G. Dai, H. Yang, and Y. Wang,
@@ -1797,7 +1801,7 @@ in \textit{Proc. NeurIPS}, 2022.
 \bibitem{quip}
 A. Tseng, J. Chee, Q. Sun, V. Kuleshov, and C. De Sa,
 ``QuIP\#: Even Better LLM Quantization with Hadamard Incoherence and Lattice Codebooks,''
-arXiv preprint arXiv:2402.04396, 2024.
+in \textit{Proc. ICML}, 2024. arXiv:2402.04396.
 
 \bibitem{flashattention}
 T. Dao, D.~Y. Fu, S. Ermon, A. Rudra, and C. R{\'e},
