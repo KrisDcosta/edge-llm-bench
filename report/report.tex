@@ -152,116 +152,175 @@ overflow model (\S\ref{sec:nonmonotonic}, \S\ref{sec:kvcache_mechanism}).
 \section{Related Work}
 % ===========================================================================
 
-\subsection{LLM Quantization Methods}
+Table~\ref{tab:rw_comparison} positions this work against the most closely related
+empirical studies. We organize the discussion around five themes.
 
-Post-training quantization (PTQ) for LLMs has produced a rich body of techniques
-targeting GPU inference. GPTQ~\cite{gptq} introduced second-order weight quantization
-using the Optimal Brain Compression framework, achieving near-lossless 4-bit compression
-for models with tens of billions of parameters. AWQ~\cite{awq} improved compression
-by identifying and protecting salient weight channels through activation-aware scaling.
-SmoothQuant~\cite{smoothquant} addressed the joint weight-activation quantization problem
-by migrating quantization difficulty from activations to weights via mathematically
-equivalent channel-wise scaling. LLM.int8()~\cite{dettmers_int8} demonstrated that
-8-bit inference is feasible at scale by handling outlier channels in fp16.
-QuIP\#~\cite{quip} applied lattice quantization to achieve near-lossless 2-bit compression.
-SpQR~\cite{spqr} isolated outlier weights in higher precision while compressing the rest;
-this mixed-precision approach highlights why uniform K-quant superblocks lose accuracy at Q2\_K.
-Dettmers and Zettlemoyer~\cite{dettmers_kbit} derived scaling laws showing 4-bit is Pareto-optimal
-for inference quality, supporting the paper's recommendation of Q4\_K variants as the default.
-GGUF K-quant quantization, the focus of this paper, differs from all these methods in targeting
-CPU inference with hand-written SIMD kernels using superblock (256-element) K-quantization
-with separate per-block scales. The K-quant block layout---not the bit-width---is the
-primary determinant of dequantization cost on CPU, a finding not addressed by prior GPU-centric work.
+\begin{table}[t]
+\centering
+\caption{Comparison with the closest related empirical work.
+\checkmark = measured and explained; $\circ$ = observed but unexplained; -- = not addressed.}
+\label{tab:rw_comparison}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Work} & \textbf{Platform} & \textbf{Non-mono.} & \textbf{KV cliff} & \textbf{Mech.} & \textbf{CPU/GPU} \\
+\midrule
+MELTing Point~\cite{meltingpoint}    & Mobile ARM/iOS & $\circ$ & --         & --         & --         \\
+Xiao et al.~\cite{xiao_mobile}       & Mobile SoC     & $\circ$ & --         & --         & $\circ$    \\
+MLC-LLM~\cite{mlcllm}               & Mobile GPU     & --      & --         & --         & $\circ$    \\
+Na et al.~\cite{na_cpu_perf}         & Server CPU     & --      & --         & \checkmark & --         \\
+He et al.~\cite{he_cpu_inference}    & x86 CPU        & --      & --         & \checkmark & --         \\
+Gope et al.~\cite{gope_arm_kernels}  & ARM CPU        & --      & --         & \checkmark & --         \\
+\textbf{This work}                   & ARM+x86+M4     & \checkmark & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\subsection{LLM Inference Systems}
+\subsection{Post-Training Quantization Methods}
 
-FlashAttention~\cite{flashattention} and FlashAttention-2~\cite{flashattention2} optimized
-attention computation via tiling to maximize GPU SRAM reuse, reducing memory bandwidth
-usage quadratically in sequence length. These techniques are GPU-specific; on CPU,
-the attention kernel must stream the full KV cache through main memory or L2/L3,
-making cache overflow the dominant cost at longer contexts.
-vLLM~\cite{vllm} introduced PagedAttention for efficient KV-cache management in
-server-scale inference, reducing memory fragmentation. For edge inference with a single
-model and single user, paging overhead dominates; the simpler contiguous KV-cache
-used by llama.cpp is more appropriate.
-Speculative decoding~\cite{leviathan_speculative} proposed using a small draft model to
-generate token candidates for verification by a larger verifier model, achieving
-1.5--3$\times$ latency improvements without quality loss. This technique is orthogonal
-to our quantization analysis and represents a promising avenue for on-device inference.
+The dominant PTQ methods for GPU inference---GPTQ~\cite{gptq}, AWQ~\cite{awq},
+SmoothQuant~\cite{smoothquant}, LLM.int8()~\cite{dettmers_int8}, QuIP\#~\cite{quip},
+and SpQR~\cite{spqr}---all optimize for CUDA/Tensor Core execution paths where
+higher-bit representations generally improve throughput. These methods assume
+that dequantization cost is negligible (GPU fuses it with GEMM) and that
+weight layout is irrelevant to speed. Both assumptions break on CPU.
+Dettmers and Zettlemoyer~\cite{dettmers_kbit} derived scaling laws showing 4-bit
+is Pareto-optimal for inference \emph{quality}---consistent with our Q4\_K\_S finding---
+but these laws were derived on GPU and do not model CPU SIMD overheads.
 
-\subsection{SIMD CPU Optimization and Memory Bottlenecks}
+Calibration-based quantization methods such as OBC~\cite{obc} and
+SparseGPT~\cite{sparsegpt} use second-order Hessian information to identify
+important weights, forming the theoretical basis for GGUF's imatrix calibration.
+Our evaluation confirms the literature finding~\cite{dettmers_kbit} that calibration
+benefit diminishes sharply below 3~bpw: BoolQ accuracy \emph{degrades} $-4$ to $-8$~pp
+for Q2\_K-imatrix and Q3\_K\_M-imatrix, while 4-bit variants are unaffected.
 
-Georganas et al.~\cite{georganas_simd} analyzed AVX-512/AVX2 SIMD scheduling for DNN operations,
-establishing the methodology of counting SIMD instruction sequences and understanding cache effects
-on throughput---directly applicable to the paper's NEON/AVX2 kernel analysis.
-The roofline model~\cite{williams_roofline} characterizes compute-bound vs.\
-memory-bound regimes for hardware performance analysis. LLM decode throughput on
-commodity hardware is memory-bandwidth-limited: each token requires loading the
-entire model weight matrix once. Prior work~\cite{pope_efficiently_scaling} showed
-that decode throughput is directly proportional to memory bandwidth for
-memory-bound regimes. DeepSpeed-Inference~\cite{deepspeed} confirmed GPU decode
-is memory-bandwidth-saturated at scale. Alizadeh et al.~\cite{llm_flash} studied
-inference with flash-storage streaming, highlighting granularity as the key
-bandwidth parameter---analogous to the cache-line analysis for the CPU L2 cliff here.
-Our work extends this understanding to the \emph{intra-format} level: within GGUF
-K-quants, dequantization instruction overhead (not just bytes loaded) creates
-ordering inversions invisible to a pure bandwidth model.
-KVQuant~\cite{kvquant} proposed quantizing the KV cache itself to reduce the per-layer
-memory footprint. Our work shows that the KV cache overflow mechanism causes 40--51\%
-throughput degradation on CPU even before KV cache quantization---establishing a
-strong motivation for KV cache compression on CPU-only deployments.
+A recent evaluation~\cite{tang_eval} found significant accuracy gaps even at 4-bit
+precision across a range of tasks. Dutta et al.~\cite{dutta_accuracy} showed that
+perplexity-equivalent compressed models produce measurably divergent task behavior.
+Both findings support our conclusion that WikiText-2 perplexity is an insufficient
+proxy: Q5\_K\_M through Q8\_0 differ by only 0.035 PPL nats yet span 10+ percentage
+points on BoolQ and TruthfulQA. Pythia~\cite{pythia} showed the same PPL--task
+decoupling across training checkpoints; we show it across quantization levels.
+
+\subsection{CPU Inference Systems and SIMD Optimization}
+
+The roofline model~\cite{williams_roofline} predicts that single-batch LLM decode is
+memory-bandwidth-limited, since each token requires loading all weight matrices once.
+Na et al.~\cite{na_cpu_perf} confirmed this for server CPUs, characterizing the
+decode bottleneck as L3 bandwidth saturation.
+Pope et al.~\cite{pope_efficiently_scaling} and DeepSpeed-Inference~\cite{deepspeed}
+established the same regime on GPU.
+Our work extends this picture: \emph{within} GGUF K-quants, dequantization instruction
+overhead creates throughput inversions invisible to a pure bandwidth model.
+At the same memory bandwidth, Q2\_K's 4-operand AND-mask dequantization is
+fundamentally cheaper than Q6\_K's 8-operand split-bit shuffle---a distinction
+the standard roofline model cannot capture.
+
+Georganas et al.~\cite{georganas_simd} established the methodology of counting SIMD
+instruction sequences and cache effects on throughput for DNN operations.
+Shen et al.~\cite{shen_llm_cpu} demonstrated INT4 weight-only quantization on x86
+AVX2/AVX512 Xeon CPUs achieving competitive throughput, providing a baseline for
+our x86 Q2\_K finding of 14.1~tok/s at ctx=256.
+He et al.~\cite{he_cpu_inference} extended this with distributed INT8/INT4 inference
+and KV cache quantization on Intel Xeon.
+Most directly relevant to our mechanistic analysis, Gope et al.~\cite{gope_arm_kernels}
+(Arm Ltd.) characterize dequantization overhead in group-quantized LLM kernels for
+ARM CPUs, demonstrating 2--3$\times$ speedup over llama.cpp baselines via weight layout
+interleaving---confirming that the K-quant superblock layout is the primary
+performance determinant, not bit-width.
+
+Zhang et al.~\cite{nomad_attention} showed that at long contexts (16k tokens),
+attention memory access becomes the dominant CPU bottleneck and is amenable
+to SIMD table-lookup acceleration. Our KV-cache cliff occurs at much shorter contexts
+(ctx=512 ARM, ctx=1300--1400 x86) because the L2 cache is smaller than the L3 assumed
+in server-scale work; the underlying mechanism is the same.
 
 \subsection{Mobile and Edge LLM Inference}
 
-MLC-LLM~\cite{mlcllm} demonstrated competitive LLM inference on mobile GPUs
-(Adreno, Apple Neural Engine) via ML compilation. Their results differ fundamentally
-from the CPU-only llama.cpp path we evaluate: Metal/CUDA kernel path selection
-eliminates the dequantization bottleneck we characterize here.
-Laskaridis et al.~\cite{laskaridis_energy} measured energy consumption of LLMs
-at the edge, finding that memory access dominates energy over computation for small
-models---a finding consistent with our bandwidth-driven performance analysis.
-The closest related work is \textbf{MELTing Point}~\cite{meltingpoint} (Laskaridis et al., MobiSys 2024),
-which benchmarks LLM inference on consumer mobile devices across ARM/iOS/Android hardware
-using multiple quantization formats. Our work differs by: (1) providing mechanistic kernel-level
-analysis (NEON/AVX2 instruction counts) explaining the non-monotonic ordering they observe but
-do not explain; (2) adding the filled-context KV-cache cliff analysis absent from their work;
-(3) providing cross-ISA validation that the non-monotonic ordering is CPU-general;
-and (4) integrating the CPU/GPU divide via M4 Metal comparison.
-MobileLLM~\cite{mobilellm} studies architecture choices for sub-billion parameter on-device models,
-including GQA which determines the KV-cache footprint formula derived in Contribution 2.
-MediaTek and Qualcomm have published NPU-based on-device inference results~\cite{qualcomm_llm},
-which differ from the CPU-only path due to dedicated matrix-multiply hardware.
+\textbf{MELTing Point}~\cite{meltingpoint} (Laskaridis et al., MobiSys 2024) is the
+closest related work, benchmarking LLM inference on consumer mobile devices across
+ARM/iOS/Android hardware. They observe non-monotonic quantization throughput ordering
+but do not explain it mechanistically, do not report context-length sensitivity,
+and do not establish the CPU/GPU divide.
+Our work provides (1) the SIMD kernel explanation for the ordering, (2) the
+filled-context cliff analysis, (3) cross-ISA validation, and (4) the
+Metal CPU/GPU comparison that shows the ordering inversion is a CPU property.
+
+Xiao et al.~\cite{xiao_mobile} conducted a comprehensive measurement study of LLM
+inference across mobile SoCs, observing throughput variation across quantization formats
+but attributing it primarily to memory bandwidth without analyzing intra-format
+dequantization cost.
+MLC-LLM~\cite{mlcllm} demonstrated competitive mobile GPU inference via ML compilation;
+their results differ fundamentally from the CPU path because Metal/Vulkan kernel
+fusion eliminates the dequantization bottleneck entirely.
+Zhang and Huang~\cite{zhang_cpu_beats_gpu} provide an independent data point showing
+CPU outperforming mobile GPU for 1B-parameter llama.cpp inference on iPhone~15 Pro,
+consistent with our M4 finding that Metal is slower than CPU for high-bit variants.
+
+Chen et al.~\cite{chen_heterollm} profiled Snapdragon 8 Gen 3 heterogeneous cores
+(CPU+GPU+NPU) for LLM inference, showing that CPU/GPU assignment and memory
+bandwidth shape per-token throughput---directly relevant to our big.LITTLE thread
+scaling and Metal CPU/GPU divide findings.
+Nguyen and Nguyen~\cite{nguyen_sbc} benchmarked 25 quantized LLMs on ARM single-board
+computers (Raspberry Pi 4/5), providing the closest embedded-ARM comparison baseline.
+Tummalapalli et al.~\cite{tummalapalli_edge} measured sustained-load inference on
+Qwen 2.5 1.5B (the exact model we use for cross-model validation), reporting 44\%
+throughput loss from thermal throttling on iPhone 16 Pro---consistent with our
+thermal characterization findings (8.33 to 4.72~tok/s under sustained load on Pixel~6a).
+
+Wang et al.~\cite{wang_biglittle} characterized CNN throughput on ARM big.LITTLE
+clusters (Cortex-A57+A53), showing that cross-cluster scheduling overhead limits
+scaling beyond the big-core count---establishing the prior work context for our
+thread-scaling result: peak at 4 threads, regression at 8 (big-core saturation
+followed by LITTLE-core contention).
+Benoit-Cattin and Velasco-Montero~\cite{benoit_thermal} quantified CPU frequency
+reduction from thermal throttling on Raspberry Pi 4B (Cortex-A72) under sustained
+inference---providing the foundational empirical baseline for our Pixel~6a
+thermal characterization.
+
 Laskaridis et al.~\cite{laskaridis_energy} measured energy consumption of edge LLMs,
 confirming memory access dominates over computation for small models.
-EdgeMoE~\cite{edgeMoE} explored mixture-of-experts routing for edge inference, while
-PowerInfer~\cite{powerinfer} proposed CPU/GPU split execution leveraging activation sparsity.
-Both require architectural changes not applicable to standard dense Llama-family models.
+MobileLLM~\cite{mobilellm} studies architecture choices for sub-billion parameter
+on-device models, including GQA which determines the KV-cache footprint formula
+we derive and validate.
+EdgeMoE~\cite{edgeMoE} and PowerInfer~\cite{powerinfer} target MoE and CPU/GPU split
+execution respectively; both require architectural modifications not applicable to
+standard dense Llama/Qwen models.
 
-\subsection{Quantization Quality Evaluation}
+\subsection{KV-Cache Memory and Context Length}
 
-Tang et al.~\cite{tang_eval} evaluated quantized LLMs across multiple benchmarks,
-finding significant accuracy gaps even at 4-bit precision. Our work complements this by
-showing the gap is \emph{non-monotonic}: Q6\_K (6-bit) can underperform Q4\_K\_S (4-bit)
-on BoolQ, and PPL is insufficient to predict this.
-Pythia~\cite{pythia} demonstrated that PPL does not monotonically predict task performance
-across training checkpoints; we extend this to show the same holds across quantization levels.
-WikiText-2~\cite{wikitext2} and its perplexity metric are the standard proxy for
-quantization quality, but as we show empirically, PPL differences of 0.035 nats
-(Q5\_K\_M vs.\ Q8\_0) correspond to 10+ point accuracy gaps on BoolQ and TruthfulQA.
+FlashAttention~\cite{flashattention,flashattention2} optimized attention tiling
+for GPU SRAM reuse---a GPU-specific technique that does not transfer to CPU where
+no on-chip SRAM is available at this scale.
+vLLM~\cite{vllm} introduced PagedAttention for server KV-cache management;
+our single-session edge use case does not have the fragmentation problem PagedAttention
+solves, but the analysis of KV-cache working set size translates directly.
+KVQuant~\cite{kvquant} proposed quantizing the KV cache itself; our work establishes
+that L2 overflow at ctx=512 (ARM) and ctx=1300--1400 (x86) causes 40--50\% throughput
+degradation even \emph{before} KV cache quantization, motivating KVQuant-style compression
+specifically for CPU deployments.
+Alizadeh et al.~\cite{llm_flash} highlighted memory access granularity as the key
+bandwidth parameter for flash-storage LLM inference---analogous to our cache-line
+analysis of the L2 cliff threshold formula.
+
+\subsection{Quantization Evaluation and llama.cpp}
+
 The standard benchmarks we use---BoolQ~\cite{boolq}, HellaSwag~\cite{hellaswag},
-MMLU~\cite{mmlu}, TruthfulQA~\cite{truthfulqa}, ARC~\cite{arc}---are established
-NLP benchmarks; their use in quantization evaluation follows the methodology of
-the LMSYS Chatbot Arena~\cite{chatbot_arena} and the Open LLM Leaderboard.
+MMLU~\cite{mmlu}, TruthfulQA~\cite{truthfulqa}, ARC~\cite{arc},
+WikiText-2~\cite{wikitext2}---are established NLP evaluation datasets.
+The Zhou et al.\ survey~\cite{zhou_survey} provides the broader context for
+efficient LLM inference methods, of which GGUF K-quant CPU inference is a
+practically important but undercharacterized case.
 
-\subsection{llama.cpp on Mobile}
-
-The llama.cpp project~\cite{llamacpp} supports Android via the NDK and
-compiles NEON SIMD kernels for arm64-v8a targets. Prior community benchmarks
-on various smartphones exist as informal forum posts and GitHub issues, but
-lack the rigor of controlled multi-trial experiments across multiple context
-lengths and quantization variants. The present work fills this gap with a
-reproducible, scripted benchmark methodology and the first mechanistic explanation
-of the non-monotonic throughput ordering via kernel-level analysis.
+The llama.cpp project~\cite{llamacpp} supports Android via the NDK, compiling
+NEON SIMD kernels for arm64-v8a. The GGUF format~\cite{gguf} standardizes
+K-quant weight layout with superblock structure.
+Prior community llama.cpp benchmarks exist as informal GitHub issues and forum
+posts, lacking controlled multi-trial methodology, context-length sweeps, and
+mechanistic explanation. This work provides the first reproducible, scripted
+evaluation with kernel-level analysis of the non-monotonic throughput ordering.
 
 % ===========================================================================
 \section{Methodology}\label{sec:methodology}
@@ -285,7 +344,7 @@ All main throughput, context-scaling, quality, and perplexity experiments are on
     cliff sweep (all 7 variants $\times$ 13 ctx $\times$ 5 trials).
 \end{itemize}
 
-\textbf{Generalizability check:} \textbf{Qwen~2.5~1.5B~Instruct} (all 7 GGUF K-quant
+\textbf{Generalizability check:} \textbf{Qwen~2.5~1.5B~Instruct}~\cite{qwen25} (all 7 GGUF K-quant
 variants) was benchmarked on the Pixel~6a ($n{=}20$ trials, ctx=256) to confirm the
 non-monotonic ordering is model-independent.
 
@@ -1304,7 +1363,7 @@ and \emph{avoid} Q8\_0, which loses $1.97\times$ to its CPU-only equivalent on t
 \textbf{Generalizability: Qwen 2.5 1.5B replicates the non-monotonic ordering.}
 To test whether the non-monotonic CPU throughput ordering is Llama-specific, we ran
 a clean TPS sweep ($n{=}20$ trials, ctx=256, short prompt, 4 threads) of all seven
-K-quant variants of \textbf{Qwen~2.5~1.5B~Instruct} on the Pixel~6a
+K-quant variants of \textbf{Qwen~2.5~1.5B~Instruct}~\cite{qwen25} on the Pixel~6a
 (run \texttt{pixel\_qwen\_tps\_20260326\_033619}).
 The result is an \emph{exact replication} of the Llama~3.2~3B ordering:
 \textbf{Q2\_K is fastest at 13.9~tok/s and Q6\_K is slowest at 7.25~tok/s},
@@ -1792,6 +1851,94 @@ W.-L. Chiang, L. Zheng, Y. Sheng, A.~N. Angelopoulos, T. Li,
 D. Li, H. Zhang, B. Zhu, M. Jordan, J.~E. Gonzalez, and I. Stoica,
 ``Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference,''
 arXiv preprint arXiv:2403.04132, 2024.
+
+\bibitem{xiao_mobile}
+J. Xiao, Q. Huang, X. Chen, and C. Tian,
+``Understanding Large Language Models in Your Pockets: Performance Study on COTS Mobile Devices,''
+arXiv preprint arXiv:2410.03613, 2024.
+
+\bibitem{na_cpu_perf}
+S. Na, G. Jeong, B.~H. Ahn, J. Young, T. Krishna, and H. Kim,
+``Understanding Performance Implications of LLM Inference on CPUs,''
+in \textit{Proc. IEEE IISWC}, 2024.
+
+\bibitem{zhang_cpu_beats_gpu}
+H. Zhang and J. Huang,
+``Challenging GPU Dominance: When CPUs Outperform for On-Device LLM Inference,''
+arXiv preprint arXiv:2505.06461, 2025.
+
+\bibitem{nguyen_sbc}
+T. Nguyen and T. Nguyen,
+``An Evaluation of LLMs Inference on Popular Single-board Computers,''
+arXiv preprint arXiv:2511.07425, 2025.
+
+\bibitem{tummalapalli_edge}
+P. Tummalapalli, S. Arayakandy, R. Pal, and K. Kundan,
+``LLM Inference at the Edge: Mobile, NPU, and GPU Performance Efficiency Trade-offs
+Under Sustained Load,''
+arXiv preprint arXiv:2603.23640, 2026.
+
+\bibitem{gope_arm_kernels}
+D. Gope, D. Mansell, D. Loh, and I. Bratt,
+``Highly Optimized Kernels and Fine-Grained Codebooks for LLM Inference on Arm CPUs,''
+arXiv preprint arXiv:2501.00032, 2024.
+
+\bibitem{shen_llm_cpu}
+H. Shen, H. Chang, B. Dong, Y. Luo, and H. Meng,
+``Efficient LLM Inference on CPUs,''
+in \textit{Proc. NeurIPS}, 2023.
+
+\bibitem{he_cpu_inference}
+P. He, S. Zhou, W. Huang et al.,
+``Inference Performance Optimization for Large Language Models on CPUs,''
+in \textit{ICML 2024 Workshop on Foundation Models in the Wild},
+arXiv preprint arXiv:2407.07304, 2024.
+
+\bibitem{nomad_attention}
+T. Zhang, J.~W. Yi, B. Yao, Z. Xu, and A. Shrivastava,
+``NoMAD-Attention: Efficient LLM Inference on CPUs Through Multiply-add-free Attention,''
+in \textit{Proc. NeurIPS}, 2024.
+
+\bibitem{obc}
+E. Frantar and D. Alistarh,
+``Optimal Brain Compression: A Framework for Accurate Post-Training Quantization and Pruning,''
+in \textit{Proc. NeurIPS}, 2022.
+
+\bibitem{sparsegpt}
+E. Frantar and D. Alistarh,
+``SparseGPT: Massive Language Models Can Be Accurately Pruned in One-Shot,''
+in \textit{Proc. ICML}, 2023.
+
+\bibitem{dutta_accuracy}
+A. Dutta, S. Krishnan, N. Kwatra, and R. Ramjee,
+``Accuracy is Not All You Need,''
+in \textit{Proc. NeurIPS}, 2024.
+
+\bibitem{wang_biglittle}
+S. Wang, G. Ananthanarayanan, Y. Zeng, N. Goel, A. Pathania, and T. Mitra,
+``High-Throughput CNN Inference on Embedded ARM big.LITTLE Multi-Core Processors,''
+\textit{IEEE Trans. Comput.-Aided Design Integr. Circuits Syst.},
+vol.~39, no.~10, pp.~2254--2267, 2020.
+
+\bibitem{chen_heterollm}
+L. Chen, D. Feng, E. Feng et al.,
+``Characterizing Mobile SoC for Accelerating Heterogeneous LLM Inference,''
+arXiv preprint arXiv:2501.14794, 2025.
+
+\bibitem{benoit_thermal}
+T. Benoit-Cattin and D. Velasco-Montero,
+``Impact of Thermal Throttling on Long-Term Visual Inference in a CPU-based Edge Device,''
+\textit{Electronics}, vol.~9, no.~12, p.~2106, 2020.
+
+\bibitem{qwen25}
+Qwen Team,
+``Qwen2.5 Technical Report,''
+arXiv preprint arXiv:2412.15115, 2024.
+
+\bibitem{zhou_survey}
+Z. Zhou, X. Ning, K. Hong, T. Fu, J. Xu, S. Li et al.,
+``A Survey on Efficient Inference for Large Language Models,''
+arXiv preprint arXiv:2404.14294, 2024.
 
 \end{thebibliography}
 
