@@ -32,11 +32,6 @@
     "Pixel6a": {
       "standard": {
         "arc_easy": {
-          "F16": {
-            "accuracy": 95.0,
-            "correct": 95,
-            "total": 100
-          },
           "Q2_K": {
             "accuracy": 76.0,
             "correct": 76,

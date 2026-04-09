@@ -134,9 +134,9 @@ print(f"Writing JSON to {OUT}\n")
 # ══════════════════════════════════════════════════════════════════════════════
 # Chart 1 — tps_by_variant.json
 # Bar chart: mean decode TPS per variant × device
-# Pixel: ctx=512 cliff sweep (stable pre-collapse baseline)
+# Pixel: ctx=256 cliff sweep (pre-collapse baseline, all variants pre-cliff)
 # M4:    ctx=1024 cliff sweep (lowest available context)
-# x86:   raw decode_tps (single point per variant)
+# x86:   ctx=256 cliff sweep mean of n=5 trials (Llama only)
 # ══════════════════════════════════════════════════════════════════════════════
 
 def bake_tps_by_variant():
@@ -145,11 +145,11 @@ def bake_tps_by_variant():
     for model_label, model_name in [("Llama", MODEL_LLAMA), ("Qwen", MODEL_QWEN)]:
         model_data = {}
 
-        # Pixel @ ctx=512 cliff sweep
+        # Pixel @ ctx=256 cliff sweep (pre-collapse baseline, all variants pre-cliff)
         p = pixel[
             (pixel["model"] == model_name) &
             (pixel["experiment_type"] == "cliff_sweep") &
-            (pixel["context_len"] == 512)
+            (pixel["context_len"] == 256)
         ]
         pixel_tps = {}
         for v, grp in p.groupby("variant"):
@@ -167,15 +167,16 @@ def bake_tps_by_variant():
             m4_tps[v] = agg(grp["decode_tps"])
         model_data["M4Mac"] = m4_tps
 
-        # x86 — single point, no std
-        x_model = x86[x86["model"] == model_name] if model_name in x86["model"].values else x86
+        # x86 @ ctx=256 cliff sweep — use mean of n=5 trials (Llama only; no Qwen on x86)
         x86_tps = {}
-        for _, row in x_model.iterrows():
-            v = row["variant"]
-            x86_tps[v] = {
-                "mean": safe_float(row["decode_tps"]),
-                "std": None, "min": None, "max": None, "n": 1,
-            }
+        if model_name in x86["model"].values:
+            x_cliff256 = x86[
+                (x86["model"] == model_name) &
+                (x86["experiment_type"] == "cliff_sweep") &
+                (x86["context_len"] == 256)
+            ]
+            for v, grp in x_cliff256.groupby("variant"):
+                x86_tps[v] = agg(grp["decode_tps"])
         model_data["x86"] = x86_tps
 
         result["data"][model_label] = model_data
@@ -254,10 +255,11 @@ def bake_quality_scores():
     )
     # Only suppress old arc_easy for Pixel6a (where arc_easy_fixed was collected).
     # x86 has no arc_easy_fixed — keep its arc_easy rows.
+    # Also suppress F16 from old arc_easy (flawed ~100% run; F16 not in arc_easy_fixed).
     q = q[~(
         (q["benchmark_clean"] == "arc_easy") &
         (q["device_resolved"] == "Pixel6a") &
-        (q["variant"].isin(arc_easy_fixed_variants))
+        (q["variant"].isin(arc_easy_fixed_variants | {"F16"}))
     )]
     q["benchmark_clean"] = q["benchmark_clean"].replace(
         "arc_easy_fixed", "arc_easy"
