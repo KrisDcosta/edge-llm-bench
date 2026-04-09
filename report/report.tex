@@ -35,35 +35,19 @@ kdcosta@ucsd.edu}
 \maketitle
 
 \begin{abstract}
-Deploying quantized LLMs on CPU requires choosing among GGUF K-quant variants
-(Q2\_K through Q8\_0), but the dominant design intuition---higher bit-width yields
-higher throughput---is \emph{wrong} on CPU.
-We present the first mechanistic, cross-platform study explaining why.
-On ARM (Pixel~6a, Cortex-X1) and x86 (Intel i5-1235U, AVX2), decode throughput
-is \emph{non-monotonic} with bit-width: Q2\_K leads at 7.49~tok/s (ARM) and
-14.1~tok/s (x86), while Q6\_K is slowest (3.53 and 6.8~tok/s respectively)---
-\emph{regardless of platform}.
-Direct inspection of llama.cpp's NEON and AVX2 kernels explains the mechanism:
-Q6\_K stores weights split across two arrays (\texttt{ql[128]} + \texttt{qh[64]}),
-requiring $\approx$26 NEON operations per 256-weight superblock to reconstruct
-6-bit values---nearly \textbf{3$\times$ the instruction count and data bandwidth}
-of Q2\_K's simple 2-bit masking ($\approx$10 ops, 84~bytes/block).
-This SIMD dequantization overhead creates a \textbf{CPU/GPU divide}:
-the non-monotonic ordering with Q6\_K slowest holds on all three CPU backends tested
-(ARM, x86 AVX2, M4 CPU-only).
-Only Apple Metal---with dedicated 4-bit kernel paths---reverses the ordering
-(Q4\_K\_S leads at 19.9~tok/s; Q8\_0 is slowest at 6.4~tok/s---even $1.97\times$ slower
-than the same chip running CPU-only inference).
-We further discover that KV-cache context sensitivity is also non-monotonic:
-Q2\_K degrades $-48\%$ on ARM (cliff at ctx=512, matching the $L2/1024$ formula exactly)
-and $-50\%$ on x86 (cliff onset ctx=1300--1400), while Q3\_K\_M varies $<\pm11\%$ on both.
-We derive a cache-overflow formula---per-layer K+V footprint = $2048\times\text{ctx}$
-bytes---that predicts the x86 cliff threshold within 5\% of the observed value
-from the i5-1235U's 1.25~MB L2 cache capacity alone.
-Finally, we show that WikiText-2 perplexity is monotonic with bit-width yet fails
-to predict task accuracy: Q5\_K\_M through Q8\_0 differ by only 0.035 PPL nats
-but span 10+ percentage-point accuracy gaps on BoolQ and TruthfulQA.
-All 1{,}200+ measurements across four platforms, benchmark scripts, and figures are publicly available.
+On CPU endpoints, the GPU heuristic---higher bit-width yields higher throughput---is wrong.
+We present a mechanistic, cross-platform study of GGUF K-quant inference on ARM (Pixel~6a)
+and x86 (Intel i5-1235U), finding three non-obvious results.
+(1)~Throughput is non-monotonic: Q2\_K leads at 7.49~tok/s (ARM) and 14.1~tok/s (x86),
+while Q6\_K is \emph{slowest} (3.53 and 6.8~tok/s)---a $2.1\times$ intra-format spread.
+The root cause is SIMD dequantization overhead: Q6\_K's split-bit layout requires
+$\approx$26 NEON ops/block versus $\approx$10 for Q2\_K.
+(2)~Apple M4 Metal reverses the ordering entirely (Q4\_K\_S fastest, Q8\_0 slowest),
+confirming the non-monotonicity is a CPU property; M4 CPU-only beats Metal for Q8\_0
+($1.97\times$).
+(3)~Q2\_K exhibits a KV-cache context cliff ($-48\%$ ARM at ctx=512; $-50\%$ x86 at
+ctx=1300--1400), predicted within 5\% by $L2_\text{cache}/1024$ on both platforms.
+Results validated on 1,200+ measurements across Llama~3.2~3B and Qwen~2.5~1.5B.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -385,7 +369,7 @@ not to the prompt length processed.
 We additionally include a thread-count sweep
 (1, 2, 4, 8 threads) for Q4\_K\_M at 256-token context, and a dedicated
 extended-context sweep (KV-cache window=2048) for all six non-F16 variants. In total, the
-experiment produced \textbf{700+ valid measurements across throughput, context-scaling,
+experiment produced \textbf{1,200+ valid measurements across throughput, context-scaling,
 and quality benchmarks} after discarding warmup runs, timed-out F16 trials, and one
 contaminated Q8\_0 ctx=2048 run (discarded due to concurrent-process memory interference;
 replaced by a clean sequential re-run). All timing-valid experiments include 2 warmup runs
@@ -410,7 +394,7 @@ We measure the following metrics, extracted from llama-cli's structured timing o
 
 \subsection{Quality Evaluation}
 
-To characterize the efficiency--accuracy trade-off (RQ4), we conducted two
+To characterize the accuracy ordering (§\ref{sec:quality}), we conducted two
 standard benchmark evaluations directly on-device via USB ADB for all seven variants
 (including F16).
 
@@ -451,11 +435,8 @@ measurements. The default thread count is 4 (matching the number of big+mid
 cores: 2$\times$ X1 + 2$\times$ A76) unless otherwise stated.
 
 % ===========================================================================
-\section{Results}
-% ===========================================================================
-
-\subsection{RQ1: Impact of Quantization on Inference Metrics}
-\label{sec:rq1}
+\section{Throughput: Non-Monotonic Ordering on CPU}
+\label{sec:throughput}
 
 Table~\ref{tab:main_results} presents the core benchmark results. The primary
 finding is that decode throughput is \textbf{non-monotonic} with quantization
@@ -531,8 +512,8 @@ with TTFT of 14.53~s, the variant produced only one complete trial result within
 two minutes to complete. The F16 variant's 6.4~GB footprint also leaves minimal OS
 headroom in a 6~GB device.
 
-\subsection{RQ2: Context-Length Scaling and KV-Cache Sensitivity}
-\label{sec:rq2}
+\section{Context Sensitivity: The KV-Cache Cliff}
+\label{sec:cliff}
 
 \begin{figure*}[t]
   \centering
@@ -556,7 +537,7 @@ cache is genuinely filled to capacity.  This \emph{filled-context} methodology
 produces qualitatively different results from the allocation-only baseline.
 
 Context-length sensitivity is \textbf{non-monotonic with quantization level}---
-mirroring the throughput ordering anomaly from RQ1.
+mirroring the throughput ordering anomaly from §\ref{sec:throughput}.
 Table~\ref{tab:ctx2048} summarises decode throughput from ctx=256 to ctx=2048.
 
 The striking finding is that \textbf{Q2\_K, the fastest variant at short context,
@@ -620,8 +601,7 @@ Note: Flash Attention (\texttt{-fa} flag) was tested as a potential mitigation
 for the Q2\_K cliff but was found to be unsupported by the \texttt{llama-completion}
 binary build used in this study.  Evaluating FA-enabled builds is left for future work.
 
-\subsection{RQ3: Prefill vs. Decode Time Fraction}
-\label{sec:rq3}
+\subsection{Prefill vs.\ Decode Phase Split}
 
 \begin{figure}[t]
   \centering
@@ -642,8 +622,8 @@ the decode phase consumes approximately 81\% of the 29.33~s total. This asymmetr
 means that optimizations targeting prefill throughput yield limited user-visible
 benefit compared to improvements in decode throughput.
 
-\subsection{RQ4: Efficiency--Accuracy Trade-off}
-\label{sec:rq4}
+\section{Quality: Non-Monotonic Accuracy Ordering}
+\label{sec:quality}
 
 \begin{figure}[t]
   \centering
@@ -742,7 +722,7 @@ Q4\_K\_S=57\%, Q2\_K=50\%.
 Three findings are noteworthy.
 First, \textbf{Q3\_K\_M leads at 68\%}---the highest truthfulness score despite
 being mid-range on BoolQ (69\%) and slower than Q2\_K. This is the same variant
-that shows near-zero context sensitivity (Section~\ref{sec:rq2}), suggesting a
+that shows near-zero context sensitivity (§\ref{sec:cliff}), suggesting a
 consistent pattern: Q3\_K\_M's block quantization structure may preserve factual
 representations better than its bit-count implies.
 Second, \textbf{Q2\_K collapses to 50\%}---near-chance for binary MC1---while
@@ -807,8 +787,7 @@ their TPS, BoolQ, HellaSwag, and TruthfulQA scores differ substantially.
 This confirms definitively that WikiText-2 PPL is an \emph{insufficient proxy} for
 practical task performance. Task-specific evaluation remains essential for variant selection.
 
-\subsection{RQ5: Deployment Limits and Thread Scaling}
-\label{sec:rq5}
+\subsection{Thread Scaling and Memory Footprint}
 
 \begin{figure}[t]
   \centering
@@ -871,10 +850,10 @@ exhibit tighter distributions ($\sigma \leq 0.40$ tokens/s), indicating more
 predictable behavior suitable for latency-SLA applications.
 
 % ===========================================================================
-\section{Discussion}
-% ===========================================================================
+\section{Root Cause: SIMD Dequantization and Cache Pressure}
+\label{sec:mechanism}
 
-\subsection{Mechanistic Analysis: SIMD Dequantization Overhead}
+\subsection{SIMD Dequantization Overhead}
 \label{sec:nonmonotonic}
 
 \textbf{Superblock structure and kernel complexity.}
@@ -937,7 +916,7 @@ vs.\ complex multi-field reconstruction (Q6\_K).
 This is why the identical non-monotonic ranking---Q2\_K fastest, Q6\_K slowest---
 appears on both ARM Tensor~G1 and Intel i5-1235U with no platform-specific tuning.
 
-\subsection{Mechanistic Analysis: KV-Cache L2 Pressure and the Filled-Context Cliff}
+\subsection{KV-Cache L2 Overflow and Cliff Threshold Prediction}
 \label{sec:kvcache_mechanism}
 
 \textbf{KV-cache working set per attention layer.}
@@ -1002,7 +981,8 @@ attenuating the cliff to below measurement noise ($<\pm5\%$).
 This is not intrinsic immunity; it is a masking effect from Q3\_K\_M's higher
 baseline compute cost per token.
 
-\subsection{Deployment Recommendations}
+\section{Deployment Recommendations}
+\label{sec:deployment}
 
 \textbf{Default recommendation: Q4\_K\_M.} At 4.78 tokens/s, 2.0~GB, and 72\%
 BoolQ accuracy with low variance (std~0.07) and the lowest context-length sensitivity,
@@ -1019,7 +999,7 @@ It is the best choice for deployments where task accuracy is the primary constra
 Q2\_K is the fastest practical option (69\% BoolQ, speed-dominant).
 It is the best choice when throughput matters most and RAM is limited to 2~GB,
 \emph{provided} the target task does not involve structured multi-choice prompts
-(see HellaSwag collapse finding in Section~\ref{sec:rq4}).
+(see HellaSwag collapse finding in §\ref{sec:quality}).
 
 \textbf{Memory-constrained deployments (3--4~GB devices): Q2\_K or Q3\_K\_M.}
 Both fit comfortably in 2~GB and can run on 3~GB devices. Q3\_K\_M is generally
@@ -1059,7 +1039,7 @@ TTFT grows with KV-cache window size across all variants (due to larger cache
 initialization cost), so responsiveness decisions should factor in TTFT budgets
 alongside decode throughput.
 
-\subsection{KV-Cache Quantization as a Cliff Mitigation Strategy}
+\subsection{KV-Cache Quantization as a Cliff Mitigation}
 \label{sec:kvcache_quant}
 
 llama.cpp supports quantizing the KV cache to Q8\_0 via \texttt{-ctk q8\_0 -ctv q8\_0},
@@ -1111,7 +1091,10 @@ This makes Q4\_K\_M + KV Q8\_0 the recommended configuration for
 ctx$\geq$512 deployments: stable throughput, no cliff, negligible quality impact
 from 8-bit KV quantization~\cite{kvquant}.
 
-\subsection{GPU Reference Baselines}
+\section{Cross-Device Validation}
+\label{sec:crossdevice}
+
+\subsection{GPU Backends: Metal Reverses the Ordering}
 \label{sec:gpu_baseline}
 
 Table~\ref{tab:gpu_baseline} contextualizes the Pixel~6a results against cloud GPU
@@ -1164,7 +1147,7 @@ a substantial fraction of unquantized GPU throughput (within $3.6\times$ of a T4
 while eliminating cloud dependency and model size entirely, making it the
 practical choice for battery-constrained, privacy-preserving mobile deployment.
 
-\subsection{Cross-Device Validation: x86 and Mac M4 Metal}
+\subsection{x86 and M4: ARM Non-Monotonicity Confirmed}
 \label{sec:crossdevice}
 
 To determine whether the non-monotonic CPU ordering is ARM-specific or
