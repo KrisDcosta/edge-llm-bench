@@ -119,49 +119,49 @@
       },
       "x86": {
         "Q2_K": {
-          "mean": 14.05,
+          "mean": 9.31,
           "std": null,
           "min": null,
           "max": null,
           "n": 1
         },
         "Q3_K_M": {
-          "mean": 8.38,
+          "mean": 8.27,
           "std": null,
           "min": null,
           "max": null,
           "n": 1
         },
         "Q4_K_M": {
-          "mean": 8.55,
+          "mean": 9.58,
           "std": null,
           "min": null,
           "max": null,
           "n": 1
         },
         "Q4_K_S": {
-          "mean": 8.93,
+          "mean": 10.01,
           "std": null,
           "min": null,
           "max": null,
           "n": 1
         },
         "Q5_K_M": {
-          "mean": 7.31,
+          "mean": 8.35,
           "std": null,
           "min": null,
           "max": null,
           "n": 1
         },
         "Q6_K": {
-          "mean": 6.8,
+          "mean": 7.79,
           "std": null,
           "min": null,
           "max": null,
           "n": 1
         },
         "Q8_0": {
-          "mean": 7.43,
+          "mean": 7.73,
           "std": null,
           "min": null,
           "max": null,
@@ -274,49 +274,49 @@
       },
       "x86": {
         "Q2_K": {
-          "mean": 14.05,
+          "mean": 9.31,
           "std": null,
           "min": null,
           "max": null,
           "n": 1
         },
         "Q3_K_M": {
-          "mean": 8.38,
+          "mean": 8.27,
           "std": null,
           "min": null,
           "max": null,
           "n": 1
         },
         "Q4_K_M": {
-          "mean": 8.55,
+          "mean": 9.58,
           "std": null,
           "min": null,
           "max": null,
           "n": 1
         },
         "Q4_K_S": {
-          "mean": 8.93,
+          "mean": 10.01,
           "std": null,
           "min": null,
           "max": null,
           "n": 1
         },
         "Q5_K_M": {
-          "mean": 7.31,
+          "mean": 8.35,
           "std": null,
           "min": null,
           "max": null,
           "n": 1
         },
         "Q6_K": {
-          "mean": 6.8,
+          "mean": 7.79,
           "std": null,
           "min": null,
           "max": null,
           "n": 1
         },
         "Q8_0": {
-          "mean": 7.43,
+          "mean": 7.73,
           "std": null,
           "min": null,
           "max": null,

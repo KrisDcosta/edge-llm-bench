@@ -573,7 +573,7 @@ function renderHeatmap() {
   VARIANT_ORDER.forEach(v => {
     devices.forEach(d => {
       const val = d === 'x86'
-        ? x86Tps[v]
+        ? (ctxData.x86?.[v]?.mean ?? x86Tps[v])
         : ctxData[d]?.[v]?.mean;
       if (val != null) allVals.push(val);
     });
@@ -613,10 +613,10 @@ function renderHeatmap() {
     const rowHL  = isHL === v ? 'highlighted' : '';
     const cells  = devices.map(d => {
       const val = d === 'x86'
-        ? x86Tps[v]
+        ? (ctxData.x86?.[v]?.mean ?? x86Tps[v])
         : ctxData[d]?.[v]?.mean;
       const bg  = heatColor(val);
-      const n   = d !== 'x86' ? ctxData[d]?.[v]?.n : null;
+      const n   = d === 'x86' ? ctxData.x86?.[v]?.n : ctxData[d]?.[v]?.n;
       const tt  = n != null ? `title="n=${n} trials"` : '';
       return `<td style="background:${bg}" ${tt}>
         ${val != null ? val.toFixed(1) : '—'}

@@ -41,7 +41,7 @@ Controlled inference benchmark dataset for **7 GGUF K-quant quantization variant
 | Apple M4 Mac | Apple M4 (ARM, 10-core) | 16 GB unified | llama.cpp Metal |
 | HP Pavilion x86 | Intel Core i5-1235U (12th gen) | 16 GB DDR4 | llama.cpp CPU |
 
-**3,923 total records** across 5 splits. All inference records are non-warmup,
+**4,312 total records** across 5 splits. All inference records are non-warmup,
 success-status runs collected under controlled thermal conditions. Contaminated
 and failed records are archived separately and not included here.
 
@@ -51,14 +51,18 @@ and failed records are archived separately and not included here.
 
 - **Non-monotonic throughput on ARM:** Q2\_K is 112% faster than Q6\_K on Pixel 6a
   despite having less than half the bits per weight — contradicting GPU-derived assumptions
-- **KV-cache collapse threshold:** Q3\_K\_M and Q6\_K suffer a ≥40% throughput cliff beyond
-  ~1400–1500 context tokens on Pixel 6a; Q2\_K, Q4\_K\_M, Q8\_0 remain stable
-- **Non-monotonic quality:** Q4\_K\_M outperforms Q6\_K on BoolQ (72% vs 65%) despite
-  fewer bits — superblock structure matters more than raw bit count
-- **imatrix calibration:** Importance-weighted quantization recovers 4–6% accuracy at
-  4–5 bits with minimal throughput cost
-- **Cross-device consistency:** ARM throughput ordering replicates on M4 (±5%); reverses
-  on M4 Metal GPU where Q8\_0 is fastest
+- **KV-cache collapse threshold:** Q2\_K suffers a −48% throughput cliff beyond ~512 tokens
+  on Pixel 6a (ARM); Q3\_K\_M is cliff-immune across all tested contexts; x86 cliff predicted
+  at ctx≈1,280 tokens via L2-cache formula, observed at 1,300–1,400 (within 8%)
+- **Non-monotonic quality:** Q4\_K\_S outperforms Q8\_0 on BoolQ (74% vs 68%) despite
+  fewer bits — superblock K-quant structure allocates precision more effectively than naive
+  int8; Q6\_K is Pareto-dominated (slower AND less accurate than Q4\_K\_M)
+- **imatrix calibration hurts low-bitwidth models:** imatrix degrades Q2\_K by −5pp and
+  Q3\_K\_M by −8pp on BoolQ; modest improvement for Q6\_K (+4pp). Do not use imatrix for
+  variants below Q4\_K\_S
+- **Cross-device consistency:** Non-monotonic CPU throughput ordering (Q2\_K fastest,
+  Q6\_K slowest) confirmed on both ARM NEON and x86 AVX2; ordering reverses on Metal GPU
+  where Q4\_K\_S/Q4\_K\_M are fastest and Q8\_0 is slowest
 
 ---
 
@@ -106,14 +110,23 @@ Includes Llama 3.2 3B and Qwen 2.5 1.5B for cross-model validation.
 
 ---
 
-### `x86_inference` — 7 rows
-Intel Core i5-1235U (x86, AVX2, CPU backend), Windows 11. One aggregate data point
-per variant (single timed run, not repeated trials). Useful as a rough cross-architecture
-reference point only.
+### `x86_inference` — 392 rows
+Intel Core i5-1235U (x86, AVX2, CPU backend), Windows 11. Contains two experiment types:
+
+- **`standard_sweep`** (7 rows) — one reference run per variant at ctx=256, 6 threads
+- **`cliff_sweep`** (385 rows) — n=5 trials per variant across 11 context lengths (256–2,048)
+  using filled-context methodology; collected 2026-04-08 to characterise the x86 KV-cache cliff
+
+The cliff sweep enables x86 KV-cache collapse characterisation. Predicted cliff at ctx≈1,280
+tokens (from L2-cache formula); observed at 1,300–1,400 tokens (within 8%).
+
+Same columns as `pixel_inference`. `backend = "CPU"`, `threads = 6`.
+
+> **Note:** Only Llama 3.2 3B Instruct was benchmarked on x86. No Qwen data for x86.
 
 ---
 
-### `quality_benchmarks` — 103 rows
+### `quality_benchmarks` — 107 rows
 Accuracy scores on 6 NLP benchmarks for 7 quantization variants on Pixel 6a.
 
 | Column | Type | Description |
@@ -129,7 +142,8 @@ Accuracy scores on 6 NLP benchmarks for 7 quantization variants on Pixel 6a.
 | `status` | string | `"success"` for all included rows |
 
 **Benchmark sample sizes:** 100 questions each (random sample from official test sets).
-BoolQ imatrix calibration covers all 7 variants.
+BoolQ imatrix calibration covers all 7 variants. TruthfulQA imatrix data collected for
+Q2\_K and Q3\_K\_M only.
 
 ---
 
@@ -220,7 +234,9 @@ print(threads.groupby("threads")["decode_tps"].agg(["mean", "std"]))
 
 **x86:**
 - llama.cpp CPU, AVX2 enabled, 6 threads, Windows 11
-- Single timed run per variant (not repeated trials)
+- Reference run: 1 trial per variant at ctx=256 (collected March 2026)
+- Cliff sweep: n=5 trials per variant × 11 context sizes (256–2,048), filled-context
+  methodology, 140s inter-trial cooldown (collected April 2026)
 
 **Quality evaluation:**
 - 100-question samples from official benchmark test sets
@@ -231,14 +247,15 @@ print(threads.groupby("threads")["decode_tps"].agg(["mean", "std"]))
 
 ## Known Limitations
 
-1. **Pixel 6a only for primary data** — cross-device coverage for M4 and x86 is less
-   comprehensive than Pixel; x86 is a single data point per variant
-2. **x86 no repeated trials** — cannot report variance for x86 results
+1. **Pixel 6a primary focus** — x86 and M4 coverage is less comprehensive than Pixel;
+   x86 has n=5 trials for cliff sweep but no thread sweep, no kv_cache_quant experiments
+2. **x86 Llama only** — no Qwen 2.5 1.5B data on x86; cannot compare cross-model
+   behaviour on x86
 3. **Perplexity corpus inconsistency** — see note in perplexity split above
 4. **No power/energy data** — `/proc` interfaces on Pixel 6a are unreliable without root;
    battery drain proxy metrics were collected but not included in this release
-5. **Single model family** — primary data uses Llama 3.2 3B Instruct; Qwen 2.5 1.5B
-   cross-model data is included for M4 and Pixel cliff sweeps only
+5. **Single model family for quality benchmarks** — quality data (BoolQ, HellaSwag, etc.)
+   collected on Pixel 6a only; no cross-device quality comparison
 6. **llama.cpp version** — builds used llama.cpp circa February–April 2026;
    results may differ with significantly newer versions
 
@@ -249,7 +266,7 @@ print(threads.groupby("threads")["decode_tps"].agg(["mean", "std"]))
 | Variant | Bits/Weight | File Size | Notes |
 |---|---|---|---|
 | Q2\_K | 2.6 | ~1.3 GB | Fastest on ARM; lowest quality |
-| Q3\_K\_M | 3.3 | ~1.6 GB | Susceptible to KV-cache collapse |
+| Q3\_K\_M | 3.3 | ~1.6 GB | Cliff-immune on ARM; stable across all tested contexts |
 | Q4\_K\_S | 4.1 | ~1.8 GB | Good compression; imatrix gains significant |
 | Q4\_K\_M | 4.5 | ~1.9 GB | Pareto-optimal on ARM (speed × quality) |
 | Q5\_K\_M | 5.5 | ~2.2 GB | Best imatrix gains |
