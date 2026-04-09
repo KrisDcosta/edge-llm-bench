@@ -323,7 +323,7 @@ All main throughput, context-scaling, quality, and perplexity experiments are on
 \begin{itemize}[nosep]
   \item \textbf{x86 AVX2:} Intel i5-1235U laptop (12th Gen, 1.25~MB P-core L2,
     Windows~11, 6 threads, \texttt{llama-cli -ngl~0}). Used for TPS, filled-context
-    cliff sweep (all 7 variants $\times$ 11 ctx $\times$ 3 trials), and all 6 quality
+    cliff sweep (all 7 variants $\times$ 11 ctx $\times$ 5 trials), and all 6 quality
     benchmarks ($n{=}100$ each).
   \item \textbf{Apple M4 Metal GPU:} MacBook Air M4 (16-core GPU, unified memory,
     \texttt{llama-bench -ngl~99}). Used for TPS ($n{=}10$) and full filled-context
@@ -1595,59 +1595,41 @@ per variant is the most impactful remaining quality experiment.
 \section{Conclusion}
 % ===========================================================================
 
-We have presented a rigorous, multi-factor benchmark of seven GGUF quantization
-variants of Llama 3.2 3B Instruct on a Google Pixel 6a (Tensor G1, 6~GB LPDDR5),
-yielding 700+ valid measurements across throughput, context-scaling, and quality
-benchmarks spanning four context lengths (256--2048 tokens) and a thread-count
-scaling study.
+On CPU endpoints, the standard GPU intuition---higher bit-width yields higher
+throughput---is wrong across every ISA we tested.
+We identified three non-obvious phenomena, explained their root causes, and derived
+a predictive model validated across 1,200+ measurements on ARM, x86, and GPU.
 
-Our primary empirical findings are:
+\textbf{Non-monotonic throughput (CPU-general).}
+Q2\_K is fastest on both ARM (7.49~tok/s) and x86 (14.1~tok/s);
+Q6\_K is slowest (3.53 and 6.8~tok/s)---a $2.1\times$ intra-format spread in
+the wrong direction, reproduced on Qwen~2.5~1.5B.
+The root cause is SIMD dequantization overhead: Q6\_K's split-bit layout
+requires $\approx$26 NEON operations per block versus $\approx$10 for Q2\_K.
 
-\begin{enumerate}
-  \item \textbf{Non-monotonic throughput}: Q6\_K (6-bit, 2.7~GB) delivers
-        3.53~tokens/s---slower than Q4\_K\_M (4.78~tokens/s) and Q8\_0 (4.52~tokens/s)
-        due to kernel de-quantization overhead on ARM NEON.
-  \item \textbf{Context sensitivity is non-monotonic with bit-width}:
-        Q3\_K\_M is the most context-stable variant ($-11\%$ across 256--2048~tokens).
-        Q4\_K\_M also shows low degradation ($-6\%$).
-        Counterintuitively, Q2\_K---the fastest at short context---is the
-        \emph{most} context-sensitive, losing $-48\%$ decode TPS from ctx=256 to 2048
-        (cliff onset at ctx=512, matching $L2/1024$ exactly).  Q5\_K\_M ($-26\%$) and Q8\_0 ($-18\%$) show
-        substantial degradation.  This non-monotonic pattern mirrors the throughput
-        ordering anomaly and is explained by the relative KV-cache pressure on each
-        variant's weight-tile footprint.
-  \item \textbf{Thread-count sweet spot}: 4 threads is optimal on the Tensor G1's
-        heterogeneous cluster; 8 threads degrades throughput by 20\% due to
-        little-core load imbalance.
-  \item \textbf{BoolQ accuracy non-monotonicity}: On-device BoolQ reading comprehension
-        accuracy does not monotonically improve with bit-width (65--74\%):
-        Q4\_K\_S (4-bit, small) achieves the highest score at 74\%, Q6\_K (6-bit)
-        scores lowest at 65\% despite having more bits per weight.
-        ARC-Easy factual accuracy ranges 76--82\% (Q4\_K\_M highest, Q2\_K lowest),
-        non-monotonic with bit-width and narrower than BoolQ variance.
-        Q2\_K exhibits instruction-following collapse on HellaSwag MCQ tasks (19\%),
-        despite 69\% on BoolQ, revealing a task-format-specific failure mode.
-        Q6\_K is strictly dominated on both BoolQ accuracy and throughput,
-        confirming it as the weakest deployment choice.
-  \item \textbf{Q4\_K\_S leads on accuracy; Q4\_K\_M recommended as default}:
-        Q4\_K\_S (74\%, 5.01~tokens/s) achieves the highest BoolQ accuracy of any
-        variant. Q4\_K\_M (72\%, 4.78~tokens/s) offers the most context-stable
-        operating point and is the recommended default. Q2\_K (69\%, 7.49~tokens/s)
-        is the speed-dominant choice for throughput-critical deployments, subject to
-        the HellaSwag instruction-following collapse caveat.
-        Q8\_0 is dominated by Q4\_K\_M on both accuracy and throughput axes.
-        Q4\_K\_M (2.0~GB) offers the best overall balance for 6~GB deployment.
-\end{enumerate}
+\textbf{CPU/GPU divide.}
+Apple M4 Metal reverses the ordering entirely (Q4\_K\_S fastest, Q8\_0 slowest),
+confirming the non-monotonicity is a CPU property.
+M4 CPU-only inference outperforms Metal for Q8\_0 ($1.97\times$) and Q6\_K,
+because Metal's 4-bit dispatch paths eliminate the dequantization bottleneck
+that defines CPU throughput ordering.
 
-These findings provide actionable guidance: use Q4\_K\_S when task accuracy is
-paramount (highest BoolQ at 74\%); use Q4\_K\_M as the default
-(context-stable, 72\% BoolQ, best overall balance); use Q2\_K for
-latency-constrained or RAM-limited deployments (fastest at 7.49~tok/s,
-69\% BoolQ, but unsafe for structured MCQ tasks); use 4 threads on big.LITTLE ARM;
-and avoid Q6\_K on CPU backends entirely---it is strictly dominated on both
-BoolQ accuracy and throughput, and catastrophically slow at ctx=2048. As on-device AI
-continues to proliferate, hardware-specific benchmarks of this kind are essential
-for evidence-based quantization selection.
+\textbf{KV-cache cliff with predictive formula.}
+Q2\_K throughput collapses $-48\%$ on ARM (ctx=512) and $-50\%$ on x86
+(ctx=1300--1400).
+The threshold is predicted within 5\% on both platforms by $L2/1024$---the
+context at which the per-layer combined K+V working set overflows L2.
+Q3\_K\_M is immune because its higher FFN compute cost masks the proportional
+attention overhead.
+
+\textbf{Practical guidance.}
+Q6\_K is strictly dominated on CPU: slower than all 4-bit variants and no
+accuracy advantage.
+Q4\_K\_S gives the best quality (74\% BoolQ); Q4\_K\_M gives the best
+throughput-stability balance.
+Q2\_K is viable for throughput-limited deployment but fails structured
+reasoning tasks (19\% HellaSwag).
+KV-cache Q8\_0 quantization eliminates the Q2\_K cliff at a $-46\%$ short-context cost.
 
 % ===========================================================================
 % References
