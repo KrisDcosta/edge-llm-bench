@@ -1948,24 +1948,30 @@ project repository.
 
 \subsection{Invocation Template}
 
-Each trial was executed with the following command template:
+Each trial was executed with the following command template,
+where \texttt{<prompt>} is padded to exactly \texttt{ctx - 64} tokens
+to saturate the KV cache (filled-context methodology):
 \begin{verbatim}
 ./llama-cli \
-  -m <model_path>.gguf \
-  -p "<system_prompt><user_prompt>" \
-  -n 128 \
-  --ctx-size <context_length> \
-  --seed <trial_seed> \
-  -t <thread_count> \
-  --log-format json
+  -m <model>.gguf \
+  -p "<prompt>" \
+  -n 64 \
+  -c <ctx> \
+  --no-mmap \
+  -ngl 0 \
+  -t <threads> \
+  --log-format json \
+  --seed <trial_seed>
 \end{verbatim}
 
 \subsection{Statistical Methodology}
 
 Means and standard deviations in Table~\ref{tab:main_results} are computed
-across 15 samples per variant per context (5 trials $\times$ 3 prompt types).
-Warmup runs (2 per configuration) are excluded. Outlier rejection was not applied;
-all completed trials within the timeout threshold are included in analysis.
+across $n{=}10$ trials per (variant, context) cell using the filled-context protocol
+(prompt $= N - 64$ tokens, 128 output tokens).
+Trial~1 is excluded as warmup; trials 2--11 are used.
+Outlier rejection was not applied; all completed trials within the 600-second
+timeout are included in analysis.
 
 \section{Quality Evaluation Details}
 

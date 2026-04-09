@@ -1,8 +1,8 @@
 # Paper Roadmap: GGUF K-Quant Benchmarking on CPU Inference
 ## Targeting: MLSys 2026 / MobiSys 2027 / USENIX ATC 2027
 
-**Last Updated:** 2026-04-08
-**Status:** All data gaps closed. All phases 1–3 complete. Entering Phase 4: conference paper rewrite.
+**Last Updated:** 2026-04-09
+**Status:** All data gaps closed. Phases 1–4 complete. Entering Phase 5: figures + final submission prep.
 
 ---
 
@@ -86,8 +86,8 @@
 - [x] Thermal characterization updated with measured values
 - [x] Cross-model replication section (Qwen cliff confirmed)
 - [x] Deployment recommendations updated with Q8_0 KV guidance
-- [ ] Conference-quality related work (need 35+ citations, explicit comparison table)
-- [ ] Strong abstract (current is too long for top-venue submission)
+- [x] Conference-quality related work (51 citations, 5 subsections, explicit comparison table ✅ 2026-04-08)
+- [x] Strong abstract (146 words, 3 numbered findings, Llama + Qwen validation ✅ 2026-04-09)
 - [ ] Publication-quality figure pass (current matplotlib plots functional but not camera-ready)
 
 ---
@@ -131,17 +131,18 @@ Would directly measure cache miss rate per variant; highest-impact future experi
 - ✅ Thread scaling sweep: n=15 at 1/2/4/8 threads; big.LITTLE behavior documented
 - ✅ All paper values updated (ARM TPS, cliff thresholds, cross-platform table expanded to 4 platforms)
 
-### Phase 4 — Paper Rewrite (April 12–25)
-Full conference-quality rewrite. The current 12-page course paper is the scaffold;
-the conference paper is a new document that reuses verified data but rewrites every section.
+### Phase 4 — Paper Rewrite — ✅ COMPLETE (2026-04-09)
 
-Key changes from course paper:
-- **Introduction:** Cut motivation, sharpen to 3 concrete unknowns → 3 findings
-- **Methodology:** Add full hardware teardown, exact llama.cpp version/commit, build flags
-- **New section:** Mechanistic Analysis (superblock structure, cache model, cliff prediction)
-- **Results:** Restructure around CPU/GPU divide as unifying theme, not 5 separate RQs
-- **Related Work:** 35+ citations, explicit comparison table showing what prior work measured vs. didn't
-- **Abstract:** 150 words max, 4 findings, target MLSys reviewer mental model
+| Task | Status | Notes |
+|------|--------|-------|
+| Abstract | ✅ | 146 words, 3 findings, Llama+Qwen validation |
+| Introduction | ✅ | Tight conference prose, wrong heuristic → Finding 1/2/3 |
+| Related work | ✅ | 51 citations, 5 subsections, comparison table |
+| Methodology §3 | ✅ | Filled-context methodology described accurately |
+| Section structure | ✅ | RQ framing removed; §4–9 topic-driven |
+| Conclusion | ✅ | Mirrors intro structure; 3 findings + practical guidance |
+| Thermal section | ✅ | std corrected (±0.58), fresh-context vs filled-context clarified |
+| Statistical appendix | ✅ | n=10 filled-context protocol, invocation template updated |
 
 ### Phase 5 — Submission (April 26 – May deadline)
 - Final figures (publication-quality matplotlib)
@@ -212,7 +213,7 @@ Key changes from course paper:
 | Pixel cliff (filled-context) | `results/pixel_llama_cliff_filled_20260326_132101/` |
 | Pixel quality (6 benchmarks) | `results/quality_scores.json` keys without prefix |
 | x86 TPS | `results/x86_tps_results.json` |
-| x86 cliff | `results/x86_llama_cliff_20260329_002333/` |
+| x86 cliff (n=5 canonical) | `results/x86_llama_cliff_20260408_070924/` |
 | x86 quality | `results/quality_scores.json` keys `x86_*` |
 | x86 PPL | `results/x86_perplexity_results.json` |
 | M4 Metal TPS | `results/m4_llama_tps_20260326_001546/` |
@@ -221,4 +222,4 @@ Key changes from course paper:
 | Qwen Pixel cliff | `results/pixel_qwen_cliff_filled_20260330_235410/` |
 | M4 cliff (filled-context) | `results/m4_metal_cliff_20260323_015934/` |
 | KV-cache Q8_0 mitigation | `results/quality_scores.json` keys `kvcache_q8_0:*` |
-| Thermal characterization | See §5.6 paper; baseline 8.33±0.42, throttle 4.72–4.96, recovery 7.04±0.29 t/s |
+| Thermal characterization | See §Limitations; baseline 8.33±0.58 (fresh-ctx), throttle 4.72–4.96, recovery 7.04±0.30 t/s |
