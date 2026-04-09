@@ -41,7 +41,7 @@ Controlled inference benchmark dataset for **7 GGUF K-quant quantization variant
 | Apple M4 Mac | Apple M4 (ARM, 10-core) | 16 GB unified | llama.cpp Metal |
 | HP Pavilion x86 | Intel Core i5-1235U (12th gen) | 16 GB DDR4 | llama.cpp CPU |
 
-**4,312 total records** across 5 splits. All inference records are non-warmup,
+**4,310 total records** across 5 splits. All inference records are non-warmup,
 success-status runs collected under controlled thermal conditions. Contaminated
 and failed records are archived separately and not included here.
 
@@ -49,16 +49,16 @@ and failed records are archived separately and not included here.
 
 ## Key Findings (from the accompanying paper)
 
-- **Non-monotonic throughput on ARM:** Q2\_K is 112% faster than Q6\_K on Pixel 6a
-  despite having less than half the bits per weight — contradicting GPU-derived assumptions
+- **Non-monotonic throughput on ARM:** Q2\_K is ~99% faster than Q6\_K on Pixel 6a
+  (ctx=256 cliff\_sweep, mean of n=10 trials) despite having less than half the bits per weight — contradicting GPU-derived assumptions
 - **KV-cache collapse threshold:** Q2\_K suffers a −48% throughput cliff beyond ~512 tokens
   on Pixel 6a (ARM); Q3\_K\_M is cliff-immune across all tested contexts; x86 cliff predicted
   at ctx≈1,280 tokens via L2-cache formula, observed at 1,300–1,400 (within 8%)
 - **Non-monotonic quality:** Q4\_K\_S outperforms Q8\_0 on BoolQ (74% vs 68%) despite
   fewer bits — superblock K-quant structure allocates precision more effectively than naive
   int8; Q6\_K is Pareto-dominated (slower AND less accurate than Q4\_K\_M)
-- **imatrix calibration hurts low-bitwidth models:** imatrix degrades Q2\_K by −5pp and
-  Q3\_K\_M by −8pp on BoolQ; modest improvement for Q6\_K (+4pp). Do not use imatrix for
+- **imatrix calibration hurts low-bitwidth models:** imatrix degrades Q2\_K by −4pp and
+  Q3\_K\_M by −7pp on BoolQ; modest improvement for Q6\_K (+4pp). Do not use imatrix for
   variants below Q4\_K\_S
 - **Cross-device consistency:** Non-monotonic CPU throughput ordering (Q2\_K fastest,
   Q6\_K slowest) confirmed on both ARM NEON and x86 AVX2; ordering reverses on Metal GPU
@@ -126,7 +126,7 @@ Same columns as `pixel_inference`. `backend = "CPU"`, `threads = 6`.
 
 ---
 
-### `quality_benchmarks` — 107 rows
+### `quality_benchmarks` — 105 rows
 Accuracy scores on 6 NLP benchmarks for 7 quantization variants on Pixel 6a.
 
 | Column | Type | Description |
