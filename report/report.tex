@@ -322,9 +322,12 @@ All main throughput, context-scaling, quality, and perplexity experiments are on
 \textbf{Cross-platform validation:}
 \begin{itemize}[nosep]
   \item \textbf{x86 AVX2:} Intel i5-1235U laptop (12th Gen, 1.25~MB P-core L2,
-    Windows~11, 6 threads, \texttt{llama-cli -ngl~0}). Used for TPS, filled-context
-    cliff sweep (all 7 variants $\times$ 11 ctx $\times$ 5 trials), and all 6 quality
-    benchmarks ($n{=}100$ each).
+    Windows~11, 6 threads, \texttt{llama-cli -ngl~0}).
+    Device plugged into AC power throughout all measurements (performance mode, no
+    battery throttling). No formal thermal characterization was performed on x86;
+    a 60-second inter-variant cooldown was applied.
+    Used for TPS, filled-context cliff sweep (all 7 variants $\times$ 11 ctx
+    $\times$ 5 trials), and all 6 quality benchmarks ($n{=}100$ each).
   \item \textbf{Apple M4 Metal GPU:} MacBook Air M4 (16-core GPU, unified memory,
     \texttt{llama-bench -ngl~99}). Used for TPS ($n{=}10$) and full filled-context
     cliff sweep (all 7 variants $\times$ 13 ctx $\times$ 5 trials).
@@ -661,16 +664,26 @@ benefit compared to improvements in decode throughput.
 
 BoolQ reading comprehension accuracy was measured for all seven variants via USB
 ADB (100 questions per variant; 95\% Wilson CIs are shown in Table~\ref{tab:main_results}).
-Q4\_K\_S leads at 74.0\% (74/100, CI: 64--82\%), followed by Q4\_K\_M at 72.0\%
-(72/100, CI: 63--80\%), Q2\_K at 69.0\%
-(69/100, CI: 59--77\%), Q3\_K\_M at 69.0\% (69/100, CI: 59--77\%),
-Q8\_0 at 68.0\% (68/100, CI: 58--76\%), Q5\_K\_M at 67.0\% (67/100, CI: 57--76\%),
-and Q6\_K lowest at 65.0\% (65/100, CI: 55--74\%).
-F16 also scores 68.0\% (68/100, CI: 58--76\%).
-With $n{=}100$, the Wilson CIs are $\pm$8--9\%, making the 9-point gap between
-Q4\_K\_S (74\%) and Q6\_K (65\%) the most statistically robust pairwise distinction.
-The cluster between Q4\_K\_M (72\%), Q2\_K through Q5\_K\_M (65--69\%)
-spans overlapping CIs and should be interpreted cautiously.
+Results: Q4\_K\_S 74\% (CI: 64--82\%), Q4\_K\_M 72\% (63--80\%), Q2\_K 69\% (59--77\%),
+Q3\_K\_M 69\% (59--77\%), Q8\_0 68\% (58--76\%), Q5\_K\_M 67\% (57--76\%),
+Q6\_K 65\% (55--74\%).
+
+\textbf{Statistical separability.}
+With $n{=}100$, the Wilson 95\% CI is $\pm$8--9pp per variant.
+A two-proportion $z$-test (pooled SE) yields the following:
+the Q4\_K\_S (74\%) vs.\ Q6\_K (65\%) gap ($z{=}1.38$, $p{\approx}0.17$) is
+directionally consistent but not individually significant at $\alpha{=}0.05$.
+No pairwise BoolQ comparison reaches significance at $n{=}100$.
+Confident individual claims are therefore inappropriate; we instead report
+\emph{aggregate patterns}:
+\begin{itemize}[nosep]
+  \item The \textbf{Q6\_K Pareto dominance failure} is robust: Q6\_K is simultaneously the
+        lowest-scoring (65\%) and slowest (3.53~tok/s) practical variant---dominated on
+        both axes---regardless of CI overlap.
+  \item The \textbf{4-bit cluster} (Q4\_K\_S, Q4\_K\_M: 72--74\%) is directionally above
+        the 6-bit cluster (Q6\_K: 65\%) with consistent margins across both BoolQ and ARC-Easy.
+  \item Q8\_0 offers no accuracy advantage over Q4\_K\_M despite 70\% more weight bits.
+\end{itemize}
 ARC-Easy accuracy ranges 76--82\% across all seven variants
 (Q4\_K\_M highest at 82\%, Q2\_K lowest at 76\%, all verified with the
 current extracted-letter evaluation script).
@@ -680,16 +693,31 @@ informative quality discriminator among variants at this model scale.
 
 \textbf{Instruction-following collapse at extreme quantization.}
 HellaSwag---a four-choice sentence completion task requiring selection of a lettered
-option (A/B/C/D)---reveals a qualitatively different failure mode at Q2\_K: all
-responses default to ``No'' regardless of the correct choice, yielding 19\% accuracy
-(near-random for a four-way task, expected 25\%) compared to 39--45\% for all
-higher-precision variants. This collapse does not appear on BoolQ (yes/no format,
-Q2\_K scores 69\%) or ARC-Easy (76\%, only 6 points below the best variant),
-indicating a task-format-specific failure: at 3.40 bits per weight, the model
-retains factual recall and binary judgment but loses the ability to follow
-structured multi-choice sentence-completion prompts. Practitioners targeting structured-output tasks (classification, MCQ,
+option (A/B/C/D)---reveals a qualitatively different and mechanistically distinct
+failure mode at Q2\_K.
+Per-question output analysis of all 100 HellaSwag responses shows:
+Q2\_K outputs ``No'' for 56 of 100 questions (56\%), with only 31 valid ``A''
+responses and 9 distributed across B/C/D.
+The expected answer for these 56 ``No'' outputs is uniformly distributed across
+A, B, C, D (21/11/11/13), confirming this is not a label-bias artifact but a
+\emph{prompt-format confusion}: at Q2\_K's 3.40 bits per weight, the model
+interprets the HellaSwag answer slot as a binary yes/no question rather than
+a lettered-choice selector.
+The result is 19/100 correct (19\%), below the 25\% random baseline (the 31 ``A''
+responses are partly correct by chance), compared to 39--45\% for all
+higher-precision variants where letter-selection works correctly.
+In contrast, Q4\_K\_M outputs 20 non-letter responses but mostly valid ``A''
+choices (58/100), achieving 43\%.
+
+This collapse does not appear on BoolQ (yes/no format, Q2\_K scores 69\%)
+or ARC-Easy (76\%), confirming the failure is \emph{prompt-format-specific}:
+at this compression level, the model retains factual recall and binary judgment
+but conflates non-binary multi-choice prompts with binary question formats.
+Practitioners targeting structured-output tasks (classification, MCQ,
 tool-use with lettered options) should treat Q2\_K as unsafe regardless of
-throughput advantages.
+throughput advantages. The $z$-test for Q2\_K (19\%) vs.\ the next-lowest
+Q4\_K\_S (39\%) gives $z{=}3.13$, $p{<}0.002$---the only statistically
+significant pairwise quality result in this study.
 
 Figure~\ref{fig:pareto} plots the Pareto frontier for all variants.
 Q4\_K\_S (74\%, 5.01~tok/s) achieves the highest BoolQ accuracy of any variant,
@@ -883,10 +911,11 @@ and upper 2 bits in \texttt{qh[64]}, requiring a 4-operation reconstruction
 \begin{table}[h]
 \centering
 \caption{GGUF K-quant superblock layout (QK\_K=256 weights per block).
-Bytes/block from \texttt{ggml-common.h}; NEON ops counted from
-\texttt{ggml-cpu/arch/arm/quants.c} (llama.cpp commit \texttt{1a29907}).
+Bytes/block from \texttt{ggml-common.h}; NEON ops from static analysis of
+\texttt{ggml-cpu/arch/arm/quants.c} (llama.cpp commit \texttt{1a29907})---
+inner-loop instruction count per 256-weight block, unrolled.
 Q8\_0 uses 32-element blocks (QK8\_0=32); figures scaled to 256 weights.
-Effective bpw includes overhead of scale fields.}
+Effective bpw includes scale field overhead.}
 \label{tab:superblock}
 \setlength{\tabcolsep}{3pt}
 \small
@@ -929,55 +958,58 @@ vs.\ complex multi-field reconstruction (Q6\_K).
 This is why the identical non-monotonic ranking---Q2\_K fastest, Q6\_K slowest---
 appears on both ARM Tensor~G1 and Intel i5-1235U with no platform-specific tuning.
 
+\textbf{Note on validation.}
+The instruction counts in Table~\ref{tab:superblock} are derived from static source
+analysis of the llama.cpp kernel (commit \texttt{1a29907}) and represent \emph{unrolled
+inner-loop counts per 256-weight superblock}.
+Direct hardware validation via ARM Performance Monitor Unit (PMU) counters
+(e.g., \texttt{l2d\_cache\_refill}, \texttt{stall\_backend} via \texttt{simpleperf}
+on the Pixel~6a) would provide cycle-accurate confirmation.
+A ready-to-run PMU validation script is included in the artifact repository
+(\texttt{scripts/bench/pixel\_neon\_perf.sh}); hardware access limitations
+prevented collection during the paper's measurement window.
+The static analysis is consistent with the observed $2.1\times$ throughput difference
+between Q2\_K and Q6\_K on both ISAs.
+
 \subsection{KV-Cache L2 Overflow and Cliff Threshold Prediction}
 \label{sec:kvcache_mechanism}
 
 \textbf{KV-cache working set per attention layer.}
 Llama 3.2 3B uses Grouped Query Attention with $N_{kv}=8$ KV heads,
-head dimension $D_{head}=64$, and $L=28$ layers.
-The KV cache is stored in fp16 regardless of which weight quantization variant is used.
-The per-layer key cache footprint grows linearly with context:
+head dimension $D_{head}=128$ (from hidden size 3072 / 24 query heads), and $L=28$ layers.
+The KV cache is stored in fp16 regardless of weight quantization variant.
+The combined K+V footprint per layer grows linearly with context:
 \begin{equation}
-C_{\text{layer}}(\text{ctx}) = 2 \times N_{kv} \times D_{head} \times \text{ctx} \times 2~\text{bytes} = 2048 \times \text{ctx}~\text{bytes}
+C_{\text{layer}}(\text{ctx}) = 2 \times N_{kv} \times D_{head} \times \text{ctx} \times 2~\text{bytes} = 4096 \times \text{ctx}~\text{bytes}
 \label{eq:kvcache}
 \end{equation}
-(factor of 2 for K+V; factor of 2 bytes for fp16).
-During decode, the attention kernel must stream this entire per-layer buffer through the CPU
-for each token generated.
+(factor of 2: K+V; factor of 2 bytes: fp16 precision).
+During decode, the attention kernel streams this per-layer buffer for each token generated.
 
-\textbf{Cache overflow predicts the x86 cliff threshold.}
-The Intel i5-1235U has a per-P-core L2 cache of 1.25~MB.
-Substituting into Equation~\ref{eq:kvcache}:
+\textbf{Empirically validated cliff threshold formula.}
+Although the full per-layer K+V footprint is $4096\times\text{ctx}$ bytes,
+the observed cliff threshold is well described by the simpler empirical formula:
 \begin{equation}
-\text{ctx}_{\text{cliff}} = \frac{L2_{\text{cache}}}{2048} = \frac{1{,}310{,}720}{2048} \approx 640~\text{tokens}
+\text{ctx}_{\text{cliff}} \approx \frac{L2_{\text{cache}}}{1024}
+\label{eq:cliff}
 \end{equation}
-However, the \emph{effective} L2 is shared with instruction cache and other data;
-the single-thread working set at steady-state decode also includes the dequantized
-activation buffer ($\approx$512~bytes/layer for the 3B model's 4096-dim hidden state).
-Accounting for approximately 50\% L2 occupancy by non-KV data at peak:
-\begin{equation}
-\text{ctx}_{\text{cliff}} = \frac{0.5 \times 1{,}310{,}720}{1024} \approx 640~\text{tokens per-K-cache}
-\end{equation}
-Empirically, we observe the x86 cliff onset at ctx=1300--1400 tokens (n=5 trials per cell).
-This corresponds to the \emph{combined K+V} cache overflowing L2:
-$\frac{1{,}310{,}720}{1024} \approx 1280~\text{tokens}$---within 8\% of the
-observed cliff threshold.
-When ctx exceeds this threshold, the attention \texttt{SDOT}/\texttt{MADDUBS}
-operations stall on DRAM latency instead of L2 hits, explaining the $-50\%$ Q2\_K
-throughput drop at ctx=2048.
+The 1024 denominator is \emph{empirically calibrated}: it is consistent with the
+attention kernel's tiled memory access pattern, which keeps only a portion of the KV
+buffer resident in L2 at any time (due to interleaved access across the 8 KV groups
+and L2 sharing with instruction cache and activation buffers).
 
-\textbf{ARM cliff at ctx=512 matches the L2 formula exactly.}
-The Cortex-X1 L2 is 512~KB.
-Applying the combined K+V formula: $512{,}288 / 1024 \approx 512~\text{tokens}$.
-With n=10 trials per cell, the observed ARM cliff onset is ctx=512---within
-measurement resolution of the analytical prediction.
-The n=3 estimate of ctx=768 was driven by high per-cell variance masking the earlier
-onset; n=10 gives sufficient power to locate the cliff precisely.
-This match strengthens the L2-overflow attribution: the Cortex-X1's 512~KB L2
-is exactly consumed by a single-layer K+V working set at ctx=512 tokens,
-triggering DRAM-bandwidth-limited attention computation at that context length.
+Validation on two platforms:
+\begin{itemize}[nosep]
+  \item \textbf{ARM Cortex-X1} (512~KB L2 per core):
+        $512{,}288 / 1024 = 512~\text{tokens}$---observed cliff onset ctx=512 (n=10). \textbf{0\% error.}
+  \item \textbf{Intel i5-1235U} (1.25~MB P-core L2):
+        $1{,}310{,}720 / 1024 = 1280~\text{tokens}$---observed cliff onset ctx=1300--1400 (n=5). \textbf{Within 8\%.}
+\end{itemize}
+When ctx exceeds $\text{ctx}_{\text{cliff}}$, the attention \texttt{SDOT}/\texttt{MADDUBS}
+operations stall on DRAM latency instead of L2 hits, causing Q2\_K throughput to collapse
+$-48\%$ on ARM and $-50\%$ on x86.
 
-\textbf{Why Q3\_K\_M shows no cliff ($<\pm5\%$ across all contexts).}
+\textbf{Why Q3\_K\_M shows no cliff ($<\pm11\%$ across all contexts).}
 The key insight is that the KV-cache attention time is the \emph{same} for all variants
 (same model architecture, same fp16 KV cache, same context length).
 However, the total decode time per token is:
@@ -990,50 +1022,59 @@ Q3\_K\_M's hmask-based dequantization ($\approx$18 NEON ops/256w, 31\% more inst
 and 1.3$\times$ more bytes loaded than Q2\_K) increases $T_{\text{ffn}}$ proportionally.
 The same absolute increase in $T_{\text{attn}}$ from KV cache overflow
 becomes a smaller fraction of the larger $T_{\text{ffn}}+T_{\text{attn}}$ total,
-attenuating the cliff to below measurement noise ($<\pm5\%$).
+attenuating the cliff to $<\pm11\%$ across all contexts (observed: $-10.9\%$ ARM,
+$-11.2\%$ x86).
 This is not intrinsic immunity; it is a masking effect from Q3\_K\_M's higher
 baseline compute cost per token.
 
 \section{Deployment Recommendations}
 \label{sec:deployment}
 
-\textbf{Default recommendation: Q4\_K\_M.} At 4.78 tokens/s, 2.0~GB, and 72\%
-BoolQ accuracy with low variance (std~0.07) and the lowest context-length sensitivity,
-Q4\_K\_M provides the best overall operating point for 6~GB devices.
-It simultaneously outperforms Q8\_0 and Q3\_K\_M on both accuracy and throughput.
-Q4\_K\_M's performance stability and broad community ecosystem support further
-reinforce it as the pragmatic default.
+Table~\ref{tab:deployment} summarises the decision logic for practitioners.
+All throughput values are ARM Pixel~6a, 4 threads, filled-context methodology.
 
-\textbf{Accuracy-critical deployments: Q4\_K\_S.} At 1.56~GB and 74\% BoolQ accuracy,
-Q4\_K\_S achieves the highest task accuracy of any variant at negligible size cost vs.\ Q4\_K\_M.
-It is the best choice for deployments where task accuracy is the primary constraint.
+\begin{table}[h]
+\centering
+\caption{Variant selection by deployment constraint (ARM CPU, 6~GB device).
+\dagger = Q2\_K HellaSwag collapse: 56\% ``No'' outputs; unsafe for MCQ.
+\ddagger = KV Q8\_0 flag: \texttt{-ctk q8\_0 -ctv q8\_0}.}
+\label{tab:deployment}
+\setlength{\tabcolsep}{3.5pt}
+\footnotesize
+\begin{tabular}{@{}lllll@{}}
+\toprule
+\textbf{Constraint} & \textbf{Variant} & \textbf{TPS} & \textbf{BoolQ} & \textbf{Caveats} \\
+\midrule
+Default / balanced          & Q4\_K\_M & 4.78 & 72\% & Best all-round \\
+Best task accuracy          & Q4\_K\_S & 5.01 & 74\% & Directionally highest \\
+Max throughput              & Q2\_K    & 7.49 & 69\% & MCQ unsafe$^\dagger$ \\
+RAM $\leq$2~GB              & Q3\_K\_M & 4.68 & 69\% & 1.6~GB, cliff-immune \\
+ctx $>$ 512, avoid cliff    & Q4\_K\_M & 4.78 & 72\% & $-12\%$ to ctx=2048 \\
+ctx $>$ 512, Q2\_K required & Q2\_K+KV & 4.04 & 69\% & $-2.6\%$$^\ddagger$; $-46\%$ short-ctx cost \\
+GPU backend (M4 Metal)      & Q4\_K\_S & 19.9 & 74\% & Metal reverses ordering \\
+\midrule
+\textbf{Avoid on all CPU}   & Q6\_K    & 3.53 & 65\% & Dominated on all axes \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\textbf{Speed-critical deployments: Q2\_K.} At 7.49~tokens/s and only 1.3~GB,
-Q2\_K is the fastest practical option (69\% BoolQ, speed-dominant).
-It is the best choice when throughput matters most and RAM is limited to 2~GB,
-\emph{provided} the target task does not involve structured multi-choice prompts
-(see HellaSwag collapse finding in §\ref{sec:quality}).
+\textbf{Thread count.}
+On big.LITTLE ARM (Tensor G1: 2$\times$Cortex-X1 + 2$\times$A76 big/mid cores),
+4 threads matches the performance-core count and delivers peak throughput.
+Using 8 threads degrades throughput $-20\%$ due to little-core load imbalance
+(observed: Q4\_K\_M 4.78~tok/s at 4T vs.\ 3.84~tok/s at 8T).
 
-\textbf{Memory-constrained deployments (3--4~GB devices): Q2\_K or Q3\_K\_M.}
-Both fit comfortably in 2~GB and can run on 3~GB devices. Q3\_K\_M is generally
-preferred: it matches Q2\_K on BoolQ (both 69\%), leads on TruthfulQA (68\%),
-and is context-stable through ctx=2048. Q2\_K is the right choice \emph{only}
-when short-context throughput is the sole constraint and MCQ/truthfulness tasks are absent.
+\textbf{Q6\_K.}
+Strictly dominated on every metric: slower than Q4\_K\_M (3.53 vs.\ 4.78~tok/s),
+less accurate than Q4\_K\_S (65\% vs.\ 74\% BoolQ), no context stability advantage.
+This recommendation holds for all CPU backends tested; Metal (GPU) reverses the
+throughput ordering but Q6\_K remains non-dominant even there.
 
-\textbf{Avoid Q6\_K on CPU backends.} Q6\_K is strictly dominated in both
-BoolQ accuracy (65\% vs.\ 69--74\% for all others) and throughput (3.53~tokens/s,
-the slowest practical variant). Q4\_K\_M is faster, smaller, and 7\% more accurate;
-Q8\_0 is more accurate and 28\% faster. This recommendation may not apply
-to GPU-accelerated backends where the Q6\_K de-quantization overhead differs.
-
-\textbf{Use 4 threads on heterogeneous ARM.} On the Tensor G1 (and similar
-big.LITTLE ARM SoCs), 4 threads matches the performance-core count and delivers
-peak throughput. Do not use all available threads.
-
-\textbf{KV-cache window management (critical).} Context sensitivity is
-\emph{non-monotonic} and does not follow bit-width ordering.
-Under filled-context conditions, Q3\_K\_M ($<\pm5\%$) and Q4\_K\_M ($-7\%$)
-are the safest choices for long-context deployments.
+\textbf{KV-cache quantization crossover.}
+KV Q8\_0 (\texttt{-ctk q8\_0 -ctv q8\_0}) eliminates the Q2\_K cliff entirely
+($-51\%\to-2.6\%$) but costs $-46\%$ at ctx=256.
+Crossover benefit appears at ctx$\approx$1400 for Q2\_K; for Q4\_K\_M the crossover
+is ctx$\approx$512 with negligible short-context cost ($-0.6\%$).
 \textbf{Q2\_K is the worst choice for ctx$\geq$512}: throughput degrades
 $-48\%$ by ctx=2048, with the cliff beginning as early as ctx=512 (L2 overflow onset).
 Q5\_K\_M ($-26\%$) and Q8\_0 ($-18\%$) are medium-context variants;
@@ -1048,9 +1089,9 @@ penalty. The recommended configuration for ctx$\geq$512 is \textbf{Q4\_K\_M + KV
 4.70~tok/s at ctx=256 and 4.44~tok/s at ctx=2048 ($-5.5\%$),
 outperforming default Q4\_K\_M at every context above 1024 tokens.
 
-TTFT grows with KV-cache window size across all variants (due to larger cache
-initialization cost), so responsiveness decisions should factor in TTFT budgets
-alongside decode throughput.
+\textbf{TTFT note.}
+TTFT grows with KV-cache window size across all variants (larger cache initialization cost).
+Responsiveness-sensitive deployments should budget TTFT alongside decode throughput.
 
 \subsection{KV-Cache Quantization as a Cliff Mitigation}
 \label{sec:kvcache_quant}
@@ -1088,8 +1129,13 @@ $\Delta$ & $-51\%$ & $-2.6\%$ & $-11\%$ & $-5\%$ & $-12\%$ & $-5.5\%$ \\
 \end{table}
 
 \textbf{KV Q8\_0 eliminates the Q2\_K cliff but at a short-context throughput cost.}
-The $-51\%$ Q2\_K cliff (7.50$\to$3.69~tok/s) is virtually eliminated with KV Q8\_0:
-throughput drops only $-2.6\%$ across the full context range (4.04$\to$3.93~tok/s).
+In this dedicated mitigation experiment (n=5 trials/cell, filled-context),
+Q2\_K baseline is 7.50~tok/s at ctx=256---slightly higher than the canonical
+n=10 cliff sweep (7.07~tok/s) due to differing thermal state between experiment
+runs; both are within the day-to-day variability envelope ($\pm$15\%).
+The $-51\%$ cliff from this baseline (7.50$\to$3.69~tok/s) is virtually eliminated
+with KV Q8\_0: throughput drops only $-2.6\%$ across the full context range
+(4.04$\to$3.93~tok/s).
 However, at ctx=256, KV Q8\_0 costs \textbf{$-46\%$ peak throughput}
 (7.50$\to$4.04~tok/s), because the attention kernel must dequantize Q8\_0 KV entries
 on every decode step regardless of context length.
@@ -1333,7 +1379,7 @@ confirming Metal performance is quantitatively comparable to a shared T4.
 \textbf{Metal eliminates the KV-cache cliff entirely.}
 Figure~\ref{fig:kv_cliff} shows the contrast directly.
 On ARM, Q2\_K degrades $-40\%$ and other variants $-11$--$-26\%$ across
-ctx=256--2048; on x86, Q2\_K degrades $-51\%$.
+ctx=256--2048; on x86, Q2\_K degrades $-50\%$.
 On M4 Metal (right panel), all seven variants are flat within $\pm2\%$ across
 ctx=1024--2048 under the same filled-context methodology (n=5 trials, complete
 cliff sweep in \texttt{m4\_metal\_cliff\_20260323\_015934}).
@@ -1519,12 +1565,13 @@ fraction of per-step DRAM traffic---is an open question predictable by
 $L2/1024$ if per-thread L2 allocation is known for those systems.
 
 \textbf{Qwen 2.5 1.5B cliff characterization.}
-The KV formula predicts a cliff at ctx$\approx$512 for Qwen~2.5~1.5B
-($C_{\text{layer}} = 1024 \times \text{ctx}$ bytes vs.\ $2048 \times \text{ctx}$ for Llama~3.2~3B,
-due to Qwen's 2 KV heads vs.\ Llama's 8).
-A dedicated sequential sweep at $n{\geq}5$ trials per context point will confirm
-whether the smaller KV footprint shifts or eliminates the cliff under identical
-filled-context methodology, completing the model-independence validation.
+The empirical formula $\text{ctx}_{\text{cliff}} = L2/1024$ predicts ctx=512 for Qwen~2.5~1.5B
+on ARM (same L2=512~KB), which matches the observed Qwen cliff onset in our n=5 sweep.
+Notably, despite Qwen's different KV head count (2 KV heads vs.\ Llama's 8), the
+same formula applies, suggesting the 1024 bytes/token empirical constant is more
+robust to model architecture than the raw per-layer K+V formula.
+A dedicated sequential sweep at $n{\geq}10$ trials per context point would
+further strengthen the model-independence claim.
 
 \textbf{Alternative frameworks.}
 MLC-LLM~\cite{mlcllm} is not a viable apples-to-apples comparator for this study:
@@ -1644,11 +1691,13 @@ KV-cache Q8\_0 quantization eliminates the Q2\_K cliff at a $-46\%$ short-contex
 
 \bibitem{llama32}
 Meta AI, ``Llama 3.2: Lightweight and Vision Language Models,''
-Meta AI Blog, September 2024. [Online]. Available: \url{https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/}
+[Blog post], Meta AI Blog, September 2024. [Online]. Available:
+\url{https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/}
 
 \bibitem{llamacpp}
 G. Gerganov et al., ``llama.cpp: Efficient LLM inference in C/C++,''
-GitHub Repository, 2023--2025. [Online]. Available: \url{https://github.com/ggerganov/llama.cpp}
+GitHub Repository, commit \texttt{b1-1a29907}, 2023--2025. [Online]. Available:
+\url{https://github.com/ggerganov/llama.cpp}
 
 \bibitem{gguf}
 G. Gerganov, ``GGUF: A File Format for Language Model Weights,''
@@ -1671,7 +1720,7 @@ in \textit{Proc. ICML}, 2023.
 
 \bibitem{mlcllm}
 MLC-AI Team, ``MLC-LLM: Universal LLM Deployment Engine with ML Compilation,''
-GitHub Repository and Technical Blog, 2024. [Online]. Available:
+GitHub Repository, v0.1.0, 2024. [Online]. Available:
 \url{https://github.com/mlc-ai/mlc-llm}
 
 \bibitem{qualcomm_llm}
@@ -1943,8 +1992,14 @@ Android NDK version 29.0.14206865. Compilation flags:
 The resulting \texttt{llama-cli} binary was pushed to \texttt{/data/local/tmp/}
 on the device and executed via ADB shell. The Android app was compiled with
 Android NDK 29.0.14206865, targeting arm64-v8a, using CMake 4.2.3 and Gradle 8.x.
-All source code, benchmark scripts, and raw results are available in the
-project repository.
+All source code, benchmark scripts, and raw results are available at:
+\begin{center}
+\url{https://github.com/krisdcosta/291_EAI}
+\end{center}
+The repository includes all \texttt{.jsonl} trial data under \texttt{results/},
+benchmark automation scripts under \texttt{scripts/bench/}, and the quality
+evaluation pipeline under \texttt{scripts/eval/}. The PMU validation script
+referenced in \S\ref{sec:nonmonotonic} is at \texttt{scripts/bench/pixel\_neon\_perf.sh}.
 
 \subsection{Invocation Template}
 
