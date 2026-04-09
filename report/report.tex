@@ -255,7 +255,7 @@ computers (Raspberry Pi 4/5), providing the closest embedded-ARM comparison base
 Tummalapalli et al.~\cite{tummalapalli_edge} measured sustained-load inference on
 Qwen 2.5 1.5B (the exact model we use for cross-model validation), reporting 44\%
 throughput loss from thermal throttling on iPhone 16 Pro---consistent with our
-thermal characterization findings (8.33 to 4.72~tok/s under sustained load on Pixel~6a).
+thermal characterization findings ($\approx$40\% drop under sustained no-cooldown load on Pixel~6a).
 
 Wang et al.~\cite{wang_biglittle} characterized CNN throughput on ARM big.LITTLE
 clusters (Cortex-A57+A53), showing that cross-cluster scheduling overhead limits
@@ -1461,22 +1461,27 @@ longer-duration trials ($\geq$256 output tokens).
 
 \textbf{Thermal trajectory characterized.}
 We ran a dedicated thermal drift experiment: 5 baseline trials of Q4\_K\_M
-at ctx=256 (no cooldown), followed by 50 consecutive back-to-back trials
-(no inter-trial pause), then 5 recovery trials after a 140-second cooldown.
-Baseline throughput was $8.33\pm0.42$~tok/s.
+at ctx=256 with a short prompt and 64 output tokens (fresh-context, no cooldown),
+followed by 50 consecutive back-to-back trials (no inter-trial pause), then 5
+recovery trials after a 140-second cooldown.
+Baseline fresh-context throughput was $8.33\pm0.58$~tok/s.
+Note: this baseline is higher than the canonical filled-context measurement
+($4.78$~tok/s, Table~\ref{tab:main_results}) because with a short input prompt
+the KV cache grows only from $\sim$20 to $\sim$84 tokens during decode, whereas
+filled-context attention starts from 192 tokens and is proportionally more expensive.
 Under sustained no-cooldown load, TPS dropped to a steady-state plateau of
 $4.72$--$4.96$~tok/s within the first 10 trials (elapsed $<$65~seconds) and
 remained stable for the next 900~seconds ($\sigma=0.07$).
-After the 140-second recovery, TPS partially restored to $7.04\pm0.29$~tok/s.
+After the 140-second recovery, TPS partially restored to $7.04\pm0.30$~tok/s.
 This confirms two points: (1) the Tensor~G1 throttles under sustained CPU load
-within $\approx$60~seconds, reducing throughput $\approx40\%$ from cold baseline;
+within $\approx$60~seconds, reducing fresh-context throughput $\approx40\%$;
 (2) steady-state throughput is \emph{stable}---the $\pm$0.07~tok/s noise floor
 after throttling onset indicates thermal throttling is consistent, not drifting.
 All primary benchmarks in this paper use a 120-second inter-experiment cooldown,
-which is sufficient to produce partially-recovered (not full cold-start) throughput
-values. The difference between cold-start and 120~s recovered is $\approx$15\%
-(8.33 vs.\ 7.04~tok/s), which is within the variance noted in Table~\ref{tab:main_results}
-and does not affect relative variant ordering.
+which is sufficient to ensure thermally-stable (not cold-start) conditions.
+The relative variant ordering reported in Table~\ref{tab:main_results} is
+unaffected by thermal state, as all variants were measured under the same cooldown
+protocol.
 
 \subsection{Future Work}
 
