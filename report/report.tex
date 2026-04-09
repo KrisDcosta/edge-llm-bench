@@ -353,27 +353,40 @@ variants available in the GGUF format~\cite{gguf}, spanning the full range from
 
 \subsection{Experiment Design}
 
-We adopt a fully-crossed factorial design across four independent variables:
-quantization variant (6 levels), KV-cache context window size (256, 512, 1024,
-2048 tokens), prompt type (short factual, medium summarization, reasoning task),
-and trial (5 runs per combination).
+\textbf{Filled-context methodology.}
+All throughput and context-scaling experiments use a \emph{filled-context} protocol:
+for each target context size $N$, the input prompt is padded to exactly $N - 64$ tokens,
+ensuring the KV cache is saturated before measurement begins.
+This differs critically from the na\"ive approach of varying only the \texttt{-c} flag
+while using a short fixed prompt, which measures allocation overhead rather than genuine
+KV-cache pressure.
+Results labelled ``ctx=N'' indicate a \emph{filled} N-token KV cache, not merely a window
+size allocation.
 
-\textbf{Note on ``context length'':} In all experiments, the actual input prompts
-contain 18--38 tokens. The parameter varied is the llama.cpp \texttt{-c} flag,
-which sets the maximum \emph{KV-cache context window} allocated in memory. Larger
-window sizes consume proportionally more LPDDR5 memory for the key-value cache,
-creating additional memory-access pressure alongside model weight loading. Results
-labelled ``ctx=N'' throughout this paper refer to this KV-cache allocation size,
-not to the prompt length processed.
+\textbf{TPS sweeps.}
+Decode throughput at ctx $\in$ \{256, 512, 1024, 2048\} with $n{=}10$ trials per
+(variant, context) cell; trial~1 excluded as warmup; 5-minute cool-down between variants.
+ARM Pixel~6a and x86: \texttt{llama-cli} with \texttt{-ngl~0} (CPU-only);
+M4 Metal: \texttt{llama-bench} with \texttt{-ngl~99}.
 
-We additionally include a thread-count sweep
-(1, 2, 4, 8 threads) for Q4\_K\_M at 256-token context, and a dedicated
-extended-context sweep (KV-cache window=2048) for all six non-F16 variants. In total, the
-experiment produced \textbf{1,200+ valid measurements across throughput, context-scaling,
-and quality benchmarks} after discarding warmup runs, timed-out F16 trials, and one
-contaminated Q8\_0 ctx=2048 run (discarded due to concurrent-process memory interference;
-replaced by a clean sequential re-run). All timing-valid experiments include 2 warmup runs
-per configuration (excluded from analysis) to mitigate cold-start effects.
+\textbf{Cliff sweeps.}
+Context sensitivity at 11 context sizes
+(256, 384, 512, 640, 768, 896, 1024, 1280, 1536, 1792, 2048 tokens),
+$n{=}10$ trials (ARM), $n{=}5$ (x86 and M4 Metal);
+all 7 variants; filled-context methodology throughout.
+
+\textbf{Cross-model replication.}
+Qwen~2.5~1.5B~\cite{qwen25} repeated the ARM TPS sweep ($n{=}20$, ctx=256) and
+the cliff sweep ($n{=}5$, 11 ctx) to confirm non-monotonic ordering is
+model-independent.
+
+\textbf{Thread scaling.}
+Q4\_K\_M at ctx=256, 1/2/4/8 threads, $n{=}15$ trials, to characterize
+big.LITTLE heterogeneous-core behavior on the Pixel~6a.
+
+In total, the experiment produced \textbf{1,200+ valid measurements} across throughput,
+context-scaling, and quality benchmarks, after discarding warmup runs and one contaminated
+Q8\_0 ctx=2048 run (concurrent-process interference; replaced by a clean re-run).
 
 \subsection{Metrics}
 
