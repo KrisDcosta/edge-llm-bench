@@ -1364,6 +1364,21 @@ the M4's higher IPC and memory bandwidth.
 Q6\_K is slowest on \emph{all three} CPU backends (ARM, x86, M4)---confirming the
 SIMD dequantization overhead mechanism is not architecture-specific.
 
+\textbf{M4 CPU shows no structured KV-cache cliff.}
+A dedicated filled-context cliff sweep (13~ctx points $\times$ 5~trials, script
+\texttt{m4\_cpu\_cliff.sh}, \texttt{ngl=0}, 4~threads) confirmed no ARM-style cliff
+in the ctx=256--2048 range.
+This is consistent with the $L2/1024$ formula: the Apple M4's large per-cluster
+L2 (${\approx}16$~MB) predicts a cliff at ctx${}\approx{}16{,}384$~tokens---well
+beyond our test range.
+However, the M4 CPU sweep exhibited high context-to-context variance
+(coefficient of variation up to 80\% for some variants and context points) attributed
+to macOS background scheduling and AMX dispatch path changes at certain working-set
+sizes.
+Reliable baseline TPS values are drawn from the dedicated TPS sweep ($n{=}10$,
+Table~\ref{tab:crossdevice}); the cliff sweep corroborates the ordering but is
+not used for quantitative throughput claims.
+
 \textbf{Metal reverses the ordering---and is slower than M4 CPU for Q8\_0 and Q6\_K.}
 Q4\_K\_S leads at 19.9~tok/s and Q4\_K\_M at 19.2~tok/s on Metal;
 Q8\_0 (6.4~tok/s) and Q6\_K (7.0~tok/s) are slowest---opposite of M4 CPU.
@@ -1378,19 +1393,20 @@ confirming Metal performance is quantitatively comparable to a shared T4.
 
 \textbf{Metal eliminates the KV-cache cliff entirely.}
 Figure~\ref{fig:kv_cliff} shows the contrast directly.
-On ARM, Q2\_K degrades $-40\%$ and other variants $-11$--$-26\%$ across
+On ARM, Q2\_K degrades $-48\%$ and other variants $-11$--$-26\%$ across
 ctx=256--2048; on x86, Q2\_K degrades $-50\%$.
-On M4 Metal (right panel), all seven variants are flat within $\pm2\%$ across
-ctx=1024--2048 under the same filled-context methodology (n=5 trials, complete
-cliff sweep in \texttt{m4\_metal\_cliff\_20260323\_015934}).
-Q4\_K\_S varies by only 2.9\%, Q5\_K\_M by 1.4\%, and Q8\_0 by 1.4\%.
-The largest variation is Q2\_K at 15.2\%, but this is an \emph{increase}
-(9.40 to 10.20~tok/s)---Metal performance is insensitive to context length
-because GPU unified memory operates at much higher bandwidth (>400~GB/s on M4)
-than any CPU's L2 or L3 cache, so the KV-cache working set never becomes
-a bottleneck regardless of context size.
+On M4 Metal (right panel), all seven variants are flat or improving across
+ctx=1024--2048 under the same filled-context methodology ($n{=}5$ trials,
+complete cliff sweep in \texttt{m4\_metal\_cliff\_20260323\_015934}).
+Five variants (Q4\_K\_S, Q4\_K\_M, Q5\_K\_M, Q6\_K, Q8\_0) vary by only $\pm0.6$--$0.8\%$---
+below measurement noise.
+Q3\_K\_M drifts $+3.4\%$ and Q2\_K increases $+8.5\%$ (9.40$\to$10.20~tok/s);
+both are monotone \emph{improvements}, not degradation.
+Metal performance is insensitive to context length because GPU unified memory
+operates at much higher bandwidth ($>$400~GB/s on M4) than any CPU's L2 or L3
+cache, so the KV-cache working set never becomes a bottleneck regardless of context size.
 This is the clearest possible manifestation of the CPU/GPU divide:
-the same cache-overflow mechanism that degrades CPU inference by 40--51\%
+the same cache-overflow mechanism that degrades CPU inference by 48--50\%
 has zero effect on Metal inference.
 
 \textbf{Unified interpretation.}
@@ -1406,14 +1422,14 @@ and \emph{avoid} Q8\_0, which loses $1.97\times$ to its CPU-only equivalent on t
 
 \textbf{Generalizability: Qwen 2.5 1.5B replicates the non-monotonic ordering.}
 To test whether the non-monotonic CPU throughput ordering is Llama-specific, we ran
-a clean TPS sweep ($n{=}20$ trials, ctx=256, short prompt, 4 threads) of all seven
+a TPS sweep ($n{=}5$ trials, ctx=256, filled-context, 4 threads) of all seven
 K-quant variants of \textbf{Qwen~2.5~1.5B~Instruct}~\cite{qwen25} on the Pixel~6a
 (run \texttt{pixel\_qwen\_tps\_20260326\_033619}).
 The result is an \emph{exact replication} of the Llama~3.2~3B ordering:
-\textbf{Q2\_K is fastest at 13.9~tok/s and Q6\_K is slowest at 7.25~tok/s},
-a ratio of $1.92\times$---even wider than Llama's $1.45\times$ spread.
-The intermediate ordering (Q4\_K\_S=11.0, Q4\_K\_M=9.66, Q8\_0=10.1, Q3\_K\_M=9.94,
-Q5\_K\_M=7.69~tok/s) is also non-monotonic in bit-width, confirming the pattern is
+\textbf{Q2\_K is fastest at 16.1~tok/s and Q6\_K is slowest at 7.20~tok/s},
+a ratio of $2.23\times$---wider than Llama's $2.12\times$ spread (7.49/3.53).
+The intermediate ordering (Q4\_K\_S=11.1, Q8\_0=10.2, Q3\_K\_M=10.1, Q4\_K\_M=9.78,
+Q5\_K\_M=7.75~tok/s) is also non-monotonic in bit-width, confirming the pattern is
 not an artefact of Llama's particular weight distribution.
 The mechanism is the same in both models: all GGUF K-quant variants share the same
 ARM NEON dequantization kernels; Q2\_K's compact block structure dequantizes faster
@@ -1428,35 +1444,37 @@ $= 1024 \times \text{ctx}$~bytes---\emph{half} that of Llama~3.2~3B ($2048 \time
 The Cortex-X1's 512~KB L2 therefore predicts a cliff at
 ctx $\approx 524{,}288 / 1024 \approx 512$~tokens.
 
-\textit{Cliff sweep: broad trend, high variance.}
-A filled-context cliff sweep
-(run \texttt{pixel\_qwen\_cliff\_filled\_20260330\_004954}, $n{=}5$/cell)
-was conducted concurrently with a Llama cliff re-run, causing CPU contention that
-inflated per-cell variance substantially (e.g., Q2\_K at ctx=2048: range 2.84--6.96~tok/s).
-Despite this noise, the broad trend is consistent with the L2 prediction:
-Q4\_K\_M and Q4\_K\_S show the largest degradation (${\approx}25$--$39\%$), while
-Q2\_K and Q6\_K show less than 15\% net change.
-A definitive cliff threshold confirmation requires a dedicated sequential run at
-$n{\geq}10$; Table~\ref{tab:qwen_ctx2048} shows the current sweep for reference.
+\textit{Cliff sweep: Q2\_K cliff confirmed at ctx=512.}
+A dedicated sequential filled-context cliff sweep
+(run \texttt{pixel\_qwen\_cliff\_filled\_20260330\_235410}, $n{=}5$/cell, 11~ctx points)
+confirms the $L2/1024$ prediction precisely.
+Q2\_K drops $-24.7\%$ from ctx=256 to ctx=512 (12.63$\to$9.51~tok/s)---the
+largest single-step degradation---and reaches $-38.5\%$ total at ctx=2048.
+All other variants are stable: Q3\_K\_M, Q4\_K\_S, Q4\_K\_M, Q5\_K\_M, and Q6\_K
+each degrade $\leq10\%$ total with no sharp step.
+Q8\_0 degrades $-16.6\%$---modest and monotone.
+The Qwen result confirms that the cliff mechanism generalises beyond Llama~3.2~3B:
+the formula $\text{ctx}_{\text{cliff}}\approx L2/1024$ correctly predicts ctx=512 for
+a \emph{different} model (Qwen~2.5~1.5B) with a \emph{different} KV head count (2~vs.~8).
 
 \begin{table}[h]
 \centering
 \caption{Qwen~2.5~1.5B filled-context decode TPS (mean$\pm$SEM, $n{=}5$/cell).
   \textbf{Bold} = $>$10\% decline from ctx=256 baseline.
-  L2-predicted cliff: ctx=512 (Cortex-X1, 512~KB L2).}
+  L2-predicted cliff: ctx=512 (Cortex-X1, 512~KB L2; confirmed).}
 \label{tab:qwen_ctx2048}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lrrrrrr@{}}
 \toprule
 \textbf{Var.} & \textbf{256} & \textbf{512} & \textbf{768} & \textbf{1024} & \textbf{2048} & \textbf{$\Delta$} \\
 \midrule
-Q2\_K    & $4.45{\pm}0.24$ & $4.53{\pm}0.24$ & $4.50{\pm}0.29$ & $3.87{\pm}0.45$ & $4.77{\pm}0.65$ & $-7.3\%$ \\
-Q3\_K\_M & $5.22{\pm}0.38$ & \textbf{$4.59{\pm}0.48$} & $3.82{\pm}0.42$ & $4.39{\pm}0.27$ & $4.75{\pm}0.39$ & $-9.1\%$ \\
-Q4\_K\_S & $6.04{\pm}1.03$ & \textbf{$4.54{\pm}0.48$} & $4.29{\pm}0.70$ & $4.91{\pm}0.47$ & $4.55{\pm}0.76$ & $-24.7\%$ \\
-Q4\_K\_M & $6.31{\pm}0.24$ & \textbf{$4.76{\pm}0.69$} & $4.73{\pm}0.70$ & $4.96{\pm}0.46$ & $3.85{\pm}0.41$ & $-38.9\%$ \\
-Q5\_K\_M & $5.43{\pm}0.14$ & $4.91{\pm}0.33$ & \textbf{$4.25{\pm}0.41$} & $3.59{\pm}0.73$ & $3.89{\pm}0.28$ & $-28.5\%$ \\
-Q6\_K    & $4.46{\pm}0.25$ & \textbf{$3.85{\pm}0.35$} & $4.64{\pm}0.38$ & $4.20{\pm}0.14$ & $4.01{\pm}0.15$ & $-10.2\%$ \\
-Q8\_0    & $6.73{\pm}0.47$ & \textbf{$5.28{\pm}0.79$} & $5.53{\pm}0.25$ & $5.31{\pm}0.60$ & $5.53{\pm}0.23$ & $-17.8\%$ \\
+Q2\_K    & $12.63{\pm}0.48$ & \textbf{$9.51{\pm}0.69$} & $8.29{\pm}0.03$ & $8.23{\pm}0.01$ & $7.77{\pm}0.05$ & $-38.5\%$ \\
+Q3\_K\_M & $8.44{\pm}0.09$  & $8.10{\pm}0.10$           & $8.27{\pm}0.08$ & $8.15{\pm}0.03$ & $7.69{\pm}0.08$ & $-8.9\%$ \\
+Q4\_K\_S & $9.92{\pm}0.08$  & $9.75{\pm}0.11$           & $9.77{\pm}0.09$ & $9.55{\pm}0.10$ & $9.06{\pm}0.10$ & $-8.7\%$ \\
+Q4\_K\_M & $9.60{\pm}0.10$  & $9.25{\pm}0.11$           & $9.37{\pm}0.02$ & $9.12{\pm}0.08$ & $8.65{\pm}0.11$ & $-9.9\%$ \\
+Q5\_K\_M & $7.57{\pm}0.07$  & $7.52{\pm}0.13$           & $7.54{\pm}0.05$ & $7.51{\pm}0.04$ & $7.13{\pm}0.11$ & $-5.8\%$ \\
+Q6\_K    & $7.32{\pm}0.06$  & $7.35{\pm}0.01$           & $7.27{\pm}0.01$ & $7.37{\pm}0.03$ & $6.89{\pm}0.03$ & $-5.9\%$ \\
+Q8\_0    & $10.09{\pm}0.33$ & $9.90{\pm}0.30$           & $9.76{\pm}0.34$ & $9.58{\pm}0.37$ & $8.41{\pm}0.15$ & $-16.6\%$ \\
 \bottomrule
 \end{tabular}}
 \end{table}

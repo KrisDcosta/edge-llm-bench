@@ -1,7 +1,7 @@
 # Verified Metrics Master Table
 ## Ground-Truth Reference for Dashboard, README, and Published Dataset Validation
 
-**Generated:** 2026-04-09  
+**Generated:** 2026-04-09 | **Updated:** 2026-04-10 (M4 CPU cliff data added)  
 **All values extracted directly from raw JSONL/JSON source files.**  
 **Use this as the single source of truth — not README, not paper drafts.**
 
@@ -15,6 +15,10 @@
 | **ARM cliff canonical_n10 has wrong Q4_K_M and Q5_K_M** | The `pixel_llama_cliff_filled_canonical_n10/` directory contains rerun data (2026-04-06) for Q4_K_M and Q5_K_M that shows suspicious baselines (Q4_K_M: 7.606 tok/s, vs TPS sweep: 4.781 tok/s). PROVENANCE.md says to use n=3 from 20260326 for these two variants instead. | ARM cliff for Q4_K_M is -6.6% (n=3), not -45.8% (bad rerun). ARM cliff for Q5_K_M is -25.8% (n=3). |
 | **M4 Metal cliff only covers ctx=1024–2048** | The canonical M4 Metal cliff sweep starts at ctx=1024, not ctx=256. The TPS sweep covers ctx=256. This means we cannot compute a filled-context cliff percentage for Metal in the same way as ARM/x86. | Metal cliff table should note "1024-baseline" not "256-baseline". |
 | **Q3_K_M KV mitigation shows -11.1% cliff** | In the KV mitigation experiment, Q3_K_M default shows -11.1% (4.05→3.61), consistent with the canonical cliff. Q3_K_M is not "cliff-immune" — it's "cliff-attenuated" (<±11%). | Paper already corrected to ±11%. Verify dashboard uses "attenuated" not "immune". |
+| **Qwen TPS paper values wrong** | Paper said Q2_K=13.9 tok/s (n=20). Actual canonical data: Q2_K=16.056±0.670 (n=5). Paper ratio 1.92× → actual 2.23×. Paper now corrected. | Dashboard/README Qwen TPS must use 16.1 tok/s for Q2_K, ratio 2.23×. |
+| **Qwen cliff table was contaminated run** | Paper's Qwen cliff table used run 20260330_004954 (concurrent process contamination, 4–6 tok/s baselines). Canonical is 20260330_235410 (8–16 tok/s, clean). Paper now corrected. | Use `pixel_qwen_cliff_filled_20260330_235410` for all Qwen cliff values. |
+| **M4 Metal cliff ±2% understated** | Paper said "flat within ±2%". Actual: 5 variants ±0.6–0.8%, Q3_K_M +3.4%, Q2_K +8.5%. Paper corrected to per-variant values. | Dashboard/README Metal cliff description: "flat to +8.5% (no degradation)". |
+| **M4 CPU cliff high variance** | M4 CPU cliff sweep (run 2026-04-09, 442 min) shows no structured cliff but exhibits extreme context-to-context variance (CV up to 80%) due to macOS scheduling and AMX dispatch path changes. Ctx=256 baselines for variants 2–7 are 1.4–2× inflated vs dedicated TPS sweep (warmup contamination from sequential variant order). | Use TPS sweep (m4_cpu_tps_20260406_203938, n=10) not cliff sweep for M4 CPU baselines. |
 
 ---
 
@@ -355,7 +359,7 @@
 | x86 cliff onset ctx=1300–1400 | **ctx=1300→1400 worst step** | ✅ Correct |
 | M4 Metal Q4_K_S fastest = 19.88 tok/s | **19.879±2.050** | ✅ Correct |
 | M4 Metal Q8_0 slowest = 6.39 tok/s | **6.394±0.245** | ✅ Correct |
-| M4 Metal no cliff (flat ±2%) | **±4.3%** peak (Q2_K noisiest) | ⚠️ Slightly underestimated — ±4% is more accurate |
+| M4 Metal no cliff (flat ±2%) | 5 variants ±0.6–0.8%; Q3_K_M +3.4%; Q2_K +8.5% (increase, not drop) | ✅ Paper corrected to per-variant values |
 | ARC-Easy ARM 76–82% | **76–82% (arc_easy_fixed)** | ✅ Correct — but raw `arc_easy` key is buggy (100%) |
 | BoolQ Q4_K_S highest (74%) | **74%** | ✅ Correct |
 | HellaSwag Q2_K collapse (19%) | **19%** (56/100 "No" outputs) | ✅ Correct |
@@ -365,13 +369,54 @@
 | Thermal baseline 8.33±0.58 | **8.33±0.58** (fresh-context, short prompt) | ✅ Correct |
 | PPL Q2_K ARM = 13.29 | **13.2885** | ✅ Correct |
 | PPL Q3_K_M ARM = 11.08 | **11.0832** | ✅ Correct |
+| Qwen Q2_K TPS = 13.9 tok/s | **16.056±0.670** (n=5) | ✅ Paper corrected to 16.1 |
+| Qwen ratio = 1.92× | **2.23×** (16.056/7.202) | ✅ Paper corrected |
+| M4 CPU no cliff | **Confirmed** — no structured cliff in ctx=[256,2048]; high variance (CV up to 80%) | ✅ Paper updated (2026-04-10) |
+| M4 CPU ordering | Q4_K_S=13.16 > Q8_0=12.60 > Q4_K_M=12.51 > Q2_K=12.31 > Q3_K_M=11.48 > Q5_K_M=10.59 > Q6_K=9.29 | ✅ From TPS sweep n=10 |
+
+---
+
+## 15. M4 Mac CPU — Cliff Sweep (2026-04-10)
+
+**Source:** `results/m4_cpu_cliff_20260409_213958/` | ngl=0, 4 threads, 13 ctx × 5 trials  
+**Runtime:** 442 min
+
+### Key Findings
+
+**No structured cliff** in ctx=[256, 2048] — consistent with L2/1024 prediction:
+- M4 cluster L2 ≈ 16 MB → predicted cliff at ctx ≈ 16,384 tokens (far beyond test range)
+
+**Data quality issues:** High context-to-context variance. Main causes:
+1. **Sequential warmup inflation at ctx=256**: Q3_K_M–Q8_0 baselines are 1.4–2× higher than TPS sweep because Q2_K (run first) warms up the AMX pipeline and CPU caches. Use TPS sweep (Section 8) for reliable baselines.
+2. **macOS background scheduling**: CV up to 80% at some ctx/variant combinations (Q6_K ctx=1280: CV=79%, Q8_0 ctx=2048: mean=51.49 tok/s with std=50.92 — one pathological trial)
+3. **AMX dispatch path changes**: Q2_K jumps from ~11 tok/s at ctx=512 to ~23 tok/s at ctx=768–896 (consistent across 5 trials, CV<10%) — possible AMX threshold effect
+
+### Reliable ctx=256 TPS values (from dedicated TPS sweep, n=10)
+
+Use these — NOT the cliff sweep ctx=256 values:
+
+| Variant | M4 CPU TPS (TPS sweep n=10) | M4 Metal TPS | CPU/Metal |
+|---------|---------------------------|------------|---------|
+| Q4_K_S | **13.160** | 19.879 | 0.66× |
+| Q8_0   | **12.596** | 6.394  | **1.97× CPU wins** |
+| Q4_K_M | **12.506** | 19.223 | 0.65× |
+| Q2_K   | **12.306** | 17.787 | 0.69× |
+| Q3_K_M | **11.478** | 15.603 | 0.74× |
+| Q5_K_M | **10.589** | 13.351 | 0.79× |
+| Q6_K   | **9.290**  | 7.023  | **1.32× CPU wins** |
+
+**CPU ordering:** Q4_K_S > Q8_0 > Q4_K_M > Q2_K > Q3_K_M > Q5_K_M > Q6_K  
+(Different from both ARM ordering and Metal ordering — a third distinct pattern)
 
 ---
 
 ## Action Items Before Publishing Dashboard / Dataset
 
 1. **Fix dashboard ARC-Easy source** — ensure it uses the `arc_easy_fixed` key (76–82%), not `arc_easy` (100%)
-2. **Flag Q5_K_M cliff as uncertain** — the −25.8% (n=3) needs a clean n≥5 rerun before publishing; the paper presents Q5_K_M as "relatively stable" which contradicts this data
-3. **Fix M4 Metal cliff paper text** — paper says "flat ±2%" but actual peak deviation is ±4.3% (Q2_K); update to "±5%"
+2. **Flag Q5_K_M ARM cliff as uncertain** — the −25.8% (n=3) needs a clean n≥5 rerun; don't publish as definitive
+3. **Fix M4 Metal cliff description** — not "flat ±2%"; correct is "5 variants ±0.6–0.8%; Q2_K +8.5% improvement" (paper already corrected)
+4. **Fix Qwen TPS values** — Q2_K=16.1 tok/s (not 13.9), ratio=2.23× (not 1.92×) (paper already corrected)
+5. **Fix Qwen cliff table** — must use canonical run 20260330_235410, not contaminated 004954 (paper already corrected)
+6. **M4 CPU cliff data** — use TPS sweep for baselines, note cliff sweep as "no structured cliff, high macOS variance" in any dashboard display
 4. **Q4_K_M cliff caveat** — paper says "−12%" but verified data shows −6.6% (better than claimed, but still n=3); note as "approximately −7%, n=3"
 5. **x86 TPS: note n=1** — dashboard should show "single reference measurement, no CI" for x86 TPS
