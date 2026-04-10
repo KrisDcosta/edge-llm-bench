@@ -11,6 +11,7 @@
   "devices": [
     "Pixel6a",
     "M4Mac",
+    "M4Mac_CPU",
     "x86"
   ],
   "context_lens": [

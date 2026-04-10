@@ -38,7 +38,7 @@ MODEL_QWEN  = "Qwen2.5-1.5B-Instruct"
 
 # Canonical display order
 VARIANT_ORDER = ["Q2_K", "Q3_K_M", "Q4_K_S", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0"]
-DEVICE_ORDER  = ["Pixel6a", "M4Mac", "x86"]
+DEVICE_ORDER  = ["Pixel6a", "M4Mac", "M4Mac_CPU", "x86"]
 
 BENCHMARK_DISPLAY = {
     "arc_easy":        "ARC-Easy",
@@ -126,6 +126,14 @@ m4_qwen     = m4[m4["model"] == MODEL_QWEN]
 
 pixel_cliff = pixel_llama[pixel_llama["experiment_type"] == "cliff_sweep"]
 
+# M4 CPU cliff (ngl=0, 4 threads, 2026-04-09 run)
+# 88 rows (91 - 3 excluded: Q5_K_M ctx=2048 OOM, Q6_K ctx=1536 CV=81%, Q8_0 ctx=2048 CV=99%)
+m4_cpu_cliff = m4_llama[
+    (m4_llama["experiment_type"] == "cliff_sweep") &
+    (m4_llama["backend"] == "CPU") &
+    (m4_llama["ngl"] == 0)
+]
+
 # M4 canonical cliff: filter to the single clean benchmark run from 2026-03-23.
 # The parquet contains multiple Q2_K runs (n=28 per ctx) and NaN-trial warmup rows that
 # corrupt per-context averages (e.g. Q2_K mean=15.0 instead of correct 9.4 at ctx=1024,
@@ -180,7 +188,10 @@ def bake_tps_by_variant():
                 "Q5_K_M": "standard_sweep ctx=256 (cliff_sweep baseline inflated by thermal warmup burst)",
             },
             "M4Mac": {
-                "_all": "filled-context cliff_sweep at ctx=1024 (canonical run 2026-03-23, n=5)",
+                "_all": "Metal GPU, filled-context cliff_sweep at ctx=1024 (canonical run 2026-03-23, n=5)",
+            },
+            "M4Mac_CPU": {
+                "_all": "CPU (ngl=0, 4 threads), filled-context cliff_sweep at ctx=256 (2026-04-09, n_trials=5 pre-aggregated). Q3_K_M/Q4_K_S/Q4_K_M ctx=256 baseline may be inflated by CPU boost state.",
             },
             "x86": {
                 "_all": "cliff_sweep ctx=256, mean of n=5 trials",
@@ -225,6 +236,14 @@ def bake_tps_by_variant():
         # Qwen M4 cliff data is all NaN-trial contaminated rows — return empty
         model_data["M4Mac"] = m4_tps
 
+        # M4Mac CPU @ ctx=256 (ngl=0, 4 threads) — Llama only
+        m4_cpu_tps = {}
+        if model_name == MODEL_LLAMA:
+            m_cpu = m4_cpu_cliff[m4_cpu_cliff["context_len"] == 256]
+            for v, grp in m_cpu.groupby("variant"):
+                m4_cpu_tps[v] = agg(grp["decode_tps"])
+        model_data["M4Mac_CPU"] = m4_cpu_tps
+
         # x86 @ ctx=256 cliff sweep — use mean of n=5 trials (Llama only; no Qwen on x86)
         x86_tps = {}
         if model_name in x86["model"].values:
@@ -267,7 +286,8 @@ def bake_cliff_curves():
             (pixel["model"] == MODEL_QWEN) &
             (pixel["experiment_type"] == "cliff_sweep")
         ],
-        "M4Mac_Llama":   m4_cliff,   # canonical run only (ts-filtered, trial.notna())
+        "M4Mac_Llama":     m4_cliff,       # Metal GPU canonical run (ts-filtered, n=5/ctx)
+        "M4Mac_CPU_Llama": m4_cpu_cliff,  # CPU (ngl=0, 4 threads, 2026-04-09, n_trials=5 pre-aggregated)
         # M4Mac Qwen cliff rows all have trial=NaN (contaminated llama-bench rows) — exclude
         # "M4Mac_Qwen": excluded,
         "x86_Llama":     x86_cliff_df,

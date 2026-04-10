@@ -41,7 +41,7 @@ Controlled inference benchmark dataset for **7 GGUF K-quant quantization variant
 | Apple M4 Mac | Apple M4 (ARM, 10-core) | 16 GB unified | llama.cpp Metal |
 | HP Pavilion x86 | Intel Core i5-1235U (12th gen) | 16 GB DDR4 | llama.cpp CPU |
 
-**4,310 total records** across 5 splits. All inference records are non-warmup,
+**4,398 total records** across 5 splits. All inference records are non-warmup,
 success-status runs collected under controlled thermal conditions. Contaminated
 and failed records are archived separately and not included here.
 
@@ -101,14 +101,21 @@ Pixel 6a (ARM, CPU backend) inference runs.
 
 ---
 
-### `m4_inference` — 931 rows
-Apple M4 Mac (Metal GPU backend) inference runs.
+### `m4_inference` — 1,019 rows
+Apple M4 Mac inference runs. Contains two backend configurations:
 
-Same columns as `pixel_inference`. `backend = "Metal"`, `ngl = 99` (all layers on GPU).
-Includes Llama 3.2 3B and Qwen 2.5 1.5B for cross-model validation.
+- **Metal GPU** (931 rows) — `backend = "Metal"`, `ngl = 99`. Includes Llama 3.2 3B and Qwen 2.5 1.5B.
+  Cliff sweep covers ctx=1024–2048 (13 points, n=5 trials). Results: flat profile on Metal
+  (all variants within ±9%), confirming no KV-cache cliff on GPU-accelerated inference.
+- **CPU** (88 rows) — `backend = "CPU"`, `ngl = 0`, `threads = 4`. Llama 3.2 3B only.
+  Cliff sweep covers ctx=256–2048 (13 points, pre-aggregated n\_trials=5 per ctx).
+  Collected 2026-04-09. 3 outlier points excluded (Q5\_K\_M ctx=2048 OOM, Q6\_K ctx=1536
+  CV=81%, Q8\_0 ctx=2048 CV=99%). Results: significant context-dependent degradation
+  on M4 CPU (Q2\_K −13%, Q3\_K\_M −54%, Q4\_K\_S −53%, Q6\_K −60% from ctx=256→2048).
+  Note: ctx=256 baseline for Q3\_K\_M, Q4\_K\_S, Q4\_K\_M may be inflated by CPU boost
+  state at the start of each variant's sweep.
 
-> **Note:** M4 CPU (non-Metal) data was collected but found to be corrupted during
-> post-processing and is excluded from this dataset.
+Same columns as `pixel_inference`.
 
 ---
 
