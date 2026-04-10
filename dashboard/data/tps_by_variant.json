@@ -2,6 +2,7 @@
   "devices": [
     "Pixel6a",
     "M4Mac",
+    "M4Mac_CPU",
     "x86"
   ],
   "variants": [
@@ -117,6 +118,57 @@
           "n": 5
         }
       },
+      "M4Mac_CPU": {
+        "Q2_K": {
+          "mean": 13.3789,
+          "std": null,
+          "min": 13.3789,
+          "max": 13.3789,
+          "n": 1
+        },
+        "Q3_K_M": {
+          "mean": 23.219,
+          "std": null,
+          "min": 23.219,
+          "max": 23.219,
+          "n": 1
+        },
+        "Q4_K_M": {
+          "mean": 24.7894,
+          "std": null,
+          "min": 24.7894,
+          "max": 24.7894,
+          "n": 1
+        },
+        "Q4_K_S": {
+          "mean": 25.1888,
+          "std": null,
+          "min": 25.1888,
+          "max": 25.1888,
+          "n": 1
+        },
+        "Q5_K_M": {
+          "mean": 16.3292,
+          "std": null,
+          "min": 16.3292,
+          "max": 16.3292,
+          "n": 1
+        },
+        "Q6_K": {
+          "mean": 14.0615,
+          "std": null,
+          "min": 14.0615,
+          "max": 14.0615,
+          "n": 1
+        },
+        "Q8_0": {
+          "mean": 17.37,
+          "std": null,
+          "min": 17.37,
+          "max": 17.37,
+          "n": 1
+        }
+      },
       "x86": {
         "Q2_K": {
           "mean": 17.572,
@@ -208,6 +260,7 @@
         }
       },
       "M4Mac": {},
+      "M4Mac_CPU": {},
       "x86": {}
     }
   },
@@ -217,7 +270,10 @@
       "Q5_K_M": "standard_sweep ctx=256 (cliff_sweep baseline inflated by thermal warmup burst)"
     },
     "M4Mac": {
-      "_all": "filled-context cliff_sweep at ctx=1024 (canonical run 2026-03-23, n=5)"
+      "_all": "Metal GPU, filled-context cliff_sweep at ctx=1024 (canonical run 2026-03-23, n=5)"
+    },
+    "M4Mac_CPU": {
+      "_all": "CPU (ngl=0, 4 threads), filled-context cliff_sweep at ctx=256 (2026-04-09, n_trials=5 pre-aggregated). Q3_K_M/Q4_K_S/Q4_K_M ctx=256 baseline may be inflated by CPU boost state."
     },
     "x86": {
       "_all": "cliff_sweep ctx=256, mean of n=5 trials"
