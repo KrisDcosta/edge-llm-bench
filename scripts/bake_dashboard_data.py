@@ -125,7 +125,34 @@ m4_llama    = m4[m4["model"] == MODEL_LLAMA]
 m4_qwen     = m4[m4["model"] == MODEL_QWEN]
 
 pixel_cliff = pixel_llama[pixel_llama["experiment_type"] == "cliff_sweep"]
-m4_cliff    = m4_llama[m4_llama["experiment_type"] == "cliff_sweep"]
+
+# M4 canonical cliff: filter to the single clean benchmark run from 2026-03-23.
+# The parquet contains multiple Q2_K runs (n=28 per ctx) and NaN-trial warmup rows that
+# corrupt per-context averages (e.g. Q2_K mean=15.0 instead of correct 9.4 at ctx=1024,
+# Q3_K_M NaN row = 176 tok/s at ctx=1800).
+# The canonical run (m4_metal_cliff_20260323_015934) starts at 08:55 UTC on 2026-03-23.
+# All variants except Q2_K already have n=5 trial-numbered rows from that window;
+# Q2_K has additional run batches from earlier dates. Filter: ts in [08:55, 2026-03-24)
+# AND trial.notna() isolates exactly 5 canonical rows per variant per context.
+M4_CLIFF_TS_MIN = "2026-03-23T08:55"
+M4_CLIFF_TS_MAX = "2026-03-24"
+m4_cliff    = m4_llama[
+    (m4_llama["experiment_type"] == "cliff_sweep") &
+    m4_llama["trial"].notna() &
+    (m4_llama["ts"] >= M4_CLIFF_TS_MIN) &
+    (m4_llama["ts"] <  M4_CLIFF_TS_MAX)
+]
+
+# Pixel6a standard_sweep at ctx=256: used as fallback for Q4_K_M and Q5_K_M whose
+# cliff_sweep ctx=256 baselines are inflated by a thermal warmup artifact (device burst
+# on first trials → Q4_K_M shows 9.12 tok/s trial-1, stabilising to 6.67 by trial-7;
+# cliff_sweep mean=7.61 >> standard_sweep mean=4.85 which is consistent with TPS sweep).
+pixel_std256 = pixel_llama[
+    (pixel_llama["experiment_type"] == "standard_sweep") &
+    (pixel_llama["context_len"] == 256)
+]
+# Variants whose cliff ctx=256 baseline is known-reliable (no thermal warmup artifact)
+_CLIFF_RELIABLE_VARIANTS = {"Q2_K", "Q3_K_M", "Q4_K_S", "Q6_K", "Q8_0"}
 
 OUT.mkdir(parents=True, exist_ok=True)
 print(f"Writing JSON to {OUT}\n")
@@ -134,37 +161,68 @@ print(f"Writing JSON to {OUT}\n")
 # ══════════════════════════════════════════════════════════════════════════════
 # Chart 1 — tps_by_variant.json
 # Bar chart: mean decode TPS per variant × device
-# Pixel: ctx=256 cliff sweep (pre-collapse baseline, all variants pre-cliff)
-# M4:    ctx=1024 cliff sweep (lowest available context)
+# Pixel: ctx=256. Five variants (Q2_K, Q3_K_M, Q4_K_S, Q6_K, Q8_0) use cliff_sweep
+#         (filled-context, pre-collapse baseline). Q4_K_M and Q5_K_M use standard_sweep
+#         because their cliff_sweep ctx=256 baselines are inflated by a thermal warmup
+#         burst artifact (first trials ~9 tok/s, stabilising to ~6.7; mean=7.61 >> 4.85).
+# M4:    ctx=1024 canonical cliff sweep (n=5 per ctx per variant, 2026-03-23 clean run)
 # x86:   ctx=256 cliff sweep mean of n=5 trials (Llama only)
 # ══════════════════════════════════════════════════════════════════════════════
 
 def bake_tps_by_variant():
-    result = {"devices": DEVICE_ORDER, "variants": VARIANT_ORDER, "data": {}}
+    result = {
+        "devices": DEVICE_ORDER,
+        "variants": VARIANT_ORDER,
+        "data": {},
+        "notes": {
+            "Pixel6a": {
+                "Q4_K_M": "standard_sweep ctx=256 (cliff_sweep baseline inflated by thermal warmup burst)",
+                "Q5_K_M": "standard_sweep ctx=256 (cliff_sweep baseline inflated by thermal warmup burst)",
+            },
+            "M4Mac": {
+                "_all": "filled-context cliff_sweep at ctx=1024 (canonical run 2026-03-23, n=5)",
+            },
+            "x86": {
+                "_all": "cliff_sweep ctx=256, mean of n=5 trials",
+            },
+        },
+    }
 
     for model_label, model_name in [("Llama", MODEL_LLAMA), ("Qwen", MODEL_QWEN)]:
         model_data = {}
 
-        # Pixel @ ctx=256 cliff sweep (pre-collapse baseline, all variants pre-cliff)
-        p = pixel[
+        # Pixel @ ctx=256 — per-variant source selection
+        # Q2_K, Q3_K_M, Q4_K_S, Q6_K, Q8_0: cliff_sweep ctx=256 (filled context, n=10)
+        # Q4_K_M, Q5_K_M: standard_sweep ctx=256 (thermally settled, n≥12)
+        p_cliff = pixel[
             (pixel["model"] == model_name) &
             (pixel["experiment_type"] == "cliff_sweep") &
             (pixel["context_len"] == 256)
         ]
+        p_std = pixel[
+            (pixel["model"] == model_name) &
+            (pixel["experiment_type"] == "standard_sweep") &
+            (pixel["context_len"] == 256)
+        ]
         pixel_tps = {}
-        for v, grp in p.groupby("variant"):
-            pixel_tps[v] = agg(grp["decode_tps"])
+        for v in VARIANT_ORDER:
+            if v in _CLIFF_RELIABLE_VARIANTS:
+                grp = p_cliff[p_cliff["variant"] == v]["decode_tps"]
+            else:
+                grp = p_std[p_std["variant"] == v]["decode_tps"]
+            if not grp.empty:
+                pixel_tps[v] = agg(grp)
         model_data["Pixel6a"] = pixel_tps
 
-        # M4 @ ctx=1024 cliff sweep (lowest M4 context)
-        m = m4[
-            (m4["model"] == model_name) &
-            (m4["experiment_type"] == "cliff_sweep") &
-            (m4["context_len"] == 1024)
-        ]
+        # M4 @ ctx=1024 canonical cliff sweep (cleaned, n=5 per variant)
+        # Note: M4 Qwen cliff data in parquet has no trial-numbered rows — falls back
+        # to NaN-trial contaminated rows if Qwen is requested; return empty for Qwen.
         m4_tps = {}
-        for v, grp in m.groupby("variant"):
-            m4_tps[v] = agg(grp["decode_tps"])
+        if model_name == MODEL_LLAMA:
+            m = m4_cliff[m4_cliff["context_len"] == 1024]
+            for v, grp in m.groupby("variant"):
+                m4_tps[v] = agg(grp["decode_tps"])
+        # Qwen M4 cliff data is all NaN-trial contaminated rows — return empty
         model_data["M4Mac"] = m4_tps
 
         # x86 @ ctx=256 cliff sweep — use mean of n=5 trials (Llama only; no Qwen on x86)
@@ -209,11 +267,9 @@ def bake_cliff_curves():
             (pixel["model"] == MODEL_QWEN) &
             (pixel["experiment_type"] == "cliff_sweep")
         ],
-        "M4Mac_Llama":   m4_cliff,
-        "M4Mac_Qwen":    m4[
-            (m4["model"] == MODEL_QWEN) &
-            (m4["experiment_type"] == "cliff_sweep")
-        ],
+        "M4Mac_Llama":   m4_cliff,   # canonical run only (ts-filtered, trial.notna())
+        # M4Mac Qwen cliff rows all have trial=NaN (contaminated llama-bench rows) — exclude
+        # "M4Mac_Qwen": excluded,
         "x86_Llama":     x86_cliff_df,
     }
 
@@ -351,7 +407,9 @@ def bake_cross_device():
         ("Llama", pixel_cliff, m4_cliff),
         ("Qwen",
          pixel[(pixel["model"] == MODEL_QWEN) & (pixel["experiment_type"] == "cliff_sweep")],
-         m4[(m4["model"] == MODEL_QWEN) & (m4["experiment_type"] == "cliff_sweep")]),
+         # M4 Qwen cliff rows all have trial=NaN (contaminated llama-bench output rows);
+         # exclude entirely — renders as null/— in heatmap, which is correct.
+         m4.iloc[0:0]),  # empty with same columns
     ]:
         x86_src = x86_cliff_llama if model_label == "Llama" else pd.DataFrame()
 

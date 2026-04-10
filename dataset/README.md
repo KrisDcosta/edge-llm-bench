@@ -50,9 +50,11 @@ and failed records are archived separately and not included here.
 ## Key Findings (from the accompanying paper)
 
 - **Non-monotonic throughput on ARM:** Q2\_K is ~99% faster than Q6\_K on Pixel 6a
-  (ctx=256 cliff\_sweep, mean of n=10 trials) despite having less than half the bits per weight — contradicting GPU-derived assumptions
+  (ctx=256 cliff\_sweep filled-context, n=10) despite having less than half the bits per weight —
+  contradicting GPU-derived assumptions. Q4\_K\_M and Q5\_K\_M cliff-sweep ctx=256 baselines
+  are affected by a thermal warmup burst; use standard\_sweep values for those two variants.
 - **KV-cache collapse threshold:** Q2\_K suffers a −48% throughput cliff beyond ~512 tokens
-  on Pixel 6a (ARM); Q3\_K\_M is cliff-immune across all tested contexts; x86 cliff predicted
+  on Pixel 6a (ARM); Q3\_K\_M is cliff-attenuated (≤11%, not fully immune); x86 cliff predicted
   at ctx≈1,280 tokens via L2-cache formula, observed at 1,300–1,400 (within 8%)
 - **Non-monotonic quality:** Q4\_K\_S outperforms Q8\_0 on BoolQ (74% vs 68%) despite
   fewer bits — superblock K-quant structure allocates precision more effectively than naive
