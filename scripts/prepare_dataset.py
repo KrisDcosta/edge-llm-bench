@@ -235,9 +235,17 @@ def collect_m4(results: Path, verbose: bool) -> list[dict]:
         for d in sorted(results.glob(pattern)):
             add_flat(d, "cliff_sweep")
 
+    # M4 CPU cliff sweeps — Llama (ngl=0, backend=CPU; bake script filters by backend+ngl)
+    for d in sorted(results.glob("m4_cpu_cliff_*")):
+        add_flat(d, "cliff_sweep")
+
     # M4 TPS sweeps — Llama
     for d in sorted(results.glob("m4_llama_tps_*")):
         add_flat(d, "tps_sweep")
+
+    # M4 CPU TPS sweeps — Llama (ngl=0, context_len=0, pre-aggregated)
+    for d in sorted(results.glob("m4_cpu_tps_*")):
+        add_flat(d, "standard_sweep")
 
     # M4 Qwen cross-model
     for pattern in ("m4_metal_qwen_cliff_*", "m4_qwen_cliff_*", "m4_qwen_tps_*"):
@@ -315,6 +323,41 @@ def collect_x86(results: Path) -> list[dict]:
                 })
     else:
         print("  [warn] x86_llama_cliff_20260408_070924/ not found — GAP-5 cliff data missing")
+
+    # 3. x86 Qwen TPS sweep — output by x86_qwen_tps.sh
+    # Format: tps_{VARIANT}.jsonl with fields: variant, test_type, tps_mean, n_prompt, threads, ts
+    for qwen_dir in sorted(results.glob("x86_qwen_tps_*")):
+        for f in sorted(qwen_dir.glob("tps_*.jsonl")):
+            for rec in load_jsonl(f):
+                if rec.get("test_type") != "tg":  # only decode (tg) rows
+                    continue
+                decode = rec.get("tps_mean")
+                if not decode or decode <= 0:
+                    continue
+                variant = rec.get("variant")
+                if not variant:
+                    continue
+                # pp rows tell us the context size (n_prompt * 2 = ctx); tg uses n_prompt=0
+                # Extract context from filename hint: script uses pp=128,256,512,1024 → ctx=256
+                rows.append({
+                    "device":          "x86",
+                    "backend":         "CPU",
+                    "model":           MODEL_QWEN,
+                    "variant":         variant,
+                    "context_len":     256,
+                    "trial":           1,
+                    "threads":         rec.get("threads"),
+                    "decode_tps":      decode,
+                    "prefill_tps":     None,
+                    "ttft_s":          None,
+                    "e2e_s":           None,
+                    "n_output_tokens": None,
+                    "experiment_type": "standard_sweep",
+                    "kv_quant":        None,
+                    "ngl":             rec.get("ngl", 0),
+                    "ts":              rec.get("ts"),
+                    "source_file":     f.name,
+                })
 
     return rows
 

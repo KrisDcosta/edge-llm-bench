@@ -1,9 +1,8 @@
 {
   "collapse_threshold": {
-    "start": 512,
-    "end": 768,
-    "label": "KV-cache cliff onset (Q2_K, Q5_K_M)",
-    "note": "Q2_K/Q5_K_M cliff at ctx=512; Q8_0 at ctx=1300; Q4_K_S at ctx=1200; Q3_K_M/Q4_K_M stable"
+    "start": 1400,
+    "end": 1500,
+    "label": "KV-cache collapse zone"
   },
   "curves": {
     "Pixel6a_Llama": {
@@ -370,91 +369,91 @@
       "Q5_K_M": [
         {
           "context": 256,
-          "mean": 6.67,
-          "std": 0.2,
-          "min": 6.47,
-          "max": 6.89,
-          "n": 5
+          "mean": 6.096,
+          "std": 0.6801,
+          "min": 5.25,
+          "max": 7.22,
+          "n": 10
         },
         {
           "context": 512,
-          "mean": 5.47,
-          "std": 0.15,
-          "min": 5.32,
-          "max": 5.62,
-          "n": 5
+          "mean": 4.886,
+          "std": 0.2703,
+          "min": 4.44,
+          "max": 5.3,
+          "n": 10
         },
         {
           "context": 768,
-          "mean": 4.93,
-          "std": 0.1,
-          "min": 4.83,
-          "max": 5.03,
-          "n": 5
+          "mean": 4.459,
+          "std": 0.1581,
+          "min": 4.24,
+          "max": 4.68,
+          "n": 10
         },
         {
           "context": 1024,
-          "mean": 4.59,
-          "std": 0.08,
-          "min": 4.51,
-          "max": 4.67,
-          "n": 5
+          "mean": 4.135,
+          "std": 0.1222,
+          "min": 3.99,
+          "max": 4.39,
+          "n": 10
         },
         {
           "context": 1200,
-          "mean": 4.06,
-          "std": 0.08,
-          "min": 3.98,
-          "max": 4.14,
-          "n": 5
+          "mean": 3.769,
+          "std": 0.1558,
+          "min": 3.6,
+          "max": 4.1,
+          "n": 10
         },
         {
           "context": 1300,
-          "mean": 3.97,
-          "std": 0.07,
-          "min": 3.9,
-          "max": 4.04,
-          "n": 5
+          "mean": 3.587,
+          "std": 0.1226,
+          "min": 3.39,
+          "max": 3.84,
+          "n": 10
         },
         {
           "context": 1400,
-          "mean": 3.92,
-          "std": 0.06,
-          "min": 3.86,
-          "max": 3.98,
-          "n": 5
+          "mean": 3.739,
+          "std": 0.0831,
+          "min": 3.62,
+          "max": 3.9,
+          "n": 10
         },
         {
           "context": 1500,
-          "mean": 3.76,
-          "std": 0.06,
-          "min": 3.7,
-          "max": 3.82,
-          "n": 5
+          "mean": 3.738,
+          "std": 0.1137,
+          "min": 3.6,
+          "max": 3.88,
+          "n": 10
         },
         {
           "context": 1600,
-          "mean": 3.75,
-          "std": 0.05,
-          "min": 3.7,
-          "max": 3.8,
-          "n": 5
+          "mean": 3.503,
+          "std": 0.1513,
+          "min": 3.23,
+          "max": 3.72,
+          "n": 10
         },
         {
           "context": 1800,
-          "mean": 3.64,
-          "std": 0.05,
-          "min": 3.59,
-          "max": 3.69,
-          "n": 5
+          "mean": 3.53,
+          "std": 0.0645,
+          "min": 3.46,
+          "max": 3.65,
+          "n": 10
         },
         {
           "context": 2048,
-          "mean": 3.61,
-          "std": 0.04,
-          "min": 3.57,
-          "max": 3.65,
-          "n": 5
+          "mean": 3.554,
+          "std": 0.0615,
+          "min": 3.47,
+          "max": 3.66,
+          "n": 10
         }
       ],
       "Q6_K": [
@@ -2619,6 +2618,14 @@
           "n": 1
         },
         {
+          "context": 1536,
+          "mean": 27.0154,
+          "std": null,
+          "min": 27.0154,
+          "max": 27.0154,
+          "n": 1
+        },
+        {
           "context": 1792,
           "mean": 8.9281,
           "std": null,
@@ -2730,6 +2737,14 @@
           "std": null,
           "min": 11.0071,
           "max": 11.0071,
+          "n": 1
+        },
+        {
+          "context": 2048,
+          "mean": 51.4903,
+          "std": null,
+          "min": 51.4903,
+          "max": 51.4903,
           "n": 1
         }
       ]
@@ -3366,21 +3381,5 @@
         }
       ]
     }
-  },
-  "cliff_classification": {
-    "cliff_prone_ctx512": [
-      "Q2_K",
-      "Q5_K_M"
-    ],
-    "cliff_moderate": [
-      "Q4_K_S",
-      "Q8_0"
-    ],
-    "cliff_stable": [
-      "Q3_K_M",
-      "Q4_K_M",
-      "Q6_K"
-    ],
-    "note": "Q2_K/Q5_K_M: -46-48% total, onset ctx=512. Q4_K_S: -10% ctx=1200. Q8_0: -18% ctx=1300."
   }
 }
