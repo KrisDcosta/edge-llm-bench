@@ -162,7 +162,8 @@
           <div class="btn-group" id="tps-device-toggle">
             <button class="btn-toggle active" data-value="all">All</button>
             <button class="btn-toggle" data-value="Pixel6a">Pixel 6a</button>
-            <button class="btn-toggle" data-value="M4Mac">M4 Mac</button>
+            <button class="btn-toggle" data-value="M4Mac">M4 Mac (Metal)</button>
+            <button class="btn-toggle" data-value="M4Mac_CPU">M4 Mac (CPU)</button>
             <button class="btn-toggle" data-value="x86">x86</button>
           </div>
         </div>
@@ -173,7 +174,7 @@
       </div>
 
       <p class="chart-note">
-        Pixel 6a @ ctx=256 — cliff\_sweep (Q2\_K, Q3\_K\_M, Q4\_K\_S, Q6\_K, Q8\_0) · standard\_sweep (Q4\_K\_M, Q5\_K\_M — thermal burst artifact excluded) · M4 Mac @ ctx=1024 canonical cliff sweep (Metal GPU, n=5) · x86 mean of 5 trials @ ctx=256
+        Pixel 6a @ ctx=256 — cliff\_sweep (Q2\_K, Q3\_K\_M, Q4\_K\_S, Q6\_K, Q8\_0) · standard\_sweep (Q4\_K\_M, Q5\_K\_M — thermal burst artifact excluded) · M4 Mac Metal @ ctx=1024 canonical cliff sweep (n=5) · M4 Mac CPU — TPS sweep (n\_prompt=0, n\_gen=128, n=10, thermally settled) · x86 mean of 5 trials @ ctx=256
       </p>
     </div>
   </section>
