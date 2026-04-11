@@ -1015,6 +1015,16 @@ between Q2\_K and Q6\_K on both ISAs.
 
 \subsection{KV-Cache L2 Overflow and Cliff Threshold Prediction}
 \label{sec:kvcache_mechanism}
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{../figures/cache_hierarchy_diagram.pdf}
+\caption{Memory hierarchy for ARM Cortex-X1 (left) and Intel i5-1235U (right).
+The KV working set (red, L2 level) equals the per-thread KV footprint at the
+cliff threshold. The formula $\text{ctx}_{\text{cliff}} = L2/1024$ predicts
+512~tokens (ARM) and 1280~tokens (x86) from hardware specs alone.}
+\label{fig:cache_hierarchy}
+\end{figure}
+
 
 \textbf{KV-cache working set per attention layer.}
 Llama 3.2 3B uses Grouped Query Attention with $N_{kv}=8$ KV heads,
@@ -1100,6 +1110,17 @@ GPU backend (M4 Metal)      & Q4\_K\_S & 19.9 & 74\% & Metal reverses ordering \
 \bottomrule
 \end{tabular}
 \end{table}
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{../figures/deployment_flowchart.pdf}
+\caption{Deployment decision flowchart for GGUF variant selection.
+Follow the branches from START for your deployment constraints.
+Green boxes: recommended variants. Red box: caution --- use only with mitigation.
+All throughput values ARM Pixel~6a, 4 threads, ctx=256.}
+\label{fig:deployment_flowchart}
+\end{figure}
 
 \textbf{Context cliff guidance.}
 \textbf{Q2\_K and Q5\_K\_M} both exhibit cliff onset at ctx=512 ($-18$--$27\%$ single step,
@@ -1287,6 +1308,17 @@ Q8\_0    & 8.50 & 4.52 & 5 & 7.43 & 5 & 12.60 & 2 & \textbf{6.39}$^\dagger$ & \t
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{../figures/cross_platform_rank.pdf}
+\caption{Decode throughput (tok/s) across four platforms.
+Metal GPU (M4) reverses the CPU ordering: Q4\_K\_S becomes fastest (19.9~tok/s)
+while Q8\_0 and Q6\_K drop to last (6.39 and 7.02~tok/s) due to GPU dispatch overhead.
+The CPU ordering (Q2\_K fastest, Q6\_K slowest) is consistent across ARM and x86.}
+\label{fig:cross_platform_rank}
+\end{figure}
+
 
 \textbf{The x86 result is the most informative.}
 The ARM non-monotonic ordering---Q2\_K fastest (7.49~tok/s), Q6\_K slowest
