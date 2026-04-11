@@ -166,6 +166,7 @@ python scripts/eval/mac_humaneval_eval.py
 ```bash
 bash scripts/bench/x86_llama_tps.sh
 bash scripts/bench/x86_llama_cliff.sh
+bash scripts/bench/x86_qwen_tps.sh      # Qwen 2.5 1.5B cross-model validation
 python scripts/eval/x86_quality_eval.py
 ```
 
@@ -254,7 +255,8 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 │   │   ├── pixel_gsm8k.sh                 # GSM8K on Pixel
 │   │   ├── m4_llama_tps.sh                # M4 Metal TPS sweep
 │   │   ├── m4_llama_cliff.sh              # M4 Metal cliff sweep
-│   │   └── x86_llama_cliff.sh             # x86 cliff sweep
+│   │   ├── x86_llama_cliff.sh             # x86 cliff sweep
+│   │   └── x86_qwen_tps.sh                # x86 Qwen 2.5 1.5B TPS (cross-model validation)
 │   ├── eval/
 │   │   ├── quality_eval.py                # Pixel quality eval (7 benchmarks)
 │   │   ├── mac_gsm8k_eval.py              # Mac GSM8K eval (see Limitations)
@@ -437,4 +439,4 @@ Research project for DSC 291 (Efficient AI). Contact author for usage permission
 
 ---
 
-**Last Updated:** April 2, 2026 | **Paper:** 17 pages, 0 LaTeX errors | **Status:** All primary experiments complete; paper final draft ready; targeting MLSys 2026 / MobiSys 2027
+**Last Updated:** April 11, 2026 | **Paper:** 17 pages, 0 LaTeX errors | **Status:** All primary experiments complete; paper final draft ready; targeting MLSys 2026 / MobiSys 2027
