@@ -50,6 +50,13 @@ const DEVICE_COLORS = {
 
 const VARIANT_ORDER = ['Q2_K','Q3_K_M','Q4_K_S','Q4_K_M','Q5_K_M','Q6_K','Q8_0'];
 
+/**
+ * Variants confirmed cliff-prone (≥18% TPS drop at ctx=512 on ARM).
+ * Q2_K: −48% cliff at ctx=512 (n=10). Q5_K_M: −18% at ctx=512, −46% at ctx=2048 (n=15).
+ * Q6_K: susceptible to collapse at long ctx. Shown with ⚠ in cliff chart legend.
+ */
+const CLIFF_PRONE_VARIANTS = new Set(['Q2_K', 'Q5_K_M', 'Q6_K']);
+
 /** fmt: round to 2dp for display */
 const fmt = v => (v == null ? '—' : (+v).toFixed(2));
 
