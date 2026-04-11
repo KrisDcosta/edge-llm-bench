@@ -12,7 +12,8 @@
 | Issue | Detail | Impact |
 |-------|--------|--------|
 | **ARM ARC-Easy scoring bug** | `arc_easy:*` in quality_scores.json scores 100% for all variants — the parser finds the letter "D" in the echoed question body (e.g., "D) soft") instead of the model's actual output. Corrected values are in `arc_easy_fixed:*` keys. | Use `arc_easy_fixed` values (76–82%), NOT `arc_easy` (100%). Dashboard must be fixed if it uses the bugged key. |
-| **ARM cliff canonical_n10 has wrong Q4_K_M and Q5_K_M** | The `pixel_llama_cliff_filled_canonical_n10/` directory contains rerun data (2026-04-06) for Q4_K_M and Q5_K_M that shows suspicious baselines (Q4_K_M: 7.606 tok/s, vs TPS sweep: 4.781 tok/s). PROVENANCE.md says to use n=3 from 20260326 for these two variants instead. | ARM cliff for Q4_K_M is -6.6% (n=3), not -45.8% (bad rerun). ARM cliff for Q5_K_M is -25.8% (n=3). |
+| **ARM cliff Q4_K_M still n=3** | `pixel_llama_cliff_filled_canonical_n10/` Q4_K_M shows inflated baseline (7.606 tok/s); use n=3 from 20260326_132101 (−6.6%). | ARM cliff for Q4_K_M is −6.6% (n=3, cautious). |
+| **Q5_K_M cliff RESOLVED (2026-04-10)** | Clean isolated n=5 rerun confirms cliff onset at ctx=512 (−18%), total drop −46% (6.67→3.61 tok/s). Earlier n=3 estimate (−25.8%, cliff at ctx=1300) was an artifact of a cold-device baseline near the cliff floor. The canonical n=10 data (mean baseline 6.10) also shows ctx=512 cliff (−20%). DVFS effect: cliff-sweep 192-token prefill ramps CPU to turbo; TPS sweep 7-token prompt does not → different baselines (6.67 vs 3.75). | Q5_K_M cliff: ctx=512 onset (−18–20%), −42–46% total. Classify same as Q2_K for context sensitivity. |
 | **M4 Metal cliff only covers ctx=1024–2048** | The canonical M4 Metal cliff sweep starts at ctx=1024, not ctx=256. The TPS sweep covers ctx=256. This means we cannot compute a filled-context cliff percentage for Metal in the same way as ARM/x86. | Metal cliff table should note "1024-baseline" not "256-baseline". |
 | **Q3_K_M KV mitigation shows -11.1% cliff** | In the KV mitigation experiment, Q3_K_M default shows -11.1% (4.05→3.61), consistent with the canonical cliff. Q3_K_M is not "cliff-immune" — it's "cliff-attenuated" (<±11%). | Paper already corrected to ±11%. Verify dashboard uses "attenuated" not "immune". |
 | **Qwen TPS paper values wrong** | Paper said Q2_K=13.9 tok/s (n=20). Actual canonical data: Q2_K=16.056±0.670 (n=5). Paper ratio 1.92× → actual 2.23×. Paper now corrected. | Dashboard/README Qwen TPS must use 16.1 tok/s for Q2_K, ratio 2.23×. |
@@ -66,9 +67,11 @@
 **Sources (per PROVENANCE.md):**
 - Q2_K, Q3_K_M, Q4_K_S, Q8_0: `pixel_llama_cliff_filled_20260329_162354/` (n=10)
 - Q6_K: `pixel_llama_cliff_filled_20260330_212946/` (n=10, clean solo rerun)
-- Q4_K_M, Q5_K_M: `pixel_llama_cliff_filled_20260326_132101/` (n=3, original clean)
+- Q4_K_M: `pixel_llama_cliff_filled_20260326_132101/` (n=3, original clean)
+- Q5_K_M: `pixel_llama_cliff_filled_20260410_142752/` (n=5, isolated clean rerun 2026-04-10) ✅ RESOLVED
 
-⚠️ **Do NOT use `pixel_llama_cliff_filled_canonical_n10/` for Q4_K_M or Q5_K_M** — it contains a bad rerun with a 7.6 tok/s baseline for Q4_K_M (likely measurement artifact).
+⚠️ **Do NOT use `pixel_llama_cliff_filled_canonical_n10/` for Q4_K_M** — inflated baseline (7.6 tok/s).  
+⚠️ **Do NOT use n=3 (20260326) for Q5_K_M** — cold-device baseline masked ctx=512 cliff.
 
 | Variant | Base TPS (ctx=256) | End TPS (ctx=2048) | Total Drop | Worst Single Step | n |
 |---------|-------------------|--------------------|-----------|-----------------|---|
@@ -76,9 +79,26 @@
 | Q3_K_M | 4.065 | 3.622 | −10.9% | −3.9% at ctx=1024→1200 | 10 |
 | Q4_K_S | 4.984 | 4.470 | −10.3% | −6.4% at ctx=1024→1200 | 10 |
 | Q4_K_M | 5.573 | 5.207 | −6.6% | −5.2% at ctx=1800→2048 | 3 ⚠️ |
-| Q5_K_M | 4.463 | 3.313 | **−25.8%** | −7.3% at ctx=1200→1300 | 3 ⚠️ |
+| **Q5_K_M** | **6.670** | **3.610** | **−45.9%** | **−18.0% at ctx=256→512** | **5 ✅** |
 | Q6_K   | 3.549 | 3.172 | −10.6% | −6.0% at ctx=1024→1200 | 10 |
 | Q8_0   | 4.527 | 3.707 | −18.1% | −7.0% at ctx=768→1024 | 10 |
+
+**Q5_K_M full cliff profile (n=5, 2026-04-10):**
+| ctx | TPS | Δ from base |
+|-----|-----|------------|
+| 256 | 6.670 | 0.0% |
+| 512 | 5.470 | **−18.0%** ← cliff onset |
+| 768 | 4.930 | −26.1% |
+| 1024 | 4.590 | −31.2% |
+| 1200 | 4.060 | −39.2% |
+| 1300 | 3.970 | −40.5% |
+| 1400 | 3.920 | −41.2% |
+| 1500 | 3.760 | −43.6% |
+| 1600 | 3.750 | −43.8% |
+| 1800 | 3.640 | −45.5% |
+| 2048 | 3.610 | −45.9% |
+
+**Note on baseline vs TPS sweep:** The cliff baseline (6.67 tok/s) is higher than the fresh-context TPS sweep (3.75 tok/s). This is a DVFS effect: the 192-token filled prefill sustains CPU turbo frequency before decode starts; the 7-token TPS sweep prompt does not. Both measurements are valid for their respective use cases (peak sustained vs cold-start performance).
 
 **Q2_K full cliff profile:**
 | ctx | TPS | Δ from base |
@@ -99,8 +119,7 @@
 - Paper says Q2_K cliff = "−48%" ✅ (−47.8% from base, peak −52.5%)
 - Paper says Q3_K_M "no cliff (<±11%)" ✅ (−10.9% total)
 - Paper says Q4_K_M "-12% to ctx=2048" ❌ → actual is **−6.6%** (n=3, use cautiously)
-- Paper says Q5_K_M "stable" ❌ → actual is **−25.8%** (n=3, use cautiously; needs re-collection)
-- Q5_K_M cliff was contaminated in n=10 run; n=3 may not be definitive
+- Paper says Q5_K_M "stable" ❌ → actual: **cliff at ctx=512, −46% total** (n=5 clean run 2026-04-10) ✅ Paper corrected
 
 ---
 
@@ -354,7 +373,7 @@
 | Q2_K cliff = −48% | **−47.8%** total (peak −52.5% at ctx=1400) | ✅ Correct |
 | Q3_K_M cliff < ±11% | **−10.9%** total | ✅ Correct |
 | Q4_K_M cliff "−12% to ctx=2048" | **−6.6%** (n=3, from 20260326) | ⚠️ Paper overstates — actual is −6.6% (better than claimed) |
-| Q5_K_M stable | **−25.8%** (n=3) | ❌ Paper wrong — Q5_K_M has notable cliff; n=3, needs re-collection |
+| Q5_K_M cliff | **−45.9%**, cliff ctx=512 (n=5, 2026-04-10) | ✅ Paper corrected — cliff onset ctx=512, −18% single step |
 | x86 Q2_K cliff ≈ −50% | **−49.9%** | ✅ Correct |
 | x86 cliff onset ctx=1300–1400 | **ctx=1300→1400 worst step** | ✅ Correct |
 | M4 Metal Q4_K_S fastest = 19.88 tok/s | **19.879±2.050** | ✅ Correct |
@@ -413,7 +432,7 @@ Use these — NOT the cliff sweep ctx=256 values:
 ## Action Items Before Publishing Dashboard / Dataset
 
 1. **Fix dashboard ARC-Easy source** — ensure it uses the `arc_easy_fixed` key (76–82%), not `arc_easy` (100%)
-2. **Flag Q5_K_M ARM cliff as uncertain** — the −25.8% (n=3) needs a clean n≥5 rerun; don't publish as definitive
+2. **Q5_K_M ARM cliff RESOLVED** — n=5 isolated run (2026-04-10) confirms cliff ctx=512, −46%. Update dashboard to show Q5_K_M as "cliff-prone" (same category as Q2_K), not "moderate". Push `results/pixel_llama_cliff_filled_20260410_142752/` JSONL to repo.
 3. **Fix M4 Metal cliff description** — not "flat ±2%"; correct is "5 variants ±0.6–0.8%; Q2_K +8.5% improvement" (paper already corrected)
 4. **Fix Qwen TPS values** — Q2_K=16.1 tok/s (not 13.9), ratio=2.23× (not 1.92×) (paper already corrected)
 5. **Fix Qwen cliff table** — must use canonical run 20260330_235410, not contaminated 004954 (paper already corrected)

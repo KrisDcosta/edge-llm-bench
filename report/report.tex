@@ -503,7 +503,7 @@ F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & 68.0  & [58--76] & \
   \caption{Decode throughput (tokens/s) under filled-context conditions across KV-cache window sizes
   for all seven variants. The ordering is non-monotonic with bit-width and context-sensitivity
   is also non-monotonic: Q2\_K is fastest at ctx=256 but loses $-48\%$ by ctx=2048 (cliff at ctx=512);
-  Q3\_K\_M and Q4\_K\_M remain stable ($<\pm11\%$); Q5\_K\_M ($-26\%$) and Q8\_0 ($-18\%$) show moderate degradation.}
+  Q3\_K\_M and Q4\_K\_M remain stable ($<\pm11\%$); Q5\_K\_M ($-46\%$, cliff ctx=512) and Q8\_0 ($-18\%$) show additional degradation.}
   \label{fig:decode_tps}
 \end{figure}
 
@@ -567,9 +567,19 @@ By contrast, \textbf{Q3\_K\_M is the most context-stable variant}: throughput
 holds near $4.07$~tok/s from ctx=256 to ctx=1024, declining to $3.62$~tok/s
 at ctx=2048 ($-11\%$ over an $8{\times}$ context increase).
 
-Mid-precision variants exhibit moderate degradation: Q5\_K\_M loses $-26\%$
-(4.46 to 3.31~tok/s, cliff at ctx=1300), Q8\_0 loses $-18\%$ (4.53 to 3.71~tok/s),
-and Q4\_K\_S loses $-10\%$ (cliff at ctx=1200).
+Mid-precision variants split into two groups.
+\textbf{Q5\_K\_M shares Q2\_K's early cliff}: throughput drops $-46\%$
+(6.67 to 3.61~tok/s), with onset at ctx=512 ($-18\%$ single step)---matching
+the ARM L2 threshold.
+An earlier n=3 estimate ($-26\%$, cliff at ctx=1300) was an artifact of a
+cold-device baseline that fell near the cliff floor; the canonical n=5 isolated run
+(2026-04-10) and n=10 rerun data are consistent at $-18$--$20\%$ at ctx=512.
+Note: the cliff-sweep baseline (6.67~tok/s) exceeds the fresh-context TPS value
+(3.75~tok/s, Table~\ref{tab:tps_results}); the difference reflects DVFS behavior---
+the 192-token filled prefill sustains CPU turbo frequency before decode starts,
+whereas the TPS sweep's 7-token prompt does not.
+Q8\_0 loses $-18\%$ (4.53 to 3.71~tok/s, cliff at ctx=1300) and Q4\_K\_S $-10\%$
+(cliff at ctx=1200).
 Q6\_K shows mild degradation of $-11\%$ (3.55 to 3.17~tok/s),
 and Q4\_K\_M loses only $-6\%$ (5.57 to 5.21~tok/s)---both essentially stable.
 
@@ -577,8 +587,9 @@ and Q4\_K\_M loses only $-6\%$ (5.57 to 5.21~tok/s)---both essentially stable.
 \centering
 \caption{Filled-context decode TPS (mean) across context window (Pixel~6a ARM).
   Q2\_K/Q3\_K\_M/Q4\_K\_S/Q6\_K/Q8\_0: n=10 trials/cell;
-  Q4\_K\_M/Q5\_K\_M: n=3 thermally-stable trials (n=10 re-run available but ctx=256 shows
-  cold-start variance; steady-state values from n=3 run used for cliff characterization).
+  Q4\_K\_M: n=3 (thermally stable; n=10 rerun shows inflated ctx=256 baseline).
+  Q5\_K\_M: n=5 isolated clean run (2026-04-10); ctx=256 baseline reflects warm-CPU
+  state after 192-token filled prefill (higher than fresh-context TPS sweep---see text).
   \textbf{Bold} = $>$10\% decline from ctx=256 baseline.}
 \label{tab:ctx2048}
 \setlength{\tabcolsep}{3pt}
@@ -591,7 +602,7 @@ Q2\_K    & 7.07 & 5.18 & 3.95 & \textbf{3.69} & $-48\%$ & ctx=512 \\
 Q3\_K\_M & 4.06 & 4.09 & 4.07 & 3.62 & $-11\%$ & none \\
 Q4\_K\_S & 4.98 & 4.95 & 4.96 & \textbf{4.47} & $-10\%$ & ctx=1200 \\
 Q4\_K\_M & 5.57 & 5.42 & 5.39 & 5.21 & $-6\%$ & none \\
-Q5\_K\_M & 4.46 & 4.35 & 4.05 & \textbf{3.31} & $-26\%$ & ctx=1300 \\
+Q5\_K\_M & 6.67 & \textbf{5.47} & \textbf{4.59} & \textbf{3.61} & $-46\%$ & ctx=512 \\
 Q6\_K    & 3.55 & 3.50 & 3.46 & 3.17 & $-11\%$ & none \\
 Q8\_0    & 4.53 & 4.50 & 4.44 & \textbf{3.71} & $-18\%$ & ctx=1300 \\
 \bottomrule
@@ -612,7 +623,8 @@ fill level, explaining its anomalous stability.
 \textbf{Recommendation}: for deployments requiring ctx$\geq$512, prefer
 Q3\_K\_M (${\approx}4.0$~tok/s, $-11\%$ to ctx=2048) or Q4\_K\_M (${\approx}5.2$~tok/s,
 $-7\%$) over Q2\_K, whose $-48\%$ cliff begins at ctx=512.
-Q5\_K\_M should be limited to ctx$\leq$1200 (cliff $-26\%$ at ctx=1300).
+Q5\_K\_M behaves like Q2\_K (cliff at ctx=512, $-46\%$ total): avoid for ctx$\geq$512
+unless paired with KV Q8\_0 quantization.
 Q8\_0 offers good mid-context stability ($-18\%$ to ctx=2048).
 
 Note: Flash Attention (\texttt{-fa} flag) was tested as a potential mitigation
@@ -1092,8 +1104,9 @@ Crossover benefit appears at ctx$\approx$1400 for Q2\_K; for Q4\_K\_M the crosso
 is ctx$\approx$512 with negligible short-context cost ($-0.6\%$).
 \textbf{Q2\_K is the worst choice for ctx$\geq$512}: throughput degrades
 $-48\%$ by ctx=2048, with the cliff beginning as early as ctx=512 (L2 overflow onset).
-Q5\_K\_M ($-26\%$) and Q8\_0 ($-18\%$) are medium-context variants;
-limit them to ctx$\leq$1024 for best performance.
+Q5\_K\_M ($-46\%$, cliff ctx=512) behaves like Q2\_K and should be avoided
+for ctx$\geq$512; Q8\_0 ($-18\%$, cliff ctx=1300) is the safer mid-precision
+choice for extended context.
 Q6\_K shows mild degradation ($-11\%$) and Q4\_K\_S moderate ($-15\%$).
 
 \textbf{Use KV-cache Q8\_0 quantization for long-context deployments.}
