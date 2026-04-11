@@ -254,16 +254,17 @@ function renderCliffChart() {
     const points = curves[variant] || [];
     if (!points.length) return;
 
-    const color = vc(variant);
-    const isHL  = State.highlighted === variant;
+    const color    = vc(variant);
+    const isHL     = State.highlighted === variant;
+    const isCliff  = CLIFF_PRONE_VARIANTS.has(variant);
 
     datasets.push({
-      label:           variant,
+      label:           isCliff ? `⚠ ${variant}` : variant,
       data:            points.map(p => ({ x: p.context, y: p.mean })),
       borderColor:     color.line,
       backgroundColor: color.fill,
-      borderWidth:     isHL ? 3 : 1.8,
-      pointRadius:     isHL ? 5 : 3,
+      borderWidth:     isHL ? 3 : (isCliff ? 2.4 : 1.8),
+      pointRadius:     isHL ? 5 : (isCliff ? 4 : 3),
       pointHoverRadius: 6,
       tension:         0.3,
       fill:            false,
@@ -376,9 +377,10 @@ function renderCliffChart() {
 function highlightCliffChart(variant) {
   if (!_cliffChart) return;
   _cliffChart.data.datasets.forEach(ds => {
+    const isCliff = CLIFF_PRONE_VARIANTS.has(ds._variant);
     if (!variant) {
-      ds.borderWidth  = 1.8;
-      ds.pointRadius  = 3;
+      ds.borderWidth  = isCliff ? 2.4 : 1.8;
+      ds.pointRadius  = isCliff ? 4 : 3;
       ds.borderDash   = ds.label.includes('kv=') ? [6, 3] : [];
     } else if (ds._variant === variant) {
       ds.borderWidth  = 3.5;

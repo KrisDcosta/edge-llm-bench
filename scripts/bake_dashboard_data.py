@@ -134,6 +134,17 @@ m4_cpu_cliff = m4_llama[
     (m4_llama["ngl"] == 0)
 ]
 
+# M4 CPU TPS sweep (ngl=0, 4 threads, 2026-04-06 run) — used for bar chart baselines
+# 7 rows: pure decode (n_prompt=0, n_gen=128), n_trials=10 pre-aggregated, context_len=0
+# These are thermally settled reference measurements; cliff_sweep ctx=256 is inflated by
+# CPU boost state (Q4_K_S: 25.19 cliff vs 13.16 TPS sweep).
+m4_cpu_tps_sweep = m4_llama[
+    (m4_llama["experiment_type"] == "standard_sweep") &
+    (m4_llama["backend"] == "CPU") &
+    (m4_llama["ngl"] == 0) &
+    (m4_llama["context_len"] == 0)
+]
+
 # M4 canonical cliff: filter to the single clean benchmark run from 2026-03-23.
 # The parquet contains multiple Q2_K runs (n=28 per ctx) and NaN-trial warmup rows that
 # corrupt per-context averages (e.g. Q2_K mean=15.0 instead of correct 9.4 at ctx=1024,
@@ -191,7 +202,7 @@ def bake_tps_by_variant():
                 "_all": "Metal GPU, filled-context cliff_sweep at ctx=1024 (canonical run 2026-03-23, n=5)",
             },
             "M4Mac_CPU": {
-                "_all": "CPU (ngl=0, 4 threads), filled-context cliff_sweep at ctx=256 (2026-04-09, n_trials=5 pre-aggregated). Q3_K_M/Q4_K_S/Q4_K_M ctx=256 baseline may be inflated by CPU boost state.",
+                "_all": "CPU (ngl=0, 4 threads), TPS sweep (n_prompt=0, n_gen=128, n=10, 2026-04-06). Thermally settled reference. Cliff sweep ctx=256 excluded — inflated by CPU boost state.",
             },
             "x86": {
                 "_all": "cliff_sweep ctx=256, mean of n=5 trials",
@@ -236,11 +247,12 @@ def bake_tps_by_variant():
         # Qwen M4 cliff data is all NaN-trial contaminated rows — return empty
         model_data["M4Mac"] = m4_tps
 
-        # M4Mac CPU @ ctx=256 (ngl=0, 4 threads) — Llama only
+        # M4Mac CPU — TPS sweep (ngl=0, 4 threads, n=10, 2026-04-06) — Llama only
+        # Uses standard_sweep rows (context_len=0, pure decode) as thermally settled baseline.
+        # cliff_sweep ctx=256 excluded: inflated by CPU boost state (Q4_K_S: 25.19 vs 13.16).
         m4_cpu_tps = {}
         if model_name == MODEL_LLAMA:
-            m_cpu = m4_cpu_cliff[m4_cpu_cliff["context_len"] == 256]
-            for v, grp in m_cpu.groupby("variant"):
+            for v, grp in m4_cpu_tps_sweep.groupby("variant"):
                 m4_cpu_tps[v] = agg(grp["decode_tps"])
         model_data["M4Mac_CPU"] = m4_cpu_tps
 
