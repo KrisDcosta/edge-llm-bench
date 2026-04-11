@@ -500,7 +500,7 @@ F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & 68.0  & [58--76] & \
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{../figures/fig2_decode_tps_vs_context.png}
+  \includegraphics[width=\columnwidth]{../figures/fig2_decode_tps_vs_context.pdf}
   \caption{Decode throughput (tokens/s) under filled-context conditions across KV-cache window sizes
   for all seven variants. The ordering is non-monotonic with bit-width and context-sensitivity
   is also non-monotonic: Q2\_K is fastest at ctx=256 but loses $-48\%$ by ctx=2048 (cliff at ctx=512);
@@ -536,7 +536,7 @@ headroom in a 6~GB device.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{../figures/fig_cliff_3plat_sel.png}
+  \includegraphics[width=\textwidth]{../figures/fig_cliff_3plat_sel.pdf}
   \caption{Decode throughput (tok/s) vs.\ context window under \emph{filled-context}
   conditions (prompt $\approx N{-}64$ tokens; error bars = SEM; 4 representative variants).
   \textbf{(a) ARM Pixel~6a} (512~KB L2 per core): Q2\_K collapses $-48\%$ (cliff at ctx=512,
@@ -636,7 +636,7 @@ binary build used in this study.  Evaluating FA-enabled builds is left for futur
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{../figures/fig7_prefill_vs_decode_fraction.png}
+  \includegraphics[width=\columnwidth]{../figures/fig7_prefill_vs_decode_fraction.pdf}
   \caption{Fraction of total inference time consumed by prefill vs. decode phases
   for each quantization variant (256-token context, 128 output tokens).}
   \label{fig:prefill_decode_fraction}
@@ -658,7 +658,7 @@ benefit compared to improvements in decode throughput.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{../figures/fig6_pareto_efficiency_quality.png}
+  \includegraphics[width=\columnwidth]{../figures/fig6_pareto_efficiency_quality.pdf}
   \caption{Efficiency--accuracy Pareto frontier: BoolQ accuracy (\%)
   vs.\ decode throughput (tokens/s) for all seven variants (including F16).
   Dotted iso-efficiency contours show equal TPS$\times$accuracy product (E).
@@ -671,7 +671,7 @@ benefit compared to improvements in decode throughput.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{../figures/fig9_model_size_vs_decode_tps.png}
+  \includegraphics[width=\columnwidth]{../figures/fig9_model_size_vs_decode_tps.pdf}
   \caption{Model size (GB) vs. decode throughput (tokens/s). Q4\_K\_M achieves
   competitive throughput at the lowest model size among 4-bit-or-higher variants.}
   \label{fig:size_vs_tps}
@@ -831,7 +831,7 @@ Q8\_0    & 56 & 80 & 43 & 47 & 68 & 58 \\
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{../figures/fig_ppl_vs_accuracy.png}
+  \includegraphics[width=\textwidth]{../figures/fig_ppl_vs_accuracy.pdf}
   \caption{WikiText-2 perplexity (x-axis, lower = better) vs.\ task accuracy (\%) for
   BoolQ, MMLU, and HellaSwag (left to right). Each point is one of 7 variants;
   color-coded as in Table~\ref{tab:crossdevice}.
@@ -861,7 +861,7 @@ practical task performance. Task-specific evaluation remains essential for varia
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{../figures/fig4_peak_memory_vs_quant.png}
+  \includegraphics[width=\columnwidth]{../figures/fig4_peak_memory_vs_quant.pdf}
   \caption{Peak working memory footprint by quantization variant, measured as the
   MemAvailable delta in \texttt{/proc/meminfo} before and after inference. Values
   reflect working memory (KV-cache + activations); the model weights are
@@ -871,7 +871,7 @@ practical task performance. Task-specific evaluation remains essential for varia
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{../figures/fig8_latency_distribution.png}
+  \includegraphics[width=\columnwidth]{../figures/fig8_latency_distribution.pdf}
   \caption{Distribution of end-to-end latency across all trials for each quantization
   variant. Q3\_K\_M and Q6\_K exhibit notably tighter distributions than Q2\_K and Q8\_0.}
   \label{fig:latency_dist}
@@ -1369,7 +1369,7 @@ Q8\_0    & 43 & \textbf{55} & 47 & 47 & 68 & 63 & 58 & 46 & 56 & 51 & 80 & 71 \\
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{../figures/fig_xplat_quality_4bench.png}
+  \includegraphics[width=\textwidth]{../figures/fig_xplat_quality_4bench.pdf}
   \caption{Cross-platform quality accuracy (\%) for all 7 variants on four benchmarks.
   ARM (Pixel~6a, blue) vs.\ x86 (Intel i5-1235U, red). Error bars = 95\% Wilson CI ($n{=}100$).
   Dashed line (HellaSwag/MMLU) = 25\% 4-choice random baseline.
@@ -2619,7 +2619,7 @@ F16      & 6.4 & $0.15 \pm 0.00$ & 1.86  & 14.53 & 134.92 & 68.0  & [58--76] & \
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{../figures/fig2_decode_tps_vs_context.png}
+  \includegraphics[width=\columnwidth]{../figures/fig2_decode_tps_vs_context.pdf}
   \caption{Decode throughput (tokens/s) under filled-context conditions across KV-cache window sizes
   for all seven variants. The ordering is non-monotonic with bit-width and context-sensitivity
   is also non-monotonic: Q2\_K is fastest at ctx=256 but loses $-48\%$ by ctx=2048 (cliff at ctx=512);
@@ -2655,7 +2655,7 @@ headroom in a 6~GB device.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{../figures/fig_cliff_3plat_sel.png}
+  \includegraphics[width=\textwidth]{../figures/fig_cliff_3plat_sel.pdf}
   \caption{Decode throughput (tok/s) vs.\ context window under \emph{filled-context}
   conditions (prompt $\approx N{-}64$ tokens; error bars = SEM; 4 representative variants).
   \textbf{(a) ARM Pixel~6a} (512~KB L2 per core): Q2\_K collapses $-48\%$ (cliff at ctx=512,
@@ -2743,7 +2743,7 @@ binary build used in this study.  Evaluating FA-enabled builds is left for futur
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{../figures/fig7_prefill_vs_decode_fraction.png}
+  \includegraphics[width=\columnwidth]{../figures/fig7_prefill_vs_decode_fraction.pdf}
   \caption{Fraction of total inference time consumed by prefill vs. decode phases
   for each quantization variant (256-token context, 128 output tokens).}
   \label{fig:prefill_decode_fraction}
@@ -2765,7 +2765,7 @@ benefit compared to improvements in decode throughput.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{../figures/fig6_pareto_efficiency_quality.png}
+  \includegraphics[width=\columnwidth]{../figures/fig6_pareto_efficiency_quality.pdf}
   \caption{Efficiency--accuracy Pareto frontier: BoolQ accuracy (\%)
   vs.\ decode throughput (tokens/s) for all seven variants (including F16).
   Dotted iso-efficiency contours show equal TPS$\times$accuracy product (E).
@@ -2778,7 +2778,7 @@ benefit compared to improvements in decode throughput.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{../figures/fig9_model_size_vs_decode_tps.png}
+  \includegraphics[width=\columnwidth]{../figures/fig9_model_size_vs_decode_tps.pdf}
   \caption{Model size (GB) vs. decode throughput (tokens/s). Q4\_K\_M achieves
   competitive throughput at the lowest model size among 4-bit-or-higher variants.}
   \label{fig:size_vs_tps}
@@ -2924,7 +2924,7 @@ Q8\_0    & 56 & 80 & 43 & 47 & 68 & 58 \\
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{../figures/fig_ppl_vs_accuracy.png}
+  \includegraphics[width=\textwidth]{../figures/fig_ppl_vs_accuracy.pdf}
   \caption{WikiText-2 perplexity (x-axis, lower = better) vs.\ task accuracy (\%) for
   BoolQ, MMLU, and HellaSwag (left to right). Each point is one of 7 variants;
   color-coded as in Table~\ref{tab:crossdevice}.
@@ -2954,7 +2954,7 @@ practical task performance. Task-specific evaluation remains essential for varia
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{../figures/fig4_peak_memory_vs_quant.png}
+  \includegraphics[width=\columnwidth]{../figures/fig4_peak_memory_vs_quant.pdf}
   \caption{Peak working memory footprint by quantization variant, measured as the
   MemAvailable delta in \texttt{/proc/meminfo} before and after inference. Values
   reflect working memory (KV-cache + activations); the model weights are
@@ -2964,7 +2964,7 @@ practical task performance. Task-specific evaluation remains essential for varia
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{../figures/fig8_latency_distribution.png}
+  \includegraphics[width=\columnwidth]{../figures/fig8_latency_distribution.pdf}
   \caption{Distribution of end-to-end latency across all trials for each quantization
   variant. Q3\_K\_M and Q6\_K exhibit notably tighter distributions than Q2\_K and Q8\_0.}
   \label{fig:latency_dist}
@@ -3452,7 +3452,7 @@ Q8\_0    & 43 & \textbf{55} & 47 & 47 & 68 & 63 & 58 & 46 & 56 & 51 & 80 & 71 \\
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{../figures/fig_xplat_quality_4bench.png}
+  \includegraphics[width=\textwidth]{../figures/fig_xplat_quality_4bench.pdf}
   \caption{Cross-platform quality accuracy (\%) for all 7 variants on four benchmarks.
   ARM (Pixel~6a, blue) vs.\ x86 (Intel i5-1235U, red). Error bars = 95\% Wilson CI ($n{=}100$).
   Dashed line (HellaSwag/MMLU) = 25\% 4-choice random baseline.
