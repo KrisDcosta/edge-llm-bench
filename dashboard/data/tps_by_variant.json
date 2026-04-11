@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "devices": [
     "Pixel6a",
@@ -279,4 +280,287 @@
       "_all": "cliff_sweep ctx=256, mean of n=5 trials"
     }
   }
+=======
+{
+  "devices": [
+    "Pixel6a",
+    "M4Mac",
+    "M4Mac_CPU",
+    "x86"
+  ],
+  "variants": [
+    "Q2_K",
+    "Q3_K_M",
+    "Q4_K_S",
+    "Q4_K_M",
+    "Q5_K_M",
+    "Q6_K",
+    "Q8_0"
+  ],
+  "data": {
+    "Llama": {
+      "Pixel6a": {
+        "Q2_K": {
+          "mean": 7.066,
+          "std": 0.6943,
+          "min": 6.38,
+          "max": 8.31,
+          "n": 10
+        },
+        "Q3_K_M": {
+          "mean": 4.065,
+          "std": 0.0772,
+          "min": 4.02,
+          "max": 4.28,
+          "n": 10
+        },
+        "Q4_K_S": {
+          "mean": 4.984,
+          "std": 0.1206,
+          "min": 4.81,
+          "max": 5.16,
+          "n": 10
+        },
+        "Q4_K_M": {
+          "mean": 4.854,
+          "std": 0.8862,
+          "min": 2.74,
+          "max": 7.39,
+          "n": 104
+        },
+        "Q5_K_M": {
+          "mean": 4.2892,
+          "std": 0.0452,
+          "min": 4.24,
+          "max": 4.39,
+          "n": 12
+        },
+        "Q6_K": {
+          "mean": 3.549,
+          "std": 0.1836,
+          "min": 3.43,
+          "max": 4.06,
+          "n": 10
+        },
+        "Q8_0": {
+          "mean": 4.527,
+          "std": 0.347,
+          "min": 3.94,
+          "max": 4.91,
+          "n": 10
+        }
+      },
+      "M4Mac": {
+        "Q2_K": {
+          "mean": 9.4,
+          "std": 0.0707,
+          "min": 9.3,
+          "max": 9.5,
+          "n": 5
+        },
+        "Q3_K_M": {
+          "mean": 8.7,
+          "std": 0.0707,
+          "min": 8.6,
+          "max": 8.8,
+          "n": 5
+        },
+        "Q4_K_M": {
+          "mean": 9.9,
+          "std": 0.0,
+          "min": 9.9,
+          "max": 9.9,
+          "n": 5
+        },
+        "Q4_K_S": {
+          "mean": 10.22,
+          "std": 0.0447,
+          "min": 10.2,
+          "max": 10.3,
+          "n": 5
+        },
+        "Q5_K_M": {
+          "mean": 7.24,
+          "std": 0.0548,
+          "min": 7.2,
+          "max": 7.3,
+          "n": 5
+        },
+        "Q6_K": {
+          "mean": 7.9,
+          "std": 0.0,
+          "min": 7.9,
+          "max": 7.9,
+          "n": 5
+        },
+        "Q8_0": {
+          "mean": 7.14,
+          "std": 0.0548,
+          "min": 7.1,
+          "max": 7.2,
+          "n": 5
+        }
+      },
+      "M4Mac_CPU": {
+        "Q2_K": {
+          "mean": 13.3789,
+          "std": null,
+          "min": 13.3789,
+          "max": 13.3789,
+          "n": 1
+        },
+        "Q3_K_M": {
+          "mean": 23.219,
+          "std": null,
+          "min": 23.219,
+          "max": 23.219,
+          "n": 1
+        },
+        "Q4_K_M": {
+          "mean": 24.7894,
+          "std": null,
+          "min": 24.7894,
+          "max": 24.7894,
+          "n": 1
+        },
+        "Q4_K_S": {
+          "mean": 25.1888,
+          "std": null,
+          "min": 25.1888,
+          "max": 25.1888,
+          "n": 1
+        },
+        "Q5_K_M": {
+          "mean": 16.3292,
+          "std": null,
+          "min": 16.3292,
+          "max": 16.3292,
+          "n": 1
+        },
+        "Q6_K": {
+          "mean": 14.0615,
+          "std": null,
+          "min": 14.0615,
+          "max": 14.0615,
+          "n": 1
+        },
+        "Q8_0": {
+          "mean": 17.37,
+          "std": null,
+          "min": 17.37,
+          "max": 17.37,
+          "n": 1
+        }
+      },
+      "x86": {
+        "Q2_K": {
+          "mean": 17.572,
+          "std": 0.8941,
+          "min": 16.47,
+          "max": 18.93,
+          "n": 5
+        },
+        "Q3_K_M": {
+          "mean": 9.006,
+          "std": 0.1542,
+          "min": 8.82,
+          "max": 9.18,
+          "n": 5
+        },
+        "Q4_K_M": {
+          "mean": 10.126,
+          "std": 0.6435,
+          "min": 9.28,
+          "max": 10.77,
+          "n": 5
+        },
+        "Q4_K_S": {
+          "mean": 10.936,
+          "std": 0.1988,
+          "min": 10.78,
+          "max": 11.26,
+          "n": 5
+        },
+        "Q5_K_M": {
+          "mean": 9.17,
+          "std": 0.0927,
+          "min": 9.04,
+          "max": 9.26,
+          "n": 5
+        },
+        "Q6_K": {
+          "mean": 8.506,
+          "std": 0.1207,
+          "min": 8.38,
+          "max": 8.68,
+          "n": 5
+        },
+        "Q8_0": {
+          "mean": 7.972,
+          "std": 0.1117,
+          "min": 7.79,
+          "max": 8.06,
+          "n": 5
+        }
+      }
+    },
+    "Qwen": {
+      "Pixel6a": {
+        "Q2_K": {
+          "mean": 11.0447,
+          "std": 5.0956,
+          "min": 3.7,
+          "max": 17.09,
+          "n": 15
+        },
+        "Q3_K_M": {
+          "mean": 7.928,
+          "std": 2.1798,
+          "min": 4.24,
+          "max": 10.96,
+          "n": 15
+        },
+        "Q4_K_S": {
+          "mean": 9.018,
+          "std": 2.556,
+          "min": 2.44,
+          "max": 11.57,
+          "n": 15
+        },
+        "Q6_K": {
+          "mean": 6.3287,
+          "std": 1.4002,
+          "min": 3.61,
+          "max": 7.49,
+          "n": 15
+        },
+        "Q8_0": {
+          "mean": 9.012,
+          "std": 1.8463,
+          "min": 5.58,
+          "max": 11.0,
+          "n": 15
+        }
+      },
+      "M4Mac": {},
+      "M4Mac_CPU": {},
+      "x86": {}
+    }
+  },
+  "notes": {
+    "Pixel6a": {
+      "Q4_K_M": "standard_sweep ctx=256 (cliff_sweep baseline inflated by thermal warmup burst)",
+      "Q5_K_M": "standard_sweep ctx=256 (cliff_sweep baseline inflated by thermal warmup burst)"
+    },
+    "M4Mac": {
+      "_all": "Metal GPU, filled-context cliff_sweep at ctx=1024 (canonical run 2026-03-23, n=5)"
+    },
+    "M4Mac_CPU": {
+      "_all": "CPU (ngl=0, 4 threads), filled-context cliff_sweep at ctx=256 (2026-04-09, n_trials=5 pre-aggregated). Q3_K_M/Q4_K_S/Q4_K_M ctx=256 baseline may be inflated by CPU boost state."
+    },
+    "x86": {
+      "_all": "cliff_sweep ctx=256, mean of n=5 trials"
+    }
+  }
+>>>>>>> 6e8752a (Updated Qwen 2.5 Benchmark on x86 Intel i5 device)
 }
