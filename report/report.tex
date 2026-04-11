@@ -699,11 +699,14 @@ Confident individual claims are therefore inappropriate; we instead report
   \item Q8\_0 offers no accuracy advantage over Q4\_K\_M despite 70\% more weight bits.
 \end{itemize}
 ARC-Easy accuracy ranges 76--82\% across all seven variants
-(Q4\_K\_M highest at 82\%, Q2\_K lowest at 76\%, all verified with the
-current extracted-letter evaluation script).
-The 6-point spread is narrower than BoolQ's 9-point spread, confirming
-that BoolQ---which requires cross-sentence reasoning---is the more
-informative quality discriminator among variants at this model scale.
+(verified with the corrected extracted-letter evaluation script;
+\texttt{arc\_easy\_fixed} key).
+The 6-point spread is within the Wilson 95\% CI width ($\pm$8pp at $n{=}100$),
+meaning no individual ranking is reliable; the range confirms no variant falls
+catastrophically below chance.
+ARC-Easy's narrow spread makes it the least discriminative benchmark tested:
+BoolQ's 9-point range and HellaSwag's 26-point collapse are more informative
+discriminators at this model scale.
 
 \textbf{Instruction-following collapse at extreme quantization.}
 HellaSwag---a four-choice sentence completion task requiring selection of a lettered
@@ -725,37 +728,40 @@ choices (58/100), achieving 43\%.
 
 This collapse does not appear on BoolQ (yes/no format, Q2\_K scores 69\%)
 or ARC-Easy (76\%), confirming the failure is \emph{prompt-format-specific}:
-at this compression level, the model retains factual recall and binary judgment
-but conflates non-binary multi-choice prompts with binary question formats.
-Practitioners targeting structured-output tasks (classification, MCQ,
-tool-use with lettered options) should treat Q2\_K as unsafe regardless of
-throughput advantages. The $z$-test for Q2\_K (19\%) vs.\ the next-lowest
-Q4\_K\_S (39\%) gives $z{=}3.13$, $p{<}0.002$---the only statistically
-significant pairwise quality result in this study.
+at 2.63~bpw, the model retains factual recall and binary judgment but loses
+the instruction-following capacity required to map multi-choice prompts to
+a lettered response slot.
+\textbf{Cross-platform validation:} the same collapse is observed on x86 (Q2\_K
+HellaSwag=22\%, vs.\ 39--55\% for all other variants), confirming this is a
+model-level failure, not a platform or runtime artifact.
+The $z$-test for Q2\_K (19\%) vs.\ the next-lowest Q4\_K\_S (39\%) gives
+$z{=}3.12$, $p{<}0.002$---the only statistically significant pairwise quality
+result on a non-HellaSwag benchmark in this study; HellaSwag Q2\_K vs.\
+all other variants is similarly significant ($z{>}3.0$, $p{<}0.003$).
+\textbf{Production risk:} any application requiring structured output with
+lettered or numbered options---MCQ evaluation, classification with label
+tokens, tool-call routing, function-call dispatch---should treat Q2\_K as
+unsafe at this model scale, irrespective of throughput advantage.
 
 Figure~\ref{fig:pareto} plots the Pareto frontier for all variants.
-Q4\_K\_S (74\%, 5.01~tok/s) achieves the highest BoolQ accuracy of any variant,
+Q4\_K\_S (74\%, 5.01~tok/s) is \emph{directionally} the highest BoolQ scorer
+(no pairwise comparison reaches significance at $n{=}100$; see z-test above),
 while Q2\_K (69\%, 7.49~tok/s) leads on raw decode throughput.
 Q4\_K\_M (72\%, 4.78~tok/s) provides a stable middle ground with the lowest
 context-length sensitivity.
-Q6\_K is strictly dominated on every metric: slower than Q4\_K\_M,
-less accurate than Q4\_K\_S, and no more context-stable.
-Notably, \textbf{Q8\_0 is no longer Pareto-optimal under BoolQ}: it scores 68\%
-accuracy at 4.52~tokens/s, dominated by Q4\_K\_M which achieves both higher
-accuracy \emph{and} higher throughput. Q3\_K\_M (69\%, 4.68~tokens/s) is also
-dominated by Q4\_K\_M on BoolQ vs.\ throughput, though Q3\_K\_M leads on
-context stability and TruthfulQA (see below). \textbf{Q6\_K (65\%, 3.53~tokens/s) is
-strictly dominated on both dimensions}---simultaneously the lowest-scoring and
-slowest practical variant.
+Notably, \textbf{Q8\_0 is not Pareto-optimal under BoolQ}: it scores 68\%
+accuracy at 4.52~tok/s, directionally dominated by Q4\_K\_M on both axes.
+\textbf{Q6\_K (65\%, 3.53~tok/s) is strictly dominated on both dimensions}---the
+lowest-scoring and slowest practical variant---a result robust to CI overlap since
+it is non-dominant regardless of where within its CI the true value falls.
 
-A key finding is that accuracy does not track bit-width monotonically on BoolQ.
-Q4\_K\_S (4-bit, small) achieves the \emph{highest} accuracy at 74\%;
-Q4\_K\_M (4-bit, medium) follows at 72\%; Q6\_K (6-bit)
-scores \emph{lowest} at 65\%---fewer correct answers than any other variant despite
-having more bits per weight than either 4-bit variant.
-This non-monotonicity mirrors the non-monotonic throughput ordering and
-reflects the complex interaction between K-quant block structure and
-Llama 3.2's layer-specific weight sensitivity.
+The accuracy ordering on BoolQ is \emph{non-monotonic with bit-width}.
+The 4-bit cluster (Q4\_K\_S, Q4\_K\_M: 72--74\%) is directionally above the
+6-bit variant (Q6\_K: 65\%) with consistent margins across BoolQ and ARC-Easy,
+even though no single pairwise comparison is individually significant.
+This mirrors the non-monotonic throughput ordering and reflects the complex
+interaction between K-quant block structure and Llama~3.2's layer-specific
+weight sensitivity.
 
 \textbf{MMLU accuracy.}
 A 100-question MMLU evaluation was conducted across all quantized variants.
@@ -775,20 +781,28 @@ seven variants, measuring factual consistency and resistance to common misconcep
 Results: Q3\_K\_M=68\%, Q5\_K\_M=65\%, Q4\_K\_M=60\%, Q6\_K=60\%, Q8\_0=58\%,
 Q4\_K\_S=57\%, Q2\_K=50\%.
 Three findings are noteworthy.
-First, \textbf{Q3\_K\_M leads at 68\%}---the highest truthfulness score despite
-being mid-range on BoolQ (69\%) and slower than Q2\_K. This is the same variant
-that shows near-zero context sensitivity (§\ref{sec:cliff}), suggesting a
-consistent pattern: Q3\_K\_M's block quantization structure may preserve factual
-representations better than its bit-count implies.
-Second, \textbf{Q2\_K collapses to 50\%}---near-chance for binary MC1---while
-scoring 69\% on BoolQ and exhibiting the HellaSwag instruction-following collapse (19\%).
-These three failure modes (HellaSwag format, TruthfulQA factual coherence, long-context
-throughput) converge on Q2\_K as a variant with fundamental limitations beyond its
-throughput advantage.
-Third, the \textbf{non-monotonic quality ordering extends to TruthfulQA}: Q3\_K\_M (3.95~bpw) outperforms
-Q4\_K\_S (4.85~bpw), Q8\_0 (8.5~bpw), and Q6\_K (6.59~bpw) on truthfulness.
-This corroborates the BoolQ and MMLU findings that bits-per-weight is a poor predictor
-of downstream task quality.
+
+First, \textbf{Q3\_K\_M is directionally the highest on TruthfulQA (68\%)}, with
+one statistically significant comparison: Q3\_K\_M~(68\%) vs.\ Q2\_K~(50\%),
+$z{=}2.59$, $p{=}0.01$.
+All other pairwise TruthfulQA gaps ($\leq$10pp, $z{\leq}1.46$) are not significant
+at $\alpha{=}0.05$ with $n{=}100$.
+Q3\_K\_M's directional truthfulness lead is consistent with its near-zero context
+sensitivity (§\ref{sec:cliff}), suggesting an aggregate pattern:
+Q3\_K\_M's hmask-based quantization may preserve factual representations
+more robustly than higher-bit variants at this model scale, though this
+interpretation requires caution given the CI overlap.
+
+Second, \textbf{Q2\_K collapses to 50\% on TruthfulQA}---near-chance for binary MC1.
+Combined with 69\% BoolQ, 19\% HellaSwag, and the long-context cliff ($-48\%$),
+this defines a consistent multi-failure profile: Q2\_K retains short-context
+factual recall and binary judgment while losing multi-choice format fidelity,
+factual coherence under adversarial prompts, and context-window robustness.
+
+Third, \textbf{the non-monotonic quality pattern extends to TruthfulQA}:
+Q3\_K\_M (3.95~bpw) directionally outperforms Q4\_K\_S (4.85~bpw), Q8\_0 (8.5~bpw),
+and Q6\_K (6.59~bpw), corroborating the broader finding that bits-per-weight
+is a poor predictor of downstream task quality.
 
 \begin{table}[h]
 \centering
@@ -1076,49 +1090,45 @@ Default / balanced          & Q4\_K\_M & 4.78 & 72\% & Best all-round \\
 Best task accuracy          & Q4\_K\_S & 5.01 & 74\% & Directionally highest \\
 Max throughput              & Q2\_K    & 7.49 & 69\% & MCQ unsafe$^\dagger$ \\
 RAM $\leq$2~GB              & Q3\_K\_M & 4.68 & 69\% & 1.6~GB, $-11\%$ ctx-stable \\
-ctx $>$ 512, avoid cliff    & Q4\_K\_M & 4.78 & 72\% & $-12\%$ to ctx=2048 \\
+ctx $>$ 512, avoid cliff    & Q4\_K\_M & 4.78 & 72\% & $-7\%$ to ctx=2048 (n=3) \\
 ctx $>$ 512, Q2\_K required & Q2\_K+KV & 4.04 & 69\% & $-2.6\%$$^\ddagger$; $-46\%$ short-ctx cost \\
 GPU backend (M4 Metal)      & Q4\_K\_S & 19.9 & 74\% & Metal reverses ordering \\
 \midrule
+\textbf{Avoid ctx$\geq$512} & Q2\_K, Q5\_K\_M & — & — & Cliff −46\% at ctx=512 \\
 \textbf{Avoid on all CPU}   & Q6\_K    & 3.53 & 65\% & Dominated on all axes \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\textbf{Context cliff guidance.}
+\textbf{Q2\_K and Q5\_K\_M} both exhibit cliff onset at ctx=512 ($-18$--$27\%$ single step,
+$-46$--$48\%$ total): avoid for ctx$\geq$512 unless KV Q8\_0 quantization is enabled
+(see \S\ref{sec:kvcache_quant}).
+Q8\_0 ($-18\%$, cliff at ctx=1300) and Q4\_K\_S ($-10\%$, cliff at ctx=1200) are safer
+mid-precision choices for extended context.
+Q3\_K\_M ($-11\%$) and Q4\_K\_M ($-7\%$) are the most context-stable variants.
+
+\textbf{KV-cache Q8\_0 for long-context deployments.}
+\texttt{-ctk q8\_0 -ctv q8\_0} eliminates the Q2\_K cliff ($-51\%\to-2.6\%$) at a
+$-46\%$ short-context throughput cost (crossover at ctx$\approx$1400).
+For Q4\_K\_M, the crossover is ctx$\approx$512 with only $-0.6\%$ short-context penalty,
+making \textbf{Q4\_K\_M + KV Q8\_0} the recommended default for ctx$\geq$512 deployments:
+4.70~tok/s at ctx=256, 4.44~tok/s at ctx=2048 ($-5.5\%$).
+Full quantitative analysis in \S\ref{sec:kvcache_quant}.
+
 \textbf{Thread count.}
 On big.LITTLE ARM (Tensor G1: 2$\times$Cortex-X1 + 2$\times$A76 big/mid cores),
-4 threads matches the performance-core count and delivers peak throughput.
-Using 8 threads degrades throughput $-20\%$ due to little-core load imbalance
-(observed: Q4\_K\_M 4.78~tok/s at 4T vs.\ 3.84~tok/s at 8T).
+4 threads matches the P-core count and delivers peak throughput.
+8 threads degrades performance by $-20\%$ due to little-core load imbalance
+(Q4\_K\_M: 4.78~tok/s at 4T vs.\ 3.84~tok/s at 8T).
 
-\textbf{Q6\_K.}
-Strictly dominated on every metric: slower than Q4\_K\_M (3.53 vs.\ 4.78~tok/s),
-less accurate than Q4\_K\_S (65\% vs.\ 74\% BoolQ), no context stability advantage.
-This recommendation holds for all CPU backends tested; Metal (GPU) reverses the
-throughput ordering but Q6\_K remains non-dominant even there.
-
-\textbf{KV-cache quantization crossover.}
-KV Q8\_0 (\texttt{-ctk q8\_0 -ctv q8\_0}) eliminates the Q2\_K cliff entirely
-($-51\%\to-2.6\%$) but costs $-46\%$ at ctx=256.
-Crossover benefit appears at ctx$\approx$1400 for Q2\_K; for Q4\_K\_M the crossover
-is ctx$\approx$512 with negligible short-context cost ($-0.6\%$).
-\textbf{Q2\_K is the worst choice for ctx$\geq$512}: throughput degrades
-$-48\%$ by ctx=2048, with the cliff beginning as early as ctx=512 (L2 overflow onset).
-Q5\_K\_M ($-46\%$, cliff ctx=512) behaves like Q2\_K and should be avoided
-for ctx$\geq$512; Q8\_0 ($-18\%$, cliff ctx=1300) is the safer mid-precision
-choice for extended context.
-Q6\_K shows mild degradation ($-11\%$) and Q4\_K\_S moderate ($-15\%$).
-
-\textbf{Use KV-cache Q8\_0 quantization for long-context deployments.}
-Enabling \texttt{-ctk q8\_0 -ctv q8\_0} eliminates the Q2\_K cliff entirely
-(see \S\ref{sec:kvcache_quant}) but reduces peak short-context throughput by $-46\%$.
-For Q3\_K\_M and Q4\_K\_M, KV Q8\_0 is a net win above ctx=512 with $<$1\% short-context
-penalty. The recommended configuration for ctx$\geq$512 is \textbf{Q4\_K\_M + KV Q8\_0}:
-4.70~tok/s at ctx=256 and 4.44~tok/s at ctx=2048 ($-5.5\%$),
-outperforming default Q4\_K\_M at every context above 1024 tokens.
+\textbf{Q6\_K: avoid on all CPU backends.}
+Strictly dominated on every metric---slower than Q4\_K\_M (3.53 vs.\ 4.78~tok/s),
+less accurate on BoolQ (65\% vs.\ 74\% for Q4\_K\_S), no context stability advantage.
+Metal (GPU) reverses throughput ordering but Q6\_K remains non-dominant even there.
 
 \textbf{TTFT note.}
-TTFT grows with KV-cache window size across all variants (larger cache initialization cost).
+TTFT grows with context window size across all variants.
 Responsiveness-sensitive deployments should budget TTFT alongside decode throughput.
 
 \subsection{KV-Cache Quantization as a Cliff Mitigation}
