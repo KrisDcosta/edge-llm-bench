@@ -77,7 +77,7 @@ function renderTpsChart() {
   const datasets = Object.entries(devices).map(([dev, color]) => {
     const devData = modelData[dev] || {};
     return {
-      label: dev === 'Pixel6a' ? 'Pixel 6a' : dev === 'M4Mac' ? 'M4 Mac' : 'x86',
+      label: dev === 'Pixel6a' ? 'Pixel 6a' : dev === 'M4Mac' ? 'M4 Mac (GPU)' : dev === 'M4Mac_CPU' ? 'M4 Mac (CPU)' : 'x86',
       backgroundColor: color + 'CC',
       borderColor:     color,
       borderWidth: 1.5,
@@ -568,7 +568,7 @@ function renderHeatmap() {
   if (label) label.textContent = ctx ? `ctx=${ctx}` : 'ctx=–';
 
   const devices  = ['Pixel6a', 'M4Mac', 'x86'];
-  const devLabel = { Pixel6a: 'Pixel 6a', M4Mac: 'M4 Mac', x86: 'x86' };
+  const devLabel = { Pixel6a: 'Pixel 6a', M4Mac: 'M4 Mac (GPU)', x86: 'x86' };
 
   // Collect all values for colour scaling
   const allVals = [];
@@ -614,15 +614,21 @@ function renderHeatmap() {
     const color  = vc(v).line;
     const rowHL  = isHL === v ? 'highlighted' : '';
     const cells  = devices.map(d => {
+      const hasCtxData = d === 'x86' && ctxData.x86?.[v]?.mean != null;
+      const isX86Fallback = d === 'x86' && !hasCtxData && x86Tps[v] != null;
       const val = d === 'x86'
         ? (ctxData.x86?.[v]?.mean ?? x86Tps[v])
         : ctxData[d]?.[v]?.mean;
       const bg  = heatColor(val);
       const n   = d === 'x86' ? ctxData.x86?.[v]?.n : ctxData[d]?.[v]?.n;
-      const tt  = n != null ? `title="n=${n} trials"` : '';
+      const tt  = isX86Fallback
+        ? `title="ctx=256 only — no multi-context sweep for this model on x86"`
+        : (n != null ? `title="n=${n} trials"` : '');
       return `<td style="background:${bg}" ${tt}>
         ${val != null ? val.toFixed(1) : '—'}
-        ${n != null ? `<span class="text-gray-600 text-xs"> tok/s</span>` : ''}
+        ${isX86Fallback
+          ? `<span class="text-gray-500 text-xs"> †</span>`
+          : (n != null ? `<span class="text-gray-600 text-xs"> tok/s</span>` : '')}
       </td>`;
     }).join('');
 

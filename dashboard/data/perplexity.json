@@ -14,7 +14,7 @@
       "perplexity": 13.2885,
       "status": "success",
       "corpus": "wikitext2_full",
-      "tokens_approx": 285000,
+      "tokens_approx": 290817,
       "note": null
     },
     {
@@ -22,49 +22,49 @@
       "perplexity": 11.0832,
       "status": "success",
       "corpus": "wikitext2_full",
-      "tokens_approx": 285000,
+      "tokens_approx": 290817,
       "note": null
     },
     {
       "variant": "Q4_K_S",
-      "perplexity": null,
-      "status": "not_evaluated",
-      "corpus": null,
-      "tokens_approx": null,
-      "note": "Q4_K_S perplexity not collected \u2014 variant added after initial perplexity sweep. Re-run scheduled."
+      "perplexity": 10.7005,
+      "status": "success",
+      "corpus": "wikitext2_full",
+      "tokens_approx": 290817,
+      "note": null
     },
     {
       "variant": "Q4_K_M",
-      "perplexity": 9.7553,
+      "perplexity": 10.7128,
       "status": "success",
-      "corpus": "wikitext2_sample",
-      "tokens_approx": null,
+      "corpus": "wikitext2_full",
+      "tokens_approx": 290817,
       "note": null
     },
     {
       "variant": "Q5_K_M",
-      "perplexity": null,
-      "status": "not_evaluated",
-      "corpus": null,
-      "tokens_approx": null,
-      "note": "Q5_K_M perplexity not collected \u2014 variant added after initial perplexity sweep. Re-run scheduled."
+      "perplexity": 10.6243,
+      "status": "success",
+      "corpus": "wikitext2_full",
+      "tokens_approx": 290817,
+      "note": null
     },
     {
       "variant": "Q6_K",
-      "perplexity": 9.752,
+      "perplexity": 10.5841,
       "status": "success",
-      "corpus": "wikitext2_sample",
-      "tokens_approx": null,
+      "corpus": "wikitext2_full",
+      "tokens_approx": 290817,
       "note": null
     },
     {
       "variant": "Q8_0",
-      "perplexity": 9.7044,
+      "perplexity": 10.5894,
       "status": "success",
-      "corpus": "wikitext2_sample",
-      "tokens_approx": null,
+      "corpus": "wikitext2_full",
+      "tokens_approx": 290817,
       "note": null
     }
   ],
-  "corpus_warning": "Q2_K and Q3_K_M evaluated on full WikiText-2 (~285K tokens). Q4_K_M, Q6_K, Q8_0 evaluated on a 12K-token sample. Do not compare across groups without accounting for corpus size."
+  "corpus_warning": "All 7 variants evaluated on full WikiText-2 test corpus (~290K tokens, Pixel 6a · 4 threads). Values are directly comparable across variants."
 }

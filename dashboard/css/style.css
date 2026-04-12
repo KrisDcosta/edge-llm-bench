@@ -195,6 +195,10 @@
 .select-control:focus { border-color: #10B981; }
 
 /* ── Heatmap table ─────────────────────────────────────────────────────── */
+#heatmap-table {
+  table-layout: fixed;
+  width: 100%;
+}
 #heatmap-table th {
   padding: 0.6rem 1rem;
   text-align: center;
@@ -204,8 +208,9 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 1px solid #1E293B;
+  width: 25%;
 }
-#heatmap-table th:first-child { text-align: left; }
+#heatmap-table th:first-child { text-align: left; width: 25%; }
 
 #heatmap-table td {
   padding: 0.55rem 1rem;
@@ -214,6 +219,9 @@
   font-family: 'JetBrains Mono', monospace;
   border-bottom: 1px solid #0F172A;
   transition: background 0.2s;
+  width: 25%;
+  white-space: nowrap;
+  overflow: hidden;
 }
 #heatmap-table td:first-child {
   text-align: left;

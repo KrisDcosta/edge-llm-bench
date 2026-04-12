@@ -162,7 +162,7 @@
           <div class="btn-group" id="tps-device-toggle">
             <button class="btn-toggle active" data-value="all">All</button>
             <button class="btn-toggle" data-value="Pixel6a">Pixel 6a</button>
-            <button class="btn-toggle" data-value="M4Mac">M4 Mac (Metal)</button>
+            <button class="btn-toggle" data-value="M4Mac">M4 Mac (GPU)</button>
             <button class="btn-toggle" data-value="M4Mac_CPU">M4 Mac (CPU)</button>
             <button class="btn-toggle" data-value="x86">x86</button>
           </div>
@@ -174,7 +174,7 @@
       </div>
 
       <p class="chart-note">
-        Pixel 6a @ ctx=256 — cliff\_sweep (Q2\_K, Q3\_K\_M, Q4\_K\_S, Q6\_K, Q8\_0) · standard\_sweep (Q4\_K\_M, Q5\_K\_M — thermal burst artifact excluded) · M4 Mac Metal @ ctx=1024 canonical cliff sweep (n=5) · M4 Mac CPU — TPS sweep (n\_prompt=0, n\_gen=128, n=10, thermally settled) · x86 mean of 5 trials @ ctx=256
+        Pixel 6a @ ctx=256 — cliff\_sweep (Q2\_K, Q3\_K\_M, Q4\_K\_S, Q6\_K, Q8\_0) · standard\_sweep (Q4\_K\_M, Q5\_K\_M — thermal burst artifact excluded) · M4 Mac GPU (Metal) @ ctx=1024 canonical cliff sweep (n=5) · M4 Mac CPU — TPS sweep (n\_prompt=0, n\_gen=128, n=10, thermally settled) · x86 mean of 5 trials @ ctx=256
       </p>
     </div>
   </section>
@@ -336,7 +336,11 @@
           <span>Faster</span>
           <span class="ml-4 text-gray-600">— = no data at this context</span>
         </div>
-        <p class="text-xs text-gray-500 mt-2">x86: single context-independent measurement — slider does not affect x86 column. Both Llama and Qwen were benchmarked on x86 (Intel i5, 12 threads).</p>
+        <p class="text-xs text-gray-500 mt-2">
+          Llama x86: cliff sweep data available (n=5 trials per context). ·
+          Qwen x86 <span class="text-gray-400">†</span>: ctx=256 reference only — no multi-context sweep collected; value is constant across slider positions.
+          Both models benchmarked on Intel i5-1235U, 6 threads.
+        </p>
       </div>
 
       <!-- Thread sweep mini-chart -->
