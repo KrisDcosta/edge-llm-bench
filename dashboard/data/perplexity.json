@@ -66,5 +66,5 @@
       "note": null
     }
   ],
-  "corpus_warning": "All 7 variants evaluated on full WikiText-2 test corpus (~290K tokens, Pixel 6a · 4 threads). Values are directly comparable across variants."
+  "corpus_warning": "All 7 variants evaluated on the full WikiText-2 test corpus (~290K tokens, Pixel 6a \u00b7 4 threads). Values are directly comparable."
 }

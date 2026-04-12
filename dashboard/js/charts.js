@@ -563,6 +563,11 @@ function renderHeatmap() {
   const ctxData   = modelData[ctxKey] || {};
   const x86Tps    = _heatmapData.x86_tps?.[model] || {};
 
+  // x86Tps values are ctx=256 reference measurements. For Llama we have a full
+  // cliff sweep so ctxData.x86 is populated at all contexts. For Qwen we only
+  // have the ctx=256 reference — show it at ctx=256, '—' everywhere else.
+  const x86HasCliffData = model === 'Llama';
+
   // Update slider label
   const label = document.getElementById('heatmap-ctx-label');
   if (label) label.textContent = ctx ? `ctx=${ctx}` : 'ctx=–';
@@ -570,13 +575,20 @@ function renderHeatmap() {
   const devices  = ['Pixel6a', 'M4Mac', 'x86'];
   const devLabel = { Pixel6a: 'Pixel 6a', M4Mac: 'M4 Mac (GPU)', x86: 'x86' };
 
-  // Collect all values for colour scaling
+  // Collect all values for colour scaling (exclude static x86 fallback at
+  // non-256 contexts so the colour scale isn't skewed by stale data)
   const allVals = [];
   VARIANT_ORDER.forEach(v => {
     devices.forEach(d => {
-      const val = d === 'x86'
-        ? (ctxData.x86?.[v]?.mean ?? x86Tps[v])
-        : ctxData[d]?.[v]?.mean;
+      let val;
+      if (d === 'x86') {
+        const hasCtx = ctxData.x86?.[v]?.mean != null;
+        val = hasCtx ? ctxData.x86[v].mean
+            : (x86HasCliffData || ctx === 256) ? x86Tps[v]
+            : null;   // Qwen x86 at non-256 ctx → omit from scale
+      } else {
+        val = ctxData[d]?.[v]?.mean;
+      }
       if (val != null) allVals.push(val);
     });
   });
@@ -614,21 +626,26 @@ function renderHeatmap() {
     const color  = vc(v).line;
     const rowHL  = isHL === v ? 'highlighted' : '';
     const cells  = devices.map(d => {
-      const hasCtxData = d === 'x86' && ctxData.x86?.[v]?.mean != null;
-      const isX86Fallback = d === 'x86' && !hasCtxData && x86Tps[v] != null;
+      const hasCtxData  = d === 'x86' && ctxData.x86?.[v]?.mean != null;
+      // Show static ctx=256 value only at ctx=256; at other contexts show '—'
+      // when no cliff-sweep data exists (i.e. Qwen x86)
+      const canShowFallback = x86HasCliffData || ctx === 256;
+      const isX86Ref    = d === 'x86' && !hasCtxData && x86Tps[v] != null && canShowFallback;
+      const noData      = d === 'x86' && !hasCtxData && !canShowFallback;
+
       const val = d === 'x86'
-        ? (ctxData.x86?.[v]?.mean ?? x86Tps[v])
+        ? (hasCtxData ? ctxData.x86[v].mean : canShowFallback ? x86Tps[v] : null)
         : ctxData[d]?.[v]?.mean;
       const bg  = heatColor(val);
       const n   = d === 'x86' ? ctxData.x86?.[v]?.n : ctxData[d]?.[v]?.n;
-      const tt  = isX86Fallback
-        ? `title="ctx=256 only — no multi-context sweep for this model on x86"`
+      const tt  = isX86Ref
+        ? `title="ctx=256 reference only — run x86_qwen_cliff.py to collect multi-context data"`
         : (n != null ? `title="n=${n} trials"` : '');
-      return `<td style="background:${bg}" ${tt}>
+      return `<td style="background:${noData ? 'transparent' : bg}" ${tt}>
         ${val != null ? val.toFixed(1) : '—'}
-        ${isX86Fallback
+        ${isX86Ref
           ? `<span class="text-gray-500 text-xs"> †</span>`
-          : (n != null ? `<span class="text-gray-600 text-xs"> tok/s</span>` : '')}
+          : (n != null && val != null ? `<span class="text-gray-600 text-xs"> tok/s</span>` : '')}
       </td>`;
     }).join('');
 

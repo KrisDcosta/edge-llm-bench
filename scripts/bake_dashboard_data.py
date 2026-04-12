@@ -566,11 +566,10 @@ def bake_perplexity():
             "note":         str(r["note"]) if pd.notna(r.get("note")) else None,
         })
 
-    # Warn about corpus mismatch
+    # All variants now on full WikiText-2 corpus — directly comparable
     result["corpus_warning"] = (
-        "Q2_K and Q3_K_M evaluated on full WikiText-2 (~285K tokens). "
-        "Q4_K_M, Q6_K, Q8_0 evaluated on a 12K-token sample. "
-        "Do not compare across groups without accounting for corpus size."
+        "All 7 variants evaluated on the full WikiText-2 test corpus "
+        "(~290K tokens, Pixel 6a · 4 threads). Values are directly comparable."
     )
 
     write("perplexity.json", result)
