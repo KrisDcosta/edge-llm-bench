@@ -1,5 +1,10 @@
 # Beyond Bit-Width: SIMD Dequantization Overhead Creates a CPU/GPU Performance Divide in GGUF K-Quant LLM Inference
-### DSC 291 — Efficient AI | Llama 3.2 3B × llama.cpp × Pixel 6a
+
+**DSC 291 — Efficient AI** | UC San Diego · Halicioglu Data Science Institute
+
+[![Dashboard](https://img.shields.io/badge/Dashboard-Live-10B981?style=flat-square)](https://krisdcosta.github.io/291_EAI/)
+[![Dataset](https://img.shields.io/badge/HuggingFace-Dataset-FF6B35?style=flat-square)](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench)
+[![Paper](https://img.shields.io/badge/Paper-17pp%20IEEE-4F8EF7?style=flat-square)](report/report.pdf)
 
 > **Comprehensive benchmarking study:** 7 GGUF K-quant variants (Q2_K–Q8_0) on Google Pixel 6a (Tensor G1 ARM64),
 > with cross-device validation (x86 i5-1235U, Mac M4 Metal) and cross-model validation (Qwen 2.5 1.5B).
@@ -12,7 +17,7 @@
 > at ctx≈512, Q3_K_M cliff-immune (<±5%), Q2_K HellaSwag collapse (19%), Q4_K_S Pareto-dominant (74% BoolQ),
 > Q6_K Pareto-dominated, KV-cache Q8_0 eliminates cliff at cost of −46% baseline throughput, confirmed on Qwen 2.5 1.5B.
 >
-> **Outputs:** ~2,500 individual inference measurements across ARM, x86, Metal · 6 quality benchmarks (all 7 variants) ·
+> **Outputs:** 4,400+ individual inference measurements across ARM, x86, Metal · 6 quality benchmarks (all 7 variants) ·
 > 17 figures · 17-page IEEE paper · Thermal characterization · Cross-model replication
 
 ---
@@ -113,9 +118,10 @@
 | Document | Status | Location | Notes |
 |----------|--------|----------|-------|
 | **IEEE Paper** | ✅ Complete | `report/report.pdf` | 17 pages; all findings, 0 LaTeX errors |
-| **Audit Report** | ✅ Complete | `AUDIT_REPORT_2026_03_27.md` | Publication-readiness audit |
 | **Conference Roadmap** | ✅ Updated | `PAPER_ROADMAP.md` | Submission plan MLSys/MobiSys/ATC |
 | **Canonical Results** | ✅ Updated | `results/CANONICAL.md` | Maps every table/figure to source data |
+| **Interactive Dashboard** | ✅ Live | [krisdcosta.github.io/291_EAI](https://krisdcosta.github.io/291_EAI/) | Chart.js · GitHub Pages |
+| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 4,400+ records · 5 splits |
 
 ---
 
@@ -192,9 +198,8 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 291_EAI/
 ├── README.md                              # This file
-├── AUDIT_REPORT_2026_03_27.md             # Publication-readiness audit (all claims verified)
 ├── PAPER_ROADMAP.md                       # Conference submission roadmap (MLSys/MobiSys/ATC)
-├── PROJECT_CONTEXT.md                     # Full project context (resume, interview prep)
+├── VERIFIED_METRICS_MASTER_TABLE.md       # Ground-truth reference for all paper claims
 │
 ├── report/
 │   ├── report.tex                         # IEEE paper (LaTeX, 17 pages)
@@ -255,8 +260,9 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 │   │   ├── pixel_gsm8k.sh                 # GSM8K on Pixel
 │   │   ├── m4_llama_tps.sh                # M4 Metal TPS sweep
 │   │   ├── m4_llama_cliff.sh              # M4 Metal cliff sweep
-│   │   ├── x86_llama_cliff.sh             # x86 cliff sweep
-│   │   └── x86_qwen_tps.sh                # x86 Qwen 2.5 1.5B TPS (cross-model validation)
+│   │   ├── x86_llama_cliff.py             # x86 Llama cliff sweep (filled-context)
+│   │   ├── x86_qwen_tps.sh                # x86 Qwen 2.5 1.5B TPS reference
+│   │   └── x86_qwen_cliff.py              # x86 Qwen cliff sweep (filled-context)
 │   ├── eval/
 │   │   ├── quality_eval.py                # Pixel quality eval (7 benchmarks)
 │   │   ├── mac_gsm8k_eval.py              # Mac GSM8K eval (see Limitations)

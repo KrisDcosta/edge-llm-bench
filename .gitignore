@@ -27,6 +27,20 @@ results/test-*.jsonl
 figures/*.png
 figures/*.csv
 
+# Internal / private docs — not for public repo
+INTERVIEW_PREP_GGUF.md
+PROJECT_CONTEXT.md
+DATA_GAPS.md
+AUDIT_REPORT_*.md
+FIGURE_SPECS.md
+PRD.md
+Proposal/
+Styles/
+
+# Generated/cached result files (derived from raw data)
+results/visualization_data.json
+report/figures/
+
 # LaTeX build artifacts
 report/*.aux
 report/*.log
