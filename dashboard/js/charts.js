@@ -797,7 +797,7 @@ function initPplChart(data) {
               const corpus = item.dataset._corpus?.[item.dataIndex];
               if (val == null) return 'Not evaluated';
               const corpusLabel = corpus === 'wikitext2_full'
-                ? 'full corpus (~285K tokens)'
+                ? 'full corpus (~290K tokens)'
                 : corpus === 'wikitext2_sample'
                 ? 'sample (~12K tokens)'
                 : corpus || '';

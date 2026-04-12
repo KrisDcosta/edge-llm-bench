@@ -4,7 +4,7 @@
 **Author:** Kris D'Costa  
 **Affiliation:** UC San Diego, Halicioglu Data Science Institute  
 **Period:** February 2026 – April 2026  
-**Artifact:** github.com/KrisDcosta/291_EAI (commit 171099f)
+**Artifact:** github.com/KrisDcosta/291_EAI
 
 ---
 

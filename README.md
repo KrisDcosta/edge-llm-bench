@@ -13,8 +13,8 @@
 > throughput ordering is *reversed* relative to GPU (Metal): Q2_K fastest, Q6_K slowest. This is not ARM-specific —
 > it is a general property of SIMD-bound CPU kernels.
 >
-> **Key findings:** Non-monotonic throughput (Q2_K fastest at 8.33 tok/s ≠ most accurate), Q2_K −48% KV-cache cliff
-> at ctx≈512, Q3_K_M cliff-immune (<±5%), Q2_K HellaSwag collapse (19%), Q4_K_S Pareto-dominant (74% BoolQ),
+> **Key findings:** Non-monotonic throughput (Q2_K fastest at 7.49 tok/s ≠ most accurate), Q2_K −48% KV-cache cliff
+> at ctx≈512, Q3_K_M cliff-attenuated (<±11%), Q2_K HellaSwag collapse (19%), Q4_K_S Pareto-dominant (74% BoolQ),
 > Q6_K Pareto-dominated, KV-cache Q8_0 eliminates cliff at cost of −46% baseline throughput, confirmed on Qwen 2.5 1.5B.
 >
 > **Outputs:** 4,400+ individual inference measurements across ARM, x86, Metal · 6 quality benchmarks (all 7 variants) ·
@@ -26,13 +26,13 @@
 
 | Variant | TPS @ ctx=256 | TPS @ ctx=2048 | Cliff % | Cliff ctx | BoolQ | Status |
 |---------|--------------|----------------|---------|-----------|-------|--------|
-| Q2_K    | **8.33±0.42** | 4.33 (−48%) | **−48%** | **≈512** | 69%  | ⚠️ Speed-dominant short ctx only |
-| Q3_K_M  | 5.01         | 5.04 (−0.5%) | **none** | —       | 69%  | ✅ Best long-context stability |
-| Q4_K_S  | 4.80         | 4.09 (−15%)  | −15%   | ≈1024     | **74%** | ✅ **Accuracy-dominant Pareto** |
-| Q4_K_M  | 4.57         | 4.25 (−7%)   | −7%    | ≈1024     | 72%  | ✅ **Recommended default** |
-| Q5_K_M  | 3.79         | 2.80 (−26%)  | −26%   | ≈1024     | 67%  | ⚠️ Context-sensitive |
-| Q6_K    | 3.55         | 3.17 (−11%)  | −11%   | ≈1400     | 65%  | ⚠️ Slower AND less accurate than Q4_K_M |
-| Q8_0    | 3.94         | 3.20 (−19%)  | −19%   | ≈1200     | 68%  | ⚠️ Significant ctx degradation |
+| Q2_K    | **7.49±0.30** | 3.69 (−48%) | **−48%** | **≈512** | 69%  | ⚠️ Speed-dominant short ctx only |
+| Q3_K_M  | 4.68         | 3.62 (−11%) | −11% (attenuated) | gradual | 69%  | ✅ Best long-context stability |
+| Q4_K_S  | **5.01**     | 4.47 (−10%)  | −10%   | ≈1024     | **74%** | ✅ **Accuracy-dominant Pareto** |
+| Q4_K_M  | 4.78         | 5.21 (−7%)   | −7%    | ≈1024     | 72%  | ✅ **Recommended default** |
+| Q5_K_M  | 3.75         | 3.61 (−46%)  | **−46%** | **≈512** | 67%  | ⚠️ Context-sensitive (same cliff as Q2_K) |
+| Q6_K    | 3.53         | 3.17 (−11%)  | −11%   | ≈1024     | 65%  | ⚠️ Slower AND less accurate than Q4_K_M |
+| Q8_0    | 4.52         | 3.71 (−18%)  | −18%   | ≈768      | 68%  | ⚠️ Significant ctx degradation |
 
 *TPS values from `results/pixel_llama_tps_20260325_120022/` (n=10) and cliff from `results/pixel_llama_cliff_filled_canonical_n10/` (n=10)*
 *imatrix: max +4% BoolQ (Q6_K); hurts Q2_K (−5%) and Q3_K_M (−8%) — calibration fails below critical bitwidth*
@@ -44,13 +44,13 @@
 
 | Variant | Pixel 6a ARM | x86 i5-1235U | Mac M4 Metal |
 |---------|-------------|--------------|--------------|
-| Q2_K    | **8.33** (fastest) | **14.05** (fastest) | 17.79 |
-| Q3_K_M  | 5.01        | —           | —    |
-| Q4_K_S  | 4.80        | 8.93        | **19.88** (fastest) |
-| Q4_K_M  | 4.57        | 8.55        | 19.22 |
-| Q5_K_M  | 3.79        | —           | —    |
-| Q6_K    | 3.55 (slowest) | **6.80** (slowest) | —  |
-| Q8_0    | 3.94        | —           | 6.39 (slowest) |
+| Q2_K    | **7.49** (fastest) | **14.05** (fastest) | 17.79 |
+| Q3_K_M  | 4.68        | 8.38        | 15.60 |
+| Q4_K_S  | **5.01**    | 8.93        | **19.88** (fastest) |
+| Q4_K_M  | 4.78        | 8.55        | 19.22 |
+| Q5_K_M  | 3.75        | 7.31        | 13.35 |
+| Q6_K    | 3.53 (slowest) | **6.80** (slowest) | 7.02 |
+| Q8_0    | 4.52        | 7.43        | 6.39 (slowest) |
 
 **CPU ordering (ARM=x86):** Q2_K fastest → Q6_K slowest — SIMD kernel bottleneck, not model arithmetic
 **GPU ordering (Metal reversed):** Q4_K_S ≈ Q4_K_M fastest → Q8_0 slowest — dedicated 4-bit dispatch paths
@@ -61,7 +61,7 @@
 
 | Variant | ctx | Default TPS | Q8_0 KV TPS | Change |
 |---------|-----|------------|------------|--------|
-| Q2_K    | 256  | 8.33 | 4.49 | −46% baseline |
+| Q2_K    | 256  | 7.49 | 4.49 | −40% baseline |
 | Q2_K    | 512  | 5.58 | 4.48 | **cliff eliminated** |
 | Q2_K    | 2048 | 4.33 | 4.37 | −2.6% (vs −48% default) |
 | Q3_K_M  | 2048 | 5.04 | 3.78 | −25% (overkill — already stable) |
@@ -74,20 +74,20 @@
 ## Key Novelties
 
 1. **Non-monotonic throughput ordering (CPU-general)**
-   - Q2_K fastest (8.33 t/s ARM, 14.05 t/s x86) despite only 3.40 bits/weight
-   - Q6_K slowest (3.55 t/s ARM, 6.80 t/s x86) despite 6.59 bits/weight
+   - Q2_K fastest (7.49 t/s ARM, 14.05 t/s x86) despite only 3.40 bits/weight
+   - Q6_K slowest (3.53 t/s ARM, 6.80 t/s x86) despite 6.59 bits/weight
    - x86 AVX2 replicates ARM NEON ordering exactly → confirms SIMD kernel bottleneck, not ARM-specific
    - **Root cause:** Q6_K dequantization requires 6-operand split-bit shuffle (ql[128]+qh[64]); Q2_K uses simple 16-entry table lookup
 
 2. **KV-cache cliff at predicted threshold**
    - Q2_K: −48% from ctx=256→2048, cliff onset at ctx≈512 (ARM, n=10, filled-context methodology)
    - x86 Q2_K: −51% cliff at ctx≈1200–1300 (matches `L2_cache/KV_dim = 1.25MB/~1KB ≈ 1280`)
-   - Q3_K_M: <±5% across all contexts — cliff immune (higher FFN compute masks KV pressure)
+   - Q3_K_M: <±11% across all contexts — cliff-attenuated (higher FFN compute partially masks KV pressure)
    - **Formula:** `cliff_ctx ≈ L2_cache / (2 × n_layers × n_kv_heads × head_dim × 2B)`
-   - Metal: flat ±2% ctx=256–2048, zero cliff — GPU DRAM bandwidth sufficient; KV-cache fits fast HBM
+   - Metal: flat ±4.3% or better ctx=1024–2048, zero cliff — GPU DRAM bandwidth sufficient; KV-cache fits fast HBM
 
 3. **Cross-model replication (Qwen 2.5 1.5B)**
-   - Non-monotonic ordering confirmed: Q2_K 13.9 t/s fastest, Q6_K 7.25 t/s slowest on Pixel 6a
+   - Non-monotonic ordering confirmed: Q2_K 16.1 t/s fastest, Q6_K slowest on Pixel 6a
    - ctx=512 cliff confirmed on Qwen (C_layer = 1024×ctx bytes, same L2 formula)
    - Proves findings are not Llama-specific — generalize across GGUF K-quant models
 
@@ -107,7 +107,7 @@
    - Crossover benefit at ctx≈1400: recommended for long-context deployments
 
 7. **Thermal throttling characterization (Tensor G1)**
-   - Baseline: 8.33±0.42 t/s; throttle onset within ~60s of sustained load
+   - Baseline: 7.49±0.30 t/s; throttle onset within ~60s of sustained load
    - Throttle plateau: 4.72–4.96 t/s (~43% reduction)
    - Recovery: 7.04±0.29 t/s after 140s cooldown (85% of baseline)
 
@@ -272,7 +272,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 │   │   ├── generate_figures.py            # All 17 paper figures
 │   │   ├── generate_tables.py             # LaTeX table generator
 │   │   └── plot_ppl_vs_accuracy.py        # PPL × accuracy scatter
-│   └── [legacy scripts...]
+│   └── legacy/                            # Archived orchestration scripts (superseded by bench/)
 │
 ├── android/                               # Android app (Jetpack Compose + NDK)
 │   ├── app/src/main/java/com/eai/...
@@ -317,10 +317,10 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | Variant | Bits/Weight | File Size | NEON Op | Superblock | Notes |
 |---------|-------------|-----------|---------|-----------|-------|
 | Q2_K    | 3.40        | 1.3 GB    | 16-entry table lookup | 6×8 | Fastest CPU; cliff at ctx≈512 (−48%); HellaSwag collapse |
-| Q3_K_M  | 3.95        | 1.6 GB    | 32-entry table lookup | 6×8 | Cliff-immune (<±5%); imatrix hurts (−8% BoolQ) |
-| Q4_K_S  | 4.85        | 1.8 GB    | 16-entry × 2 | 8×8 | **Pareto-dominant** (74% BoolQ, 4.80 t/s) |
-| Q4_K_M  | 5.30        | 1.9 GB    | 16-entry × 2 | 8×8 | **Recommended default** (72% BoolQ, stable) |
-| Q5_K_M  | 6.21        | 2.2 GB    | 32-entry × 2 | 8×8 | Best MMLU (50%); −26% cliff |
+| Q3_K_M  | 3.95        | 1.6 GB    | 32-entry table lookup | 6×8 | Cliff-attenuated (<±11%); imatrix hurts (−8% BoolQ) |
+| Q4_K_S  | 4.85        | 1.8 GB    | 16-entry × 2 | 8×8 | **Pareto-dominant** (74% BoolQ, 5.01 t/s) |
+| Q4_K_M  | 5.30        | 1.9 GB    | 16-entry × 2 | 8×8 | **Recommended default** (72% BoolQ, 4.78 t/s) |
+| Q5_K_M  | 6.21        | 2.2 GB    | 32-entry × 2 | 8×8 | Best MMLU (50%); −46% cliff at ctx≈512 |
 | Q6_K    | 6.59        | 2.5 GB    | Split-bit shuffle (ql+qh) | 8×8 | **Pareto-dominated**: slower AND less accurate than Q4_K_M |
 | Q8_0    | 8.53        | 3.2 GB    | Direct load | 32×1 | No dequant overhead; slowest on M4 Metal (6.39 t/s) |
 
@@ -330,16 +330,16 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 
 | Variant | BoolQ | ARC-Easy | ARC-Challenge | HellaSwag | MMLU | TruthfulQA | PPL (WikiText-2) |
 |---------|-------|----------|---------------|-----------|------|------------|-----------------|
-| Q2_K    | 69%   | 76%      | 50%           | 19%†      | 42%  | 62%        | 13.29 |
-| Q3_K_M  | 69%   | 78%      | 52%           | 44%       | 48%  | 65%        | 11.08 |
-| Q4_K_S  | **74%** | 81%   | **62%**       | 39%       | 49%  | 64%        | ‡ |
-| Q4_K_M  | 72%   | **82%**  | 60%           | 43%       | 47%  | 66%        | ‡ |
-| Q5_K_M  | 67%   | 81%      | 61%           | 45%       | **50%** | 64%     | ‡ |
-| Q6_K    | 65%   | 79%      | 58%           | 41%       | 48%  | 66%        | ‡ |
-| Q8_0    | 68%   | 80%      | 56%           | 43%       | 47%  | **68%**    | ‡ |
+| Q2_K    | 69%   | 76%      | 50%           | 19%†      | 42%  | 50%        | 13.29 |
+| Q3_K_M  | 69%   | 78%      | 52%           | 44%       | 48%  | **68%**    | 11.08 |
+| Q4_K_S  | **74%** | 81%   | **62%**       | 39%       | 49%  | 57%        | 10.70‡ |
+| Q4_K_M  | 72%   | **82%**  | 60%           | 43%       | 47%  | 60%        | 10.71‡ |
+| Q5_K_M  | 67%   | 81%      | 61%           | **45%**   | **50%** | 65%     | 10.62‡ |
+| Q6_K    | 65%   | 79%      | 58%           | 41%       | 48%  | 60%        | 10.58‡ |
+| Q8_0    | 68%   | 80%      | 56%           | 43%       | 47%  | 58%        | 10.59‡ |
 
 † Q2_K HellaSwag: instruction-following collapse — all responses "No"; not a true accuracy score.
-‡ PPL measured on 12KB WikiText-2 sample (full corpus only available for Q2_K and Q3_K_M on Pixel; all 7 variants measured on x86 full corpus).
+‡ PPL for Q4_K_S through Q8_0 measured on full WikiText-2 corpus (~290K tokens) on x86; Q2_K and Q3_K_M measured on Pixel 6a.
 
 ---
 
@@ -359,7 +359,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | HellaSwag accuracy (100q) | ✅ Complete | — | `quality_scores.json` |
 | MMLU accuracy (100q) | ✅ Complete | — | `quality_scores.json` |
 | TruthfulQA accuracy (100q) | ✅ Complete | — | `quality_scores.json` |
-| WikiText-2 PPL (full corpus, 285K tokens) | ✅ Q2_K, Q3_K_M | — | `pixel_6a_ppl_final/` |
+| WikiText-2 PPL (full corpus, ~290K tokens) | ✅ All 7 variants | — | `pixel_6a_ppl_final/` (Q2_K, Q3_K_M); `x86_perplexity_results.json` (Q4_K_S–Q8_0) |
 | imatrix calibration (5 variants, BoolQ) | ✅ Complete | — | `quality_scores.json` |
 | KV-cache Q8_0 mitigation | ✅ Complete | n=5 | `quality_scores.json` |
 | Battery/power measurement | ✅ Complete | — | `pixel_power_20260320_173728/` |
@@ -372,7 +372,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | Device | Status | Key Result | Source |
 |--------|--------|-----------|--------|
 | x86 Intel i5-1235U (AVX2) | ✅ Complete | Q2_K fastest (14.05), Q6_K slowest (6.80); cliff Q2_K −51% at ctx=2048 | `x86_tps_results.json`, `x86_llama_cliff_20260329_002333/` |
-| Mac M4 Metal GPU | ✅ Complete | Q4_K_S fastest (19.88), Q8_0 slowest (6.39); flat cliff ±2% all variants | `m4_llama_tps_20260326_001546/`, `m4_metal_cliff_20260323_015934/` |
+| Mac M4 Metal GPU | ✅ Complete | Q4_K_S fastest (19.88), Q8_0 slowest (6.39); flat cliff ≤±4.3% all variants (no degradation) | `m4_llama_tps_20260326_001546/`, `m4_metal_cliff_20260323_015934/` |
 | x86 Quality (6 benchmarks) | ✅ Complete | Consistent with ARM ordering | `quality_scores.json` keys `x86_*` |
 | x86 PPL | ✅ Complete | Q2_K 11.73, Q8_0 9.71 | `x86_perplexity_results.json` |
 
@@ -385,8 +385,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | **Flash Attention not supported on Tensor G1** | ✅ Documented | llama.cpp `-fa` flag returns "unsupported backend"; Tensor G1 lacks HW FA support |
 | **GSM8K/HumanEval methodology broken** | ⚠️ Archived | Mac `--single-turn` with few-shot prompt → chat template wraps entire prompt as user turn; model echoes few-shot context; results near-zero accuracy; archived in `archive/broken_evals/`; not a blocker (optional eval) |
 | **P-core affinity mask bug** | ✅ Documented | `--cpu-mask 0x0F` targets little cores (cpu0–3, 1803 MHz), NOT P-cores. Tensor G1 layout: cpu0-3=little, cpu4-5=medium (2253 MHz), cpu6-7=P-cores (2802 MHz). Correct mask: `0xC0` (P-only) or `0xF0` (P+M). P-core affinity data is invalid — not cited in paper |
-| **WikiText-2 PPL partial on Pixel** | ✅ Marked | Full 285K corpus only for Q2_K and Q3_K_M on Pixel; Q4_K_M/Q5_K_M/Q6_K/Q8_0 measured on 12KB sample or x86. Marked ‡ in Table 1 |
-| **Q4_K_S PPL missing on Pixel** | ✅ Acknowledged | No Pixel PPL run for Q4_K_S; x86 full-corpus PPL available |
+| **WikiText-2 PPL cross-device** | ✅ Complete | Q2_K, Q3_K_M on Pixel full corpus; Q4_K_S–Q8_0 on x86 full corpus (~290K tokens). All values shown in Quality Results table. |
 | **Q2_K HellaSwag collapse** | ✅ Documented | 19% score is instruction-following failure, not accuracy; all responses "No"; documented as regime failure in paper |
 | **imatrix hurts at low bpw** | ✅ Documented | Q2_K (−5%), Q3_K_M (−8%) BoolQ; paper recommends imatrix only at ≥4 bpw |
 | **Thermal throttling on sustained load** | ✅ Characterized | Onset ~60s; plateau 4.72–4.96 t/s (−43%); 5-min cooldown protocol mitigates in benchmarks |
@@ -423,6 +422,12 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 - **Thermal controls:** 5-minute cooldown between variants; T < 32°C pre-run; runs >±15% of median rejected
 - **Schema validation:** All JSONL records validated against `schemas/run.schema.json`
 - **Reproducibility:** Experiment registry (YAML), raw logs (JSONL), code (Python/Bash), spot-check re-runs
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full pipeline walkthrough and instructions on adding new devices, models, or benchmarks.
 
 ---
 

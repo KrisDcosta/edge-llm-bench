@@ -41,6 +41,13 @@ Styles/
 results/visualization_data.json
 report/figures/
 
+# Root-level LaTeX leftovers (local copies — report/report.pdf is the tracked version)
+/report.pdf
+/report.aux
+/report.log
+/report.out
+/texput.log
+
 # LaTeX build artifacts
 report/*.aux
 report/*.log
