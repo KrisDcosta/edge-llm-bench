@@ -4,36 +4,28 @@
 #                      x86_64 CPU  ·  uses llama-bench
 #
 # Measures prefill and decode throughput at 4 representative
-# context lengths on x86 hardware (Linux or Windows+Git Bash).
+# context lengths on x86 hardware (Linux or Windows+WSL/Git Bash).
 # Uses CPU inference (no GPU layers).
 #
 # Prerequisites:
 #   1. llama-bench binary in PATH or LLAMA_BENCH_PATH set
-#      - Linux:   build from source (see setup below)
-#      - Windows: download pre-built from llama.cpp releases
+#      Build from source:
+#        git clone https://github.com/ggerganov/llama.cpp /tmp/llama.cpp
+#        cmake -B /tmp/llama.cpp/build -DGGML_AVX2=ON /tmp/llama.cpp
+#        cmake --build /tmp/llama.cpp/build --config Release -j$(nproc)
+#        export LLAMA_BENCH_PATH=/tmp/llama.cpp/build/bin/llama-bench
+#
 #   2. GGUF models in local-models/qwen2_5_1_5b_gguf/
-#      - Run the download snippet in step 2 below
-#
-# Quick setup (Linux / WSL / Git Bash):
-#   # 1. Build llama.cpp (one-time, ~5 min — skip if already done for Llama):
-#   git clone https://github.com/ggerganov/llama.cpp /tmp/llama.cpp
-#   cmake -B /tmp/llama.cpp/build -DGGML_AVX2=ON /tmp/llama.cpp
-#   cmake --build /tmp/llama.cpp/build --config Release -j$(nproc)
-#   export LLAMA_BENCH_PATH=/tmp/llama.cpp/build/bin/llama-bench
-#
-#   # 2. Download Qwen models (needs WiFi, ~0.6-2.0 GB each):
-#   pip install huggingface_hub
-#   python3 -c "
-#   from huggingface_hub import hf_hub_download
-#   import os; os.makedirs('local-models/qwen2_5_1_5b_gguf', exist_ok=True)
-#   for v in ['Q2_K','Q3_K_M','Q4_K_S','Q4_K_M','Q5_K_M','Q6_K','Q8_0']:
-#       hf_hub_download('bartowski/Qwen2.5-1.5B-Instruct-GGUF',
-#           f'Qwen2.5-1.5B-Instruct-{v}.gguf',
-#           local_dir='local-models/qwen2_5_1_5b_gguf')
-#   "
-#
-#   # 3. Run benchmark (no WiFi needed after step 2):
-#   bash scripts/bench/x86_qwen_tps.sh
+#      Download with:
+#        pip install huggingface_hub
+#        python3 -c "
+#        from huggingface_hub import hf_hub_download
+#        import os; os.makedirs('local-models/qwen2_5_1_5b_gguf', exist_ok=True)
+#        for v in ['Q2_K','Q3_K_M','Q4_K_S','Q4_K_M','Q5_K_M','Q6_K','Q8_0']:
+#            hf_hub_download('bartowski/Qwen2.5-1.5B-Instruct-GGUF',
+#                f'Qwen2.5-1.5B-Instruct-{v}.gguf',
+#                local_dir='local-models/qwen2_5_1_5b_gguf')
+#        "
 #
 # Usage:
 #   bash scripts/bench/x86_qwen_tps.sh              # all 7 variants
@@ -42,7 +34,7 @@
 #   bash scripts/bench/x86_qwen_tps.sh --resume      # skip completed variants
 #
 # Output:  results/x86_qwen_tps_{HOSTNAME}_{ts}/tps_{VARIANT}.jsonl
-# Runtime: ~15-30 min  (7 variants × 4 ctx × 5 trials — Qwen is smaller than Llama)
+# Runtime: ~15-30 min  (7 variants x 4 ctx x 5 trials on mid-range x86)
 # ============================================================
 
 set -euo pipefail
@@ -56,7 +48,7 @@ ALL_VARIANTS=(Q2_K Q3_K_M Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0)
 # ctx:   256   512  1024  2048
 PP_TOKENS=(128  256   512  1024)
 TG_TOKENS=128
-NUM_TRIALS=5     # matches Llama x86 collection methodology
+NUM_TRIALS=5     # fewer than M4 (5 vs 10) — x86 is slower per trial
 NGL=0            # CPU ONLY — no GPU layers
 THREADS=$(nproc 2>/dev/null || echo 4)   # auto-detect logical cores
 
@@ -72,7 +64,7 @@ elif [ -f "./llama-bench" ]; then
 elif [ -f "./llama-bench.exe" ]; then
     LLAMA_BENCH="./llama-bench.exe"
 else
-    echo "❌ FATAL: llama-bench not found. Set LLAMA_BENCH_PATH or add to PATH."
+    echo "FATAL: llama-bench not found. Set LLAMA_BENCH_PATH or add to PATH."
     echo "   See setup instructions at top of this script."
     exit 1
 fi
@@ -114,13 +106,14 @@ MISSING=0
 for V in "${VARIANTS[@]}"; do
     MODEL="${MODELS_DIR}/${MODEL_PREFIX}-${V}.gguf"
     if [ ! -f "$MODEL" ]; then
-        log "  ❌ Missing model: $MODEL"
+        log "  Missing model: $MODEL"
         MISSING=$((MISSING+1))
     fi
 done
 if [ "$MISSING" -gt 0 ]; then
     log ""
     log "Download missing models with:"
+    log "  pip install huggingface_hub"
     log "  python3 -c \""
     log "  from huggingface_hub import hf_hub_download; import os"
     log "  os.makedirs('local-models/qwen2_5_1_5b_gguf', exist_ok=True)"
@@ -130,11 +123,11 @@ if [ "$MISSING" -gt 0 ]; then
     log "          local_dir='local-models/qwen2_5_1_5b_gguf')\""
     exit 1
 fi
-log "✅ All ${#VARIANTS[@]} model(s) present"
+log "All ${#VARIANTS[@]} model(s) present"
 
-# Python helpers (temp files to avoid heredoc+pipe stdin conflict)
-PARSE_SCRIPT=$(mktemp /tmp/x86_bench_parse.XXXXXX.py)
-SUMMARY_SCRIPT=$(mktemp /tmp/x86_bench_summary.XXXXXX.py)
+# Python helpers
+PARSE_SCRIPT=$(mktemp /tmp/x86_qwen_bench_parse.XXXXXX.py)
+SUMMARY_SCRIPT=$(mktemp /tmp/x86_qwen_bench_summary.XXXXXX.py)
 trap 'rm -f "$PARSE_SCRIPT" "$SUMMARY_SCRIPT"' EXIT
 
 cat > "$PARSE_SCRIPT" << 'PYEOF'
@@ -224,13 +217,13 @@ for VARIANT in "${VARIANTS[@]}"; do
     if [ "$RESUME" -eq 1 ] && [ -f "$OUTPUT_FILE" ]; then
         DONE=$(wc -l < "$OUTPUT_FILE" | tr -d ' ')
         if [ "$DONE" -ge "$EXPECTED_LINES" ]; then
-            log "  ⏩ SKIP $VARIANT — complete (${DONE} rows)"
+            log "  SKIP $VARIANT — complete (${DONE} rows)"
             continue
         fi
     fi
 
     log ""
-    log "━━━ [${V_IDX}/${#VARIANTS[@]}] ${VARIANT} ━━━"
+    log "=== [${V_IDX}/${#VARIANTS[@]}] ${VARIANT} ==="
     MODEL_GB=$(du -sh "$MODEL_PATH" 2>/dev/null | cut -f1 || echo "?")
     log "  Model: $MODEL_PATH  (${MODEL_GB})"
     > "$OUTPUT_FILE"
@@ -250,9 +243,8 @@ for VARIANT in "${VARIANTS[@]}"; do
         >> "$OUTPUT_FILE"
 
     ROWS=$(wc -l < "$OUTPUT_FILE" | tr -d ' ')
-    log "  ✅ Saved ${OUTPUT_FILE}  (${ROWS} rows)"
+    log "  Saved ${OUTPUT_FILE}  (${ROWS} rows)"
 
-    # Extract and display tg (decode) TPS for quick reference
     TG_TPS=$(python3 -c "
 import json
 for line in open('${OUTPUT_FILE}'):
@@ -260,7 +252,7 @@ for line in open('${OUTPUT_FILE}'):
     if d.get('test_type') == 'tg':
         print(f'decode TPS: {d[\"tps_mean\"]:.2f} tok/s')
 " 2>/dev/null || true)
-    [ -n "$TG_TPS" ] && log "  → ${TG_TPS}"
+    [ -n "$TG_TPS" ] && log "  -> ${TG_TPS}"
 done
 
 log ""
@@ -273,7 +265,4 @@ ELAPSED=$(( $(date +%s) - START_S ))
 log ""
 hr
 log "DONE  |  runtime: $(( ELAPSED/60 ))m $(( ELAPSED%60 ))s  |  results: ${RESULTS_DIR}"
-log "Next: copy results/ back to the Mac repo, then integrate with:"
-log "  python3 scripts/prepare_dataset.py   # rebuilds all parquets"
-log "  python3 scripts/bake_dashboard_data.py  # rebuilds dashboard JSON"
 hr
