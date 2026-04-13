@@ -17,7 +17,7 @@
 > at ctx≈512, Q3_K_M cliff-attenuated (<±11%), Q2_K HellaSwag collapse (19%), Q4_K_S Pareto-dominant (74% BoolQ),
 > Q6_K Pareto-dominated, KV-cache Q8_0 eliminates cliff at cost of −46% baseline throughput, confirmed on Qwen 2.5 1.5B.
 >
-> **Outputs:** 4,435 individual inference measurements across ARM, x86, Metal · 6 quality benchmarks (all 7 variants) ·
+> **Outputs:** 4,440 individual inference measurements across ARM, x86, Metal · 6 quality benchmarks (all 7 variants, standard + imatrix) ·
 > 17 figures · 17-page IEEE paper · Thermal characterization · Cross-model replication
 
 ---
@@ -121,7 +121,7 @@
 | **Conference Roadmap** | ✅ Updated | `PAPER_ROADMAP.md` | Submission plan MLSys/MobiSys/ATC |
 | **Canonical Results** | ✅ Updated | `results/CANONICAL.md` | Maps every table/figure to source data |
 | **Interactive Dashboard** | ✅ Live | [krisdcosta.github.io/291_EAI](https://krisdcosta.github.io/291_EAI/) | Chart.js · GitHub Pages |
-| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 4,400+ records · 5 splits |
+| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 4,440 records · 5 splits |
 
 ---
 

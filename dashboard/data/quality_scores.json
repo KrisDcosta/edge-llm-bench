@@ -402,6 +402,11 @@
             "accuracy": 51.0,
             "correct": 51,
             "total": 100
+          },
+          "Q8_0": {
+            "accuracy": 48.0,
+            "correct": 48,
+            "total": 100
           }
         },
         "truthfulqa": {
@@ -413,6 +418,31 @@
           "Q3_K_M": {
             "accuracy": 68.0,
             "correct": 68,
+            "total": 100
+          },
+          "Q4_K_S": {
+            "accuracy": 54.0,
+            "correct": 54,
+            "total": 100
+          },
+          "Q4_K_M": {
+            "accuracy": 52.0,
+            "correct": 52,
+            "total": 100
+          },
+          "Q5_K_M": {
+            "accuracy": 65.0,
+            "correct": 65,
+            "total": 100
+          },
+          "Q6_K": {
+            "accuracy": 60.0,
+            "correct": 60,
+            "total": 100
+          },
+          "Q8_0": {
+            "accuracy": 58.0,
+            "correct": 58,
             "total": 100
           }
         }

@@ -42,7 +42,7 @@ Controlled inference benchmark dataset for **7 GGUF K-quant quantization variant
 | Apple M4 Mac | Apple M4 (ARM, 10-core) | 16 GB unified | llama.cpp Metal |
 | HP Pavilion x86 | Intel Core i5-1235U (12th gen) | 16 GB DDR4 | llama.cpp CPU |
 
-**4,435 total records** across 5 splits. All inference records are non-warmup,
+**4,440 total records** across 5 splits. All inference records are non-warmup,
 success-status runs collected under controlled thermal conditions. Contaminated
 and failed records are archived separately and not included here.
 
@@ -143,8 +143,8 @@ Same columns as `pixel_inference`. `backend = "CPU"`, `threads = 6`.
 
 ---
 
-### `quality_benchmarks` — 105 rows
-Accuracy scores on 6 NLP benchmarks for 7 quantization variants on Pixel 6a.
+### `quality_benchmarks` — 138 rows
+Accuracy scores on 6 NLP benchmarks for 7 quantization variants on Pixel 6a, including both standard and imatrix-calibrated variants.
 
 | Column | Type | Description |
 |---|---|---|
