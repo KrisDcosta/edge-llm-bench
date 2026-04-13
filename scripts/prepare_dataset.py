@@ -250,10 +250,17 @@ def collect_m4(results: Path, verbose: bool) -> list[dict]:
     for d in sorted(results.glob("m4_cpu_tps_*")):
         add_flat(d, "standard_sweep")
 
-    # M4 Qwen cross-model
-    for pattern in ("m4_metal_qwen_cliff_*", "m4_qwen_cliff_*", "m4_qwen_tps_*"):
+    # M4 Qwen cross-model cliff (contaminated: all trial=NaN; excluded from dashboard
+    # bake via bake_dashboard_data.py comment, but kept in parquet for audit trail)
+    for pattern in ("m4_metal_qwen_cliff_*", "m4_qwen_cliff_*"):
         for d in sorted(results.glob(pattern)):
             add_flat(d, "cliff_sweep", model=MODEL_QWEN)
+    # M4 Qwen TPS sweep — standard_sweep, NOT cliff_sweep.
+    # NOTE: m4_qwen_tps_* files use a pre-aggregated format (tps_mean/tps_std/n_trials)
+    # rather than per-trial decode_tps, so parse_flat currently drops all rows silently.
+    # TODO: add a parse_aggregated_tps() path when ingesting this data is needed.
+    for d in sorted(results.glob("m4_qwen_tps_*")):
+        add_flat(d, "standard_sweep", model=MODEL_QWEN)
 
     return rows
 
