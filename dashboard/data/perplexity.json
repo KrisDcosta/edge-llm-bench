@@ -14,7 +14,7 @@
       "perplexity": 13.2885,
       "status": "success",
       "corpus": "wikitext2_full",
-      "tokens_approx": 290817,
+      "tokens_approx": 285000,
       "note": null
     },
     {
@@ -22,47 +22,47 @@
       "perplexity": 11.0832,
       "status": "success",
       "corpus": "wikitext2_full",
-      "tokens_approx": 290817,
+      "tokens_approx": 285000,
       "note": null
     },
     {
       "variant": "Q4_K_S",
-      "perplexity": 10.7005,
-      "status": "success",
-      "corpus": "wikitext2_full",
-      "tokens_approx": 290817,
-      "note": null
+      "perplexity": null,
+      "status": "not_evaluated",
+      "corpus": null,
+      "tokens_approx": null,
+      "note": "Q4_K_S perplexity not collected \u2014 variant added after initial perplexity sweep. Re-run scheduled."
     },
     {
       "variant": "Q4_K_M",
-      "perplexity": 10.7128,
+      "perplexity": 9.7553,
       "status": "success",
-      "corpus": "wikitext2_full",
-      "tokens_approx": 290817,
+      "corpus": "wikitext2_sample",
+      "tokens_approx": null,
       "note": null
     },
     {
       "variant": "Q5_K_M",
-      "perplexity": 10.6243,
-      "status": "success",
-      "corpus": "wikitext2_full",
-      "tokens_approx": 290817,
-      "note": null
+      "perplexity": null,
+      "status": "not_evaluated",
+      "corpus": null,
+      "tokens_approx": null,
+      "note": "Q5_K_M perplexity not collected \u2014 variant added after initial perplexity sweep. Re-run scheduled."
     },
     {
       "variant": "Q6_K",
-      "perplexity": 10.5841,
+      "perplexity": 9.752,
       "status": "success",
-      "corpus": "wikitext2_full",
-      "tokens_approx": 290817,
+      "corpus": "wikitext2_sample",
+      "tokens_approx": null,
       "note": null
     },
     {
       "variant": "Q8_0",
-      "perplexity": 10.5894,
+      "perplexity": 9.7044,
       "status": "success",
-      "corpus": "wikitext2_full",
-      "tokens_approx": 290817,
+      "corpus": "wikitext2_sample",
+      "tokens_approx": null,
       "note": null
     }
   ],

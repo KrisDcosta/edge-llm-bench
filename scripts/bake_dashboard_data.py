@@ -303,6 +303,8 @@ def bake_cliff_curves():
         # M4Mac Qwen cliff rows all have trial=NaN (contaminated llama-bench rows) — exclude
         # "M4Mac_Qwen": excluded,
         "x86_Llama":     x86_cliff_df,
+        "x86_Qwen":      x86[(x86["model"] == MODEL_QWEN) &
+                              (x86["experiment_type"] == "cliff_sweep")],
     }
 
     for label, df in sources.items():
@@ -406,11 +408,16 @@ def bake_cross_device():
         (x86["experiment_type"] == "standard_sweep")
     ]
 
-    # All context lengths: Pixel + M4 cliff, plus x86 cliff contexts
+    x86_qwen_cliff = x86[
+        (x86["model"] == MODEL_QWEN) &
+        (x86["experiment_type"] == "cliff_sweep")
+    ]
+    # All context lengths: Pixel + M4 cliff, plus x86 Llama + Qwen cliff contexts
     all_contexts = sorted(set(
         list(pixel_cliff["context_len"].unique()) +
         list(m4_cliff["context_len"].unique()) +
-        list(x86_cliff_llama["context_len"].dropna().unique())
+        list(x86_cliff_llama["context_len"].dropna().unique()) +
+        list(x86_qwen_cliff["context_len"].dropna().unique())
     ))
 
     result = {
@@ -450,7 +457,7 @@ def bake_cross_device():
          # exclude entirely — renders as null/— in heatmap, which is correct.
          m4.iloc[0:0]),  # empty with same columns
     ]:
-        x86_src = x86_cliff_llama if model_label == "Llama" else pd.DataFrame()
+        x86_src = x86_cliff_llama if model_label == "Llama" else x86_qwen_cliff
 
         ctx_data = {}
         for ctx in all_contexts:
