@@ -563,11 +563,7 @@ function renderHeatmap() {
   const ctxData   = modelData[ctxKey] || {};
   const x86Tps    = _heatmapData.x86_tps?.[model] || {};
 
-  // x86Tps values are ctx=256 reference measurements. Llama has a full cliff
-  // sweep (ctx=256–2048, n=5, clean). Qwen x86 cliff data (ctx=1024–2048, n_gen=32)
-  // has high within-context variance on Windows and many filtered-out points at high
-  // contexts — showing it in the heatmap would produce confusing gaps. Use ctx=256
-  // reference for Qwen x86 across all slider positions.
+  // For Qwen we only have the ctx=256 reference — show it at ctx=256, '—' everywhere else.
   const x86HasCliffData = model === 'Llama';
 
   // Update slider label

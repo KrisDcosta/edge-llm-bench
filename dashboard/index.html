@@ -200,7 +200,6 @@
             <button class="btn-toggle" data-value="M4Mac_Llama">M4 Mac · Llama</button>
             <button class="btn-toggle" data-value="M4Mac_Qwen">M4 Mac · Qwen</button>
             <button class="btn-toggle" data-value="x86_Llama">x86 · Llama</button>
-            <button class="btn-toggle" data-value="x86_Qwen" title="n_gen=32 — high variance on Windows; treat as directional">x86 · Qwen ⚠</button>
           </div>
         </div>
         <div class="control-group">
@@ -339,7 +338,7 @@
         </div>
         <p class="text-xs text-gray-500 mt-2">
           Llama x86: cliff sweep data available (n=5 trials per context). ·
-          Qwen x86 <span class="text-gray-400">†</span>: ctx=256 reference shown across all slider positions — cliff sweep data (n_gen=32) has high variance on Windows and is excluded from this view.
+          Qwen x86 <span class="text-gray-400">†</span>: ctx=256 reference only — no multi-context sweep collected; value is constant across slider positions.
           Both models benchmarked on Intel i5-1235U, 6 threads.
         </p>
       </div>

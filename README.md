@@ -17,7 +17,7 @@
 > at ctx≈512, Q3_K_M cliff-attenuated (<±11%), Q2_K HellaSwag collapse (19%), Q4_K_S Pareto-dominant (74% BoolQ),
 > Q6_K Pareto-dominated, KV-cache Q8_0 eliminates cliff at cost of −46% baseline throughput, confirmed on Qwen 2.5 1.5B.
 >
-> **Outputs:** 4,400+ individual inference measurements across ARM, x86, Metal · 6 quality benchmarks (all 7 variants) ·
+> **Outputs:** 4,435 individual inference measurements across ARM, x86, Metal · 6 quality benchmarks (all 7 variants) ·
 > 17 figures · 17-page IEEE paper · Thermal characterization · Cross-model replication
 
 ---

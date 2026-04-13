@@ -324,45 +324,6 @@ def collect_x86(results: Path) -> list[dict]:
     else:
         print("  [warn] x86_llama_cliff_20260408_070924/ not found — GAP-5 cliff data missing")
 
-    # 3b. x86 Qwen cliff sweep — output by scripts/bench/x86_qwen_cliff.py
-    # Format: cliff_{VARIANT}.jsonl, pre-aggregated (one row per variant × context)
-    # Fields: variant, context, decode_tps, decode_std, n_trials, model, methodology
-    # Quality note: n_gen=32 makes these measurements noisy on Windows; rows with
-    # decode_tps == 0 (model crash / timeout) and decode_tps > 100 (timing spike) are excluded.
-    MAX_PLAUSIBLE_QWEN_X86_TPS = 40   # Qwen 2.5 1.5B on i5-1235U peaks ~30 t/s; >40 = artifact
-    MAX_CV_QWEN_X86 = 0.6             # Exclude rows with std/mean > 60% (timing noise on Windows)
-    for qwen_cliff_dir in sorted(results.glob("x86_qwen_cliff_*")):
-        for f in sorted(qwen_cliff_dir.glob("cliff_*.jsonl")):
-            for rec in load_jsonl(f):
-                decode = rec.get("decode_tps")
-                if not decode or decode <= 0 or decode > MAX_PLAUSIBLE_QWEN_X86_TPS:
-                    continue
-                std = rec.get("decode_std", 0)
-                if decode > 0 and std / decode > MAX_CV_QWEN_X86:
-                    continue  # high-variance spike: skip
-                variant = rec.get("variant")
-                if not variant:
-                    continue
-                rows.append({
-                    "device":          "x86",
-                    "backend":         "CPU",
-                    "model":           MODEL_QWEN,
-                    "variant":         variant,
-                    "context_len":     rec.get("context"),
-                    "trial":           None,   # pre-aggregated (n_trials stored in rec)
-                    "threads":         rec.get("threads"),
-                    "decode_tps":      decode,
-                    "prefill_tps":     rec.get("prefill_tps"),
-                    "ttft_s":          None,
-                    "e2e_s":           None,
-                    "n_output_tokens": rec.get("n_gen"),
-                    "experiment_type": "cliff_sweep",
-                    "kv_quant":        None,
-                    "ngl":             rec.get("ngl", 0),
-                    "ts":              rec.get("ts"),
-                    "source_file":     f.name,
-                })
-
     # 3. x86 Qwen TPS sweep — output by x86_qwen_tps.sh
     # Format: tps_{VARIANT}.jsonl with fields: variant, test_type, tps_mean, n_prompt, threads, ts
     for qwen_dir in sorted(results.glob("x86_qwen_tps_*")):
