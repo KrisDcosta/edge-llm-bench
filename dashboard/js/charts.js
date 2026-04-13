@@ -765,6 +765,7 @@ function initPplChart(data) {
   const values  = rows.map(r => r.perplexity);          // null if not_evaluated
   const colors  = labels.map(v => vc(v).line);
   const corpuses = rows.map(r => r.corpus);
+  const devices  = rows.map(r => r.device);
 
   new Chart(ctx, {
     type: 'bar',
@@ -778,6 +779,7 @@ function initPplChart(data) {
         borderWidth: 1.5,
         borderRadius: 4,
         _corpus: corpuses,
+        _device: devices,
       }],
     },
     options: {
@@ -793,13 +795,17 @@ function initPplChart(data) {
             label(item) {
               const val    = item.parsed.y;
               const corpus = item.dataset._corpus?.[item.dataIndex];
+              const device = item.dataset._device?.[item.dataIndex];
               if (val == null) return 'Not evaluated';
               const corpusLabel = corpus === 'wikitext2_full'
                 ? 'full corpus (~290K tokens)'
                 : corpus === 'wikitext2_sample'
                 ? 'sample (~12K tokens)'
                 : corpus || '';
-              return [`PPL: ${val.toFixed(4)}`, `Corpus: ${corpusLabel}`];
+              const deviceLabel = device === 'Pixel6a' ? 'Pixel 6a'
+                : device === 'x86' ? 'x86 i5-1235U'
+                : device || '';
+              return [`PPL: ${val.toFixed(4)}`, `Corpus: ${corpusLabel}`, `Device: ${deviceLabel}`];
             },
           },
         },

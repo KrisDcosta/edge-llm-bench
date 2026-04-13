@@ -421,25 +421,45 @@ def collect_quality(results: Path) -> list[dict]:
 
 def collect_perplexity(results: Path) -> list[dict]:
     rows = []
+
+    # ── Pixel 6a PPL (perplexity_scores.json) ──
     path = results / "perplexity_scores.json"
     if not path.exists():
-        print("  [warn] perplexity_scores.json not found")
-        return rows
+        print("  [warn] perplexity_scores.json not found — Pixel PPL data missing")
+    else:
+        data = load_json(path)
+        for variant, entry in data.items():
+            if not isinstance(entry, dict):
+                continue
+            rows.append({
+                "variant":           variant,
+                "model":             MODEL_LLAMA,
+                "device":            "Pixel6a",
+                "perplexity":        entry.get("perplexity"),
+                "perplexity_status": entry.get("perplexity_status", "success"),
+                "corpus":            entry.get("corpus"),
+                "tokens_approx":     entry.get("tokens_approx"),
+                "note":              entry.get("note"),
+            })
 
-    data = load_json(path)
-    for variant, entry in data.items():
-        if not isinstance(entry, dict):
-            continue
-        rows.append({
-            "variant":           variant,
-            "model":             MODEL_LLAMA,
-            "device":            "Pixel6a",
-            "perplexity":        entry.get("perplexity"),
-            "perplexity_status": entry.get("perplexity_status", "success"),
-            "corpus":            entry.get("corpus"),
-            "tokens_approx":     entry.get("tokens_approx"),
-            "note":              entry.get("note"),
-        })
+    # ── x86 PPL (x86_perplexity_results.json — full WikiText-2 corpus) ──
+    x86_path = results / "x86_perplexity_results.json"
+    if x86_path.exists():
+        x86_data = load_json(x86_path)
+        for variant, entry in x86_data.get("results", {}).items():
+            if not isinstance(entry, dict) or entry.get("status") != "ok":
+                continue
+            rows.append({
+                "variant":           variant,
+                "model":             MODEL_LLAMA,
+                "device":            "x86",
+                "perplexity":        entry.get("perplexity"),
+                "perplexity_status": "success",
+                "corpus":            "wikitext2_full",
+                "tokens_approx":     290817,
+                "note":              "Measured on x86 i5-1235U (full WikiText-2 corpus, ~290K tokens)",
+            })
+
     return rows
 
 # ── Deduplication ─────────────────────────────────────────────────────────────

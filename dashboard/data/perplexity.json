@@ -15,7 +15,8 @@
       "status": "success",
       "corpus": "wikitext2_full",
       "tokens_approx": 285000,
-      "note": null
+      "note": null,
+      "device": "Pixel6a"
     },
     {
       "variant": "Q3_K_M",
@@ -23,48 +24,54 @@
       "status": "success",
       "corpus": "wikitext2_full",
       "tokens_approx": 285000,
-      "note": null
+      "note": null,
+      "device": "Pixel6a"
     },
     {
       "variant": "Q4_K_S",
-      "perplexity": null,
-      "status": "not_evaluated",
-      "corpus": null,
-      "tokens_approx": null,
-      "note": "Q4_K_S perplexity not collected \u2014 variant added after initial perplexity sweep. Re-run scheduled."
+      "perplexity": 9.7414,
+      "status": "success",
+      "corpus": "wikitext2_full",
+      "tokens_approx": 290817,
+      "note": "Measured on x86 i5-1235U (full WikiText-2 corpus, ~290K tokens)",
+      "device": "x86"
     },
     {
       "variant": "Q4_K_M",
-      "perplexity": 9.7553,
+      "perplexity": 9.7466,
       "status": "success",
-      "corpus": "wikitext2_sample",
-      "tokens_approx": null,
-      "note": null
+      "corpus": "wikitext2_full",
+      "tokens_approx": 290817,
+      "note": "Measured on x86 i5-1235U (full WikiText-2 corpus, ~290K tokens)",
+      "device": "x86"
     },
     {
       "variant": "Q5_K_M",
-      "perplexity": null,
-      "status": "not_evaluated",
-      "corpus": null,
-      "tokens_approx": null,
-      "note": "Q5_K_M perplexity not collected \u2014 variant added after initial perplexity sweep. Re-run scheduled."
+      "perplexity": 9.768,
+      "status": "success",
+      "corpus": "wikitext2_full",
+      "tokens_approx": 290817,
+      "note": "Measured on x86 i5-1235U (full WikiText-2 corpus, ~290K tokens)",
+      "device": "x86"
     },
     {
       "variant": "Q6_K",
-      "perplexity": 9.752,
+      "perplexity": 9.7366,
       "status": "success",
-      "corpus": "wikitext2_sample",
-      "tokens_approx": null,
-      "note": null
+      "corpus": "wikitext2_full",
+      "tokens_approx": 290817,
+      "note": "Measured on x86 i5-1235U (full WikiText-2 corpus, ~290K tokens)",
+      "device": "x86"
     },
     {
       "variant": "Q8_0",
-      "perplexity": 9.7044,
+      "perplexity": 9.7101,
       "status": "success",
-      "corpus": "wikitext2_sample",
-      "tokens_approx": null,
-      "note": null
+      "corpus": "wikitext2_full",
+      "tokens_approx": 290817,
+      "note": "Measured on x86 i5-1235U (full WikiText-2 corpus, ~290K tokens)",
+      "device": "x86"
     }
   ],
-  "corpus_warning": "All 7 variants evaluated on the full WikiText-2 test corpus (~290K tokens, Pixel 6a \u00b7 4 threads). Values are directly comparable."
+  "corpus_warning": "All 7 variants on full WikiText-2 corpus (~290K tokens). Q2_K & Q3_K_M measured on Pixel 6a; others on x86 i5-1235U."
 }

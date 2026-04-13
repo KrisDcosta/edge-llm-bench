@@ -548,15 +548,30 @@ def bake_perplexity():
     result = {"variants": VARIANT_ORDER, "data": []}
 
     for v in VARIANT_ORDER:
-        row = ppl[ppl["variant"] == v]
-        if row.empty:
+        rows_v = ppl[ppl["variant"] == v]
+        if rows_v.empty:
             result["data"].append({
                 "variant": v, "perplexity": None,
                 "status": "not_evaluated", "corpus": None,
                 "tokens_approx": None, "note": None,
             })
             continue
-        r = row.iloc[0]
+        # Prefer: full-corpus Pixel > full-corpus x86 > sample Pixel
+        full_pixel = rows_v[(rows_v["device"] == "Pixel6a") &
+                             (rows_v["corpus"] == "wikitext2_full")]
+        full_x86   = rows_v[(rows_v["device"] == "x86") &
+                             (rows_v["corpus"] == "wikitext2_full")]
+        sample     = rows_v[rows_v["corpus"] == "wikitext2_sample"]
+
+        if not full_pixel.empty:
+            r = full_pixel.iloc[0]
+        elif not full_x86.empty:
+            r = full_x86.iloc[0]
+        elif not sample.empty:
+            r = sample.iloc[0]
+        else:
+            r = rows_v.iloc[0]
+
         result["data"].append({
             "variant":      v,
             "perplexity":   safe_float(r["perplexity"]),
@@ -564,13 +579,24 @@ def bake_perplexity():
             "corpus":       str(r["corpus"]) if pd.notna(r["corpus"]) else None,
             "tokens_approx": int(r["tokens_approx"]) if pd.notna(r["tokens_approx"]) else None,
             "note":         str(r["note"]) if pd.notna(r.get("note")) else None,
+            "device":       str(r["device"]) if pd.notna(r.get("device")) else None,
         })
 
-    # All variants now on full WikiText-2 corpus — directly comparable
-    result["corpus_warning"] = (
-        "All 7 variants evaluated on the full WikiText-2 test corpus "
-        "(~290K tokens, Pixel 6a · 4 threads). Values are directly comparable."
-    )
+    # Summarise corpus coverage for the chart note
+    full_variants = [d["variant"] for d in result["data"]
+                     if d.get("corpus") == "wikitext2_full"]
+    sample_variants = [d["variant"] for d in result["data"]
+                       if d.get("corpus") == "wikitext2_sample"]
+    if not sample_variants:
+        corpus_note = ("All 7 variants on full WikiText-2 corpus (~290K tokens). "
+                       "Q2_K & Q3_K_M measured on Pixel 6a; others on x86 i5-1235U.")
+    else:
+        corpus_note = (
+            f"Full corpus (~290K tokens): {', '.join(full_variants)}. "
+            f"Sample (~12K tokens): {', '.join(sample_variants)}. "
+            "Do not directly compare across groups."
+        )
+    result["corpus_warning"] = corpus_note
 
     write("perplexity.json", result)
 

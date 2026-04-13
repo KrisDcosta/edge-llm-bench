@@ -42,7 +42,7 @@ Controlled inference benchmark dataset for **7 GGUF K-quant quantization variant
 | Apple M4 Mac | Apple M4 (ARM, 10-core) | 16 GB unified | llama.cpp Metal |
 | HP Pavilion x86 | Intel Core i5-1235U (12th gen) | 16 GB DDR4 | llama.cpp CPU |
 
-**4,440 total records** across 5 splits. All inference records are non-warmup,
+**4,447 total records** across 5 splits. All inference records are non-warmup,
 success-status runs collected under controlled thermal conditions. Contaminated
 and failed records are archived separately and not included here.
 
@@ -164,24 +164,23 @@ Q2\_K and Q3\_K\_M only.
 
 ---
 
-### `perplexity` — 7 rows
-WikiText-2 perplexity scores for Llama 3.2 3B Instruct on Pixel 6a.
+### `perplexity` — 14 rows
+WikiText-2 perplexity scores for Llama 3.2 3B Instruct. Covers both Pixel 6a and x86 i5-1235U measurements.
 
 | Column | Type | Description |
 |---|---|---|
 | `variant` | string | GGUF quantization variant |
 | `model` | string | Model name |
-| `device` | string | `"Pixel6a"` |
-| `perplexity` | float | WikiText-2 perplexity (lower = better); null if not evaluated |
+| `device` | string | `"Pixel6a"` or `"x86"` |
+| `perplexity` | float | WikiText-2 perplexity (lower = better) |
 | `perplexity_status` | string | `"success"` or `"not_evaluated"` |
-| `corpus` | string | `"wikitext2_full"` (~285K tokens) or `"wikitext2_sample"` (~12K tokens) |
+| `corpus` | string | `"wikitext2_full"` (~290K tokens) or `"wikitext2_sample"` (~12K tokens) |
 | `tokens_approx` | int | Approximate token count used |
-| `note` | string | Reason if not\_evaluated |
+| `note` | string | Measurement notes |
 
-> **Important:** Q2\_K and Q3\_K\_M were evaluated on the full WikiText-2 corpus;
-> Q4\_K\_M, Q6\_K, Q8\_0 on a 12K-token sample. Do not directly compare perplexity
-> values across these two groups without accounting for corpus size effects.
-> Q4\_K\_S and Q5\_K\_M were added after the initial sweep and are marked `not_evaluated`.
+> **All 7 variants have full-corpus PPL values.** Q2\_K and Q3\_K\_M measured on Pixel 6a (full corpus, ~285K tokens).
+> Q4\_K\_S, Q4\_K\_M, Q5\_K\_M, Q6\_K, Q8\_0 measured on x86 i5-1235U (full corpus, ~290K tokens).
+> Pixel 6a also has sample-corpus (~12K tokens) measurements for Q4\_K\_M, Q6\_K, Q8\_0 (retained for reference).
 
 ---
 
