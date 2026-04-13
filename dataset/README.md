@@ -42,7 +42,7 @@ Controlled inference benchmark dataset for **7 GGUF K-quant quantization variant
 | Apple M4 Mac | Apple M4 (ARM, 10-core) | 16 GB unified | llama.cpp Metal |
 | HP Pavilion x86 | Intel Core i5-1235U (12th gen) | 16 GB DDR4 | llama.cpp CPU |
 
-**4,447 total records** across 5 splits. All inference records are non-warmup,
+**4,062 total records** across 5 splits. All inference records are non-warmup,
 success-status runs collected under controlled thermal conditions. Contaminated
 and failed records are archived separately and not included here.
 
@@ -71,7 +71,7 @@ and failed records are archived separately and not included here.
 
 ## Splits
 
-### `pixel_inference` — 2,875 rows
+### `pixel_inference` — 2,490 rows
 Pixel 6a (ARM, CPU backend) inference runs.
 
 | Column | Type | Description |
@@ -144,13 +144,14 @@ Same columns as `pixel_inference`. `backend = "CPU"`, `threads = 6`.
 ---
 
 ### `quality_benchmarks` — 138 rows
-Accuracy scores on 6 NLP benchmarks for 7 quantization variants on Pixel 6a, including both standard and imatrix-calibrated variants.
+Accuracy scores on 6 NLP benchmarks for 7 quantization variants across Pixel 6a and x86 i5-1235U,
+including both standard and imatrix-calibrated variants.
 
 | Column | Type | Description |
 |---|---|---|
-| `benchmark` | string | `arc_challenge` \| `arc_easy` \| `boolq` \| `hellaswag` \| `mmlu` \| `truthfulqa` \| `custom_qa` |
+| `benchmark` | string | `arc_challenge` \| `arc_easy` \| `boolq` \| `hellaswag` \| `mmlu` \| `truthfulqa` |
 | `variant` | string | GGUF quantization variant |
-| `device` | string | `"Pixel6a"` |
+| `device` | string | `"Pixel6a"` or `"x86"` |
 | `model` | string | Model name |
 | `calibration` | string | `"standard"` or `"imatrix"` (importance-weighted) |
 | `accuracy_pct` | float | Accuracy percentage (0–100) |
@@ -158,9 +159,13 @@ Accuracy scores on 6 NLP benchmarks for 7 quantization variants on Pixel 6a, inc
 | `total` | int | Total questions evaluated |
 | `status` | string | `"success"` for all included rows |
 
+**Device coverage:**
+- `Pixel6a`: all 6 benchmarks × 7 variants (standard); imatrix calibration for 5 benchmarks × all 7 variants (ARC-Easy excluded — known parser artifact producing 100% for all variants)
+- `x86`: all 6 benchmarks × 7 variants (standard only; no imatrix)
+
 **Benchmark sample sizes:** 100 questions each (random sample from official test sets).
 BoolQ imatrix calibration covers all 7 variants. TruthfulQA imatrix data collected for
-Q2\_K and Q3\_K\_M only.
+all 7 variants.
 
 ---
 

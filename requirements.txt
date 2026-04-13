@@ -2,6 +2,8 @@
 matplotlib>=3.7
 numpy>=1.24
 pandas>=1.5
+pyarrow>=12.0           # required by prepare_dataset.py (parquet read/write) and datasets lib
 pyyaml>=6.0
 huggingface_hub>=0.19   # for download_models.sh / hf_transfer
+datasets>=2.14          # for HuggingFace dataset upload / load_dataset
 tqdm>=4.65              # progress bars in download scripts

@@ -282,8 +282,19 @@ def bake_tps_by_variant():
 
 def bake_cliff_curves():
     result = {
-        "collapse_threshold": {"start": 1400, "end": 1500,
-                               "label": "KV-cache collapse zone"},
+        # Per-source collapse thresholds (keyed by cliff source toggle value).
+        # ARM (Pixel): Q2_K and Q5_K_M onset at ctx=512 (−18–27% single step).
+        # x86: empirically observed at ctx=1300–1400 (L2-cache formula predicted 1280).
+        # Metal: no cliff — M4 L2 >> working set across all tested contexts.
+        "collapse_threshold": {
+            "Pixel6a_Llama": {"start": 512, "end": 512,
+                              "label": "ARM cliff onset (Q2_K, Q5_K_M)"},
+            "Pixel6a_Qwen":  {"start": 512, "end": 512,
+                              "label": "ARM cliff onset (Q2_K)"},
+            "x86_Llama":     {"start": 1300, "end": 1400,
+                              "label": "x86 KV-cache collapse zone"},
+            "M4Mac_Llama":   None,
+        },
         "curves": {},
     }
 
@@ -330,12 +341,17 @@ def bake_cliff_curves():
 # ══════════════════════════════════════════════════════════════════════════════
 
 def bake_quality_scores():
-    # Normalise x86_ prefixed benchmark names and assign device
     q = qual.copy()
-    q["device_resolved"] = q["benchmark"].apply(
-        lambda b: "x86" if b.startswith("x86_") else "Pixel6a"
-    )
-    q["benchmark_clean"] = q["benchmark"].str.replace("x86_", "", regex=False)
+    # Device is now a proper column in the parquet (set correctly by prepare_dataset.py).
+    # Benchmark names are already clean (x86_ prefix stripped at ingestion time).
+    # Retain backward compat: if old parquet still has x86_ prefix, strip and infer device.
+    if q["benchmark"].str.startswith("x86_").any():
+        q["device"] = q["device"].where(
+            ~q["benchmark"].str.startswith("x86_"), other="x86"
+        )
+        q["benchmark"] = q["benchmark"].str.replace("x86_", "", regex=False)
+    q["device_resolved"] = q["device"]
+    q["benchmark_clean"] = q["benchmark"]
 
     # Prefer arc_easy_fixed over arc_easy where both exist
     arc_easy_fixed_variants = set(

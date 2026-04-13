@@ -70,7 +70,7 @@ are sized N-64 tokens so the KV cache is actually saturated. Earlier runs using
 | M4 Metal TPS (Q4_K_S 19.9, Q4_K_M 19.2, Q2_K 17.8, Q8_0 6.4 tok/s) | `results/m4_llama_tps_20260326_001546/` |
 | M4 Metal cliff (all 7 variants flat ±2% ctx=1024–2048, no cliff) | `results/m4_metal_cliff_20260323_015934/` |
 | Pixel Qwen TPS (Q2_K=13.9 fastest, Q6_K=7.25 slowest; non-monotonic ordering replication) | `results/pixel_qwen_tps_20260326_033619/` |
-| Pixel Qwen cliff sweep (5 trials, 7 variants × 11 ctx; confirms Q2_K cliff on different model) | `results/pixel_qwen_cliff_filled_20260330_004954/` ⏳ in progress |
+| Pixel Qwen cliff sweep (5 trials, 7 variants × 11 ctx; confirms Q2_K cliff on different model) | `results/pixel_qwen_cliff_filled_20260330_235410/` ✅ canonical |
 
 **Platform metadata:**
 - x86: Intel i5-1235U, 12th Gen, Windows 11, 6 threads, llama-cli CPU-only (ngl=0)

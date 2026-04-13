@@ -17,7 +17,7 @@
 > at ctx≈512, Q3_K_M cliff-attenuated (<±11%), Q2_K HellaSwag collapse (19%), Q4_K_S Pareto-dominant (74% BoolQ),
 > Q6_K Pareto-dominated, KV-cache Q8_0 eliminates cliff at cost of −46% baseline throughput, confirmed on Qwen 2.5 1.5B.
 >
-> **Outputs:** 4,447 individual inference measurements across ARM, x86, Metal · 6 quality benchmarks (all 7 variants, standard + imatrix) · WikiText-2 PPL (full corpus, all 7 variants) ·
+> **Outputs:** 4,062 individual inference measurements across ARM, x86, Metal · 6 quality benchmarks (all 7 variants, standard + imatrix) · WikiText-2 PPL (full corpus, all 7 variants) ·
 > 17 figures · 17-page IEEE paper · Thermal characterization · Cross-model replication
 
 ---
@@ -121,7 +121,7 @@
 | **Conference Roadmap** | ✅ Updated | `PAPER_ROADMAP.md` | Submission plan MLSys/MobiSys/ATC |
 | **Canonical Results** | ✅ Updated | `results/CANONICAL.md` | Maps every table/figure to source data |
 | **Interactive Dashboard** | ✅ Live | [krisdcosta.github.io/291_EAI](https://krisdcosta.github.io/291_EAI/) | Chart.js · GitHub Pages |
-| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 4,447 records · 5 splits |
+| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 4,062 records · 5 splits |
 
 ---
 
@@ -147,11 +147,17 @@ bash scripts/bench/pixel_llama_tps.sh
 # KV-cache cliff sweep — filled-context methodology (n=10)
 bash scripts/bench/pixel_llama_cliff_filled.sh
 
-# Quality evaluation (7 benchmarks × 7 variants)
-python scripts/eval/quality_eval.py --all
+# Quality evaluation (7 benchmarks × 7 variants, via ADB)
+bash scripts/bench/pixel_quality.sh boolq
+bash scripts/bench/pixel_quality.sh arc_challenge
+bash scripts/bench/pixel_quality.sh arc_easy
+bash scripts/bench/pixel_quality.sh hellaswag
+bash scripts/bench/pixel_quality.sh mmlu
+bash scripts/bench/pixel_quality.sh truthfulqa
 
 # Qwen cross-model validation
 bash scripts/bench/pixel_qwen_tps.sh
+# Use clean run (235410) — see results/CANONICAL.md for contamination notes
 bash scripts/bench/pixel_qwen_cliff_filled.sh
 ```
 
@@ -171,9 +177,9 @@ python scripts/eval/mac_humaneval_eval.py
 ### x86 (AVX2 CPU backend)
 ```bash
 bash scripts/bench/x86_llama_tps.sh
-bash scripts/bench/x86_llama_cliff.sh
-bash scripts/bench/x86_qwen_tps.sh      # Qwen 2.5 1.5B cross-model validation
-python scripts/eval/x86_quality_eval.py
+python scripts/bench/x86_llama_cliff.py     # filled-context cliff sweep
+bash scripts/bench/x86_qwen_tps.sh          # Qwen 2.5 1.5B cross-model validation
+# x86 quality benchmarks collected via quality_scores.json (remote eval; no dedicated script)
 ```
 
 ### Generate Figures

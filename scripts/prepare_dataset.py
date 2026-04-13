@@ -205,9 +205,12 @@ def collect_pixel(results: Path, verbose: bool) -> list[dict]:
             print(f"    {f.name}: +{len(rows)-before} records")
 
     # 5. Qwen cross-model validation (Pixel)
-    for pattern in ("pixel_qwen_cliff_filled_*", "pixel_qwen_tps_*"):
-        for d in sorted(results.glob(pattern)):
-            add_flat(Path(d), "cliff_sweep", model=MODEL_QWEN)
+    # IMPORTANT: Use ONLY the clean run (235410).
+    # Run 004954 is contaminated (concurrent llama-perplexity process during collection;
+    # baselines 4–6 tok/s vs 8–16 tok/s in the clean run). See results/CANONICAL.md.
+    add_flat(results / "pixel_qwen_cliff_filled_20260330_235410", "cliff_sweep", model=MODEL_QWEN)
+    # TPS sweep (4 standard contexts × 5 trials) — standard_sweep, NOT cliff_sweep
+    add_flat(results / "pixel_qwen_tps_20260326_033619", "standard_sweep", model=MODEL_QWEN)
 
     return rows
 
@@ -388,6 +391,12 @@ def collect_quality(results: Path) -> list[dict]:
             benchmark = "custom_qa"
             variant   = key
 
+        # Device: x86_ prefix in benchmark key → x86, otherwise Pixel6a
+        device = "x86" if benchmark.startswith("x86_") else "Pixel6a"
+        # Strip x86_ prefix from benchmark name for clean public schema
+        if benchmark.startswith("x86_"):
+            benchmark = benchmark[len("x86_"):]
+
         # imatrix entries have "imatrix" in the benchmark prefix or suffix
         calibration = "imatrix" if "imatrix" in benchmark.lower() else "standard"
         # Normalise imatrix benchmark name — strip all imatrix decorators
@@ -400,7 +409,7 @@ def collect_quality(results: Path) -> list[dict]:
         rows.append({
             "benchmark":   benchmark,
             "variant":     variant,
-            "device":      "Pixel6a",
+            "device":      device,
             "model":       MODEL_LLAMA,
             "calibration": calibration,
             "accuracy_pct": acc,
@@ -409,12 +418,13 @@ def collect_quality(results: Path) -> list[dict]:
             "status":      entry.get("status", "success"),
         })
 
-    # Deduplicate: keep the last (most recent) entry per (benchmark, variant, calibration).
+    # Deduplicate: keep the last (most recent) entry per (device, benchmark, variant, calibration).
+    # Device must be in the key so that Pixel6a arc_easy and x86 arc_easy are not collapsed.
     # When the same benchmark+variant was re-run, the newer key appears later in the JSON,
     # so last-write-wins preserves the most up-to-date measurement.
     seen: dict = {}
     for row in rows:
-        key = (row["benchmark"], row["variant"], row["calibration"])
+        key = (row["device"], row["benchmark"], row["variant"], row["calibration"])
         seen[key] = row
     return list(seen.values())
 
@@ -580,12 +590,35 @@ def main():
             print(f"  [WARN] pixel_inference: missing variants {missing}")
             issues += 1
 
-    # M4 perplexity not_evaluated entries exist
-    if "perplexity_status" in df_ppl.columns:
-        not_eval = df_ppl[df_ppl["perplexity_status"] == "not_evaluated"]
-        if not_eval.empty:
-            print("  [WARN] perplexity: expected not_evaluated entries for Q4_K_S / Q5_K_M")
+    # All 7 variants should have at least one full-corpus PPL measurement (Pixel or x86)
+    if "perplexity_status" in df_ppl.columns and "corpus" in df_ppl.columns:
+        full_corpus = df_ppl[
+            (df_ppl["perplexity_status"] == "success") &
+            (df_ppl["corpus"] == "wikitext2_full")
+        ]
+        expected_variants = {"Q2_K", "Q3_K_M", "Q4_K_S", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0"}
+        covered = set(full_corpus["variant"].unique())
+        missing_ppl = expected_variants - covered
+        if missing_ppl:
+            print(f"  [WARN] perplexity: variants missing full-corpus PPL: {missing_ppl}")
             issues += 1
+    # Quality split should contain both Pixel6a and x86 rows
+    if "device" in df_quality.columns:
+        devices_found = set(df_quality["device"].unique())
+        if "x86" not in devices_found:
+            print("  [WARN] quality_benchmarks: no x86 rows found — expected x86_* benchmarks")
+            issues += 1
+        if "Pixel6a" not in devices_found:
+            print("  [WARN] quality_benchmarks: no Pixel6a rows found")
+            issues += 1
+    # Qwen Pixel rows should have correct experiment_type split
+    if "model" in df_pixel.columns and "experiment_type" in df_pixel.columns:
+        qwen = df_pixel[df_pixel["model"].str.contains("Qwen", na=False)]
+        if not qwen.empty:
+            qwen_etypes = set(qwen["experiment_type"].unique())
+            if qwen_etypes == {"cliff_sweep"}:
+                print("  [WARN] pixel_inference: Qwen rows all tagged cliff_sweep — TPS rows should be standard_sweep")
+                issues += 1
 
     if issues == 0:
         print("  All checks passed ✓")

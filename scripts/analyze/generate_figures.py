@@ -13,6 +13,7 @@ Figures generated:
 
 import json
 import os
+from pathlib import Path
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -23,7 +24,7 @@ from matplotlib.lines import Line2D
 # ─────────────────────────────────────────────
 # Paths
 # ─────────────────────────────────────────────
-BASE = "/Users/krisdcosta/291_EAI"
+BASE = str(Path(__file__).resolve().parent.parent.parent)
 PIXEL_TPS_DIR  = f"{BASE}/results/pixel_llama_tps_20260325_120022"
 PIXEL_CLIFF_DIR = f"{BASE}/results/pixel_llama_cliff_20260325_060911"
 M4_TPS_DIR     = f"{BASE}/results/m4_llama_tps_20260326_001546"

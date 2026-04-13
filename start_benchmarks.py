@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 import time
 
-PROJECT_ROOT = Path("/Users/krisdcosta/291_EAI")
+PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 datasets = [

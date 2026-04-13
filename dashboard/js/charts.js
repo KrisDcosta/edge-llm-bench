@@ -245,7 +245,11 @@ function renderCliffChart() {
   const showKV     = document.getElementById('cliff-show-kv-quant')?.checked ?? false;
   const showBand   = document.getElementById('cliff-show-threshold')?.checked ?? true;
   const curves     = _cliffData.curves[source] || {};
-  const threshold  = _cliffData.collapse_threshold;
+  // collapse_threshold is now per-source; fall back to legacy flat object for old JSON
+  const thresholdMap = _cliffData.collapse_threshold;
+  const threshold = (thresholdMap && typeof thresholdMap[source] !== 'undefined')
+    ? thresholdMap[source]
+    : thresholdMap;
 
   const datasets = [];
 
@@ -301,7 +305,7 @@ function renderCliffChart() {
   const thresholdPlugin = {
     id: 'thresholdBand',
     beforeDraw(chart) {
-      if (!showBand) return;
+      if (!showBand || !threshold) return;
       const { ctx: c, chartArea, scales: { x } } = chart;
       if (!x || !chartArea) return;
       const x0 = x.getPixelForValue(threshold.start);

@@ -6,7 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path("/Users/krisdcosta/291_EAI")
+PROJECT_ROOT = Path(__file__).resolve().parent
 datasets = [
     ("arc_easy", "data/arc_easy_100.yaml"),
     ("arc_challenge", "data/arc_challenge_100.yaml"),
