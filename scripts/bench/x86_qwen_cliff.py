@@ -3,8 +3,13 @@
 x86_qwen_cliff.py  —  Qwen 2.5 1.5B KV-cache cliff sweep
                        x86_64 CPU · AVX2 · uses llama-bench
 
-Measures decode TPS at 13 context lengths to detect KV-cache cliff behaviour.
+Measures decode TPS at 11 context lengths to detect KV-cache cliff behaviour.
 Method: pp-only + pg combined run per context → derive decode TPS.
+
+Key change from v1: TG_TOKENS raised from 32 → 128.
+  On a fast x86 (i5-1235U at ~20 t/s), 32 tokens = ~1.6s decode window.
+  Any OS scheduling jitter (Windows Defender, background updates) dominates.
+  128 tokens = ~6.4s window → CV typically < 15% instead of 50–80%.
 
 Prerequisites:
   1. llama-bench binary — set LLAMA_BENCH_PATH or add to PATH.
@@ -34,13 +39,12 @@ Usage:
   py -3 scripts/bench/x86_qwen_cliff.py --threads 8   # override thread count
 
 Output:  results/x86_qwen_cliff_<HOSTNAME>_<ts>/cliff_<VARIANT>.jsonl
-Runtime: ~3-5 h  (7 variants x 13 ctx x 5 trials on mid-range x86)
+Runtime: ~4-6 h  (7 variants x 11 ctx x 5 trials, TG=128 on mid-range x86)
 """
 
 import argparse
 import datetime
 import json
-import math
 import os
 import platform
 import shutil
@@ -53,8 +57,14 @@ import time
 # ── Configuration ─────────────────────────────────────────────────────────────
 
 ALL_VARIANTS  = ["Q2_K", "Q3_K_M", "Q4_K_S", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0"]
-CTX_SIZES     = [1024, 1100, 1200, 1250, 1300, 1350, 1400, 1450, 1500, 1550, 1600, 1800, 2048]
-TG_TOKENS     = 32
+
+# Matches Pixel 6a cliff sweep context points for direct cross-device comparison.
+# Starts at 256 to capture the low-context baseline and early cliff onset.
+CTX_SIZES     = [256, 512, 768, 1024, 1200, 1300, 1400, 1500, 1600, 1800, 2048]
+
+# 128 tokens gives ~6s decode window on i5-1235U → CV < 15% (was 32 → CV 50-80%)
+TG_TOKENS     = 128
+
 NUM_TRIALS    = 5
 NGL           = 0        # CPU only
 MODEL_PREFIX  = "Qwen2.5-1.5B-Instruct"
@@ -95,13 +105,11 @@ def find_llama_bench():
 def find_models_dir():
     if "QWEN_MODELS_DIR" in os.environ:
         return os.environ["QWEN_MODELS_DIR"]
-    # Resolve project root (two levels up from this script)
-    script_dir  = os.path.dirname(os.path.abspath(__file__))
+    script_dir   = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.normpath(os.path.join(script_dir, "..", ".."))
     local = os.path.join(project_root, "local-models", "qwen2_5_1_5b_gguf")
     if os.path.isdir(local):
         return local
-    # Fallback legacy path
     return r"C:\temp\qwen2_5_1_5b_gguf"
 
 
@@ -216,8 +224,10 @@ def print_cliff_summary(results_dir, variants):
             r = ctx_map.get(c)
             d = float(r.get("decode_tps", 0)) if r else 0
             p = float(r.get("prefill_tps", 0)) if r else 0
-            cliff = " <- CLIFF" if prev and d > 0 and (prev - d) / prev > 0.10 else ""
-            print(f"    ctx={c:5d}:  decode={d:6.2f}  prefill={p:6.1f}{cliff}")
+            std = float(r.get("decode_std", 0)) if r else 0
+            cv = f"  CV={std/d:.0%}" if d > 0 else ""
+            cliff = "  <- CLIFF" if prev and d > 0 and (prev - d) / prev > 0.10 else ""
+            print(f"    ctx={c:5d}:  decode={d:6.2f}±{std:.2f}{cv}  prefill={p:6.1f}{cliff}")
             if d > 0:
                 prev = d
 
@@ -239,14 +249,12 @@ def main():
 
     threads = args.threads or os.cpu_count() or 4
 
-    # Locate binary
     llama_bench = find_llama_bench()
     if not llama_bench:
         print("FATAL: llama-bench not found.", file=sys.stderr)
         print("  Set LLAMA_BENCH_PATH=<path to llama-bench.exe>", file=sys.stderr)
         sys.exit(1)
 
-    # Locate models
     models_dir = find_models_dir()
     missing = []
     for v in variants:
@@ -260,18 +268,15 @@ def main():
         print("\nDownload with pip install huggingface_hub then see docstring.", file=sys.stderr)
         sys.exit(1)
 
-    # Setup output dir
     host = socket.gethostname()[:12]
     ts   = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    # Resolve results dir relative to project root
     script_dir   = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.normpath(os.path.join(script_dir, "..", ".."))
     results_dir  = os.path.join(project_root, "results", f"x86_qwen_cliff_{host}_{ts}")
     os.makedirs(results_dir, exist_ok=True)
-    log_path = results_dir + ".log"
 
     hr()
-    log(f"x86 CPU  —  Qwen 2.5 1.5B KV-Cache Cliff Sweep")
+    log(f"x86 CPU  —  Qwen 2.5 1.5B KV-Cache Cliff Sweep  (v2: TG={TG_TOKENS})")
     log(f"Host     : {socket.gethostname()}  (x86_64)")
     log(f"Binary   : {llama_bench}")
     log(f"Models   : {models_dir}")
@@ -282,8 +287,8 @@ def main():
     log(f"Results  : {results_dir}")
     hr()
 
-    start_s   = time.time()
-    n_ctx     = len(CTX_SIZES)
+    start_s = time.time()
+    n_ctx   = len(CTX_SIZES)
 
     for v_idx, variant in enumerate(variants, 1):
         model_path  = os.path.join(models_dir, f"{MODEL_PREFIX}-{variant}.gguf")
@@ -302,7 +307,10 @@ def main():
         with open(output_file, "w") as out_f:
             for ctx_idx, ctx in enumerate(CTX_SIZES, 1):
                 pp_tokens = ctx - TG_TOKENS
-                elapsed   = int(time.time() - start_s)
+                if pp_tokens <= 0:
+                    log(f"  [ctx={ctx}] SKIP — ctx too small for TG_TOKENS={TG_TOKENS}")
+                    continue
+                elapsed = int(time.time() - start_s)
 
                 raw = run_llama_bench(
                     llama_bench, model_path,
@@ -318,10 +326,12 @@ def main():
                 out_f.write(json.dumps(record) + "\n")
                 out_f.flush()
 
-                d = record.get("decode_tps", 0)
-                p = record.get("prefill_tps", 0)
+                d   = record.get("decode_tps", 0)
+                std = record.get("decode_std", 0)
+                p   = record.get("prefill_tps", 0)
+                cv  = f"  CV={std/d:.0%}" if d > 0 else ""
                 err = record.get("error", "")
-                status = f"decode={d:.2f} t/s  prefill={p:.1f} t/s" if not err else f"ERROR: {err}"
+                status = f"decode={d:.2f}±{std:.2f}{cv}  prefill={p:.1f}" if not err else f"ERROR: {err}"
                 log(f"  [ctx={ctx} {ctx_idx}/{n_ctx} elapsed={elapsed}s]  {variant}  {status}")
 
         rows = sum(1 for _ in open(output_file) if _.strip())
@@ -333,7 +343,7 @@ def main():
     log("")
     hr()
     log(f"DONE  |  runtime: {elapsed//60}m {elapsed%60}s  |  results: {results_dir}")
-    log(f"Next: commit and push results to the repo branch.")
+    log(f"Next: git add results/x86_qwen_cliff_*  &&  git push")
     hr()
 
 
