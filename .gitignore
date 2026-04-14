@@ -74,3 +74,9 @@ archive/
 
 # Claude Code worktrees (local only, not for CI)
 .claude/worktrees/
+
+# Claude Code local server config (machine-specific)
+.claude/launch.json
+
+# Scratch / temp directory
+tmp/

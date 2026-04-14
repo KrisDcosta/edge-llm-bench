@@ -18,7 +18,7 @@
 > Q6_K Pareto-dominated, KV-cache Q8_0 eliminates cliff at cost of −46% baseline throughput, confirmed on Qwen 2.5 1.5B.
 >
 > **Outputs:** 4,062 individual inference measurements across ARM, x86, Metal · 6 quality benchmarks (all 7 variants, standard + imatrix) · WikiText-2 PPL (full corpus, all 7 variants) ·
-> 17 figures · 17-page IEEE paper · Thermal characterization · Cross-model replication
+> 17 figures · 20-page IEEE paper · Thermal characterization · Cross-model replication
 
 ---
 
@@ -117,7 +117,7 @@
 
 | Document | Status | Location | Notes |
 |----------|--------|----------|-------|
-| **IEEE Paper** | ✅ Complete | `report/report.pdf` | 17 pages; all findings, 0 LaTeX errors |
+| **IEEE Paper** | ✅ Complete | `report/report.pdf` | 20 pages; all findings, 0 LaTeX errors |
 | **Conference Roadmap** | ✅ Updated | `PAPER_ROADMAP.md` | Submission plan MLSys/MobiSys/ATC |
 | **Canonical Results** | ✅ Updated | `results/CANONICAL.md` | Maps every table/figure to source data |
 | **Interactive Dashboard** | ✅ Live | [krisdcosta.github.io/291_EAI](https://krisdcosta.github.io/291_EAI/) | Chart.js · GitHub Pages |
@@ -208,8 +208,8 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 ├── VERIFIED_METRICS_MASTER_TABLE.md       # Ground-truth reference for all paper claims
 │
 ├── report/
-│   ├── report.tex                         # IEEE paper (LaTeX, 17 pages)
-│   ├── report.pdf                         # Compiled 17-page paper ✅
+│   ├── report.tex                         # IEEE paper (LaTeX, 20 pages)
+│   ├── report.pdf                         # Compiled 20-page paper ✅
 │   └── *.aux, *.log                       # LaTeX build artifacts (.gitignored)
 │
 ├── data/
@@ -456,4 +456,4 @@ Research project for DSC 291 (Efficient AI). Contact author for usage permission
 
 ---
 
-**Last Updated:** April 11, 2026 | **Paper:** 17 pages, 0 LaTeX errors | **Status:** All primary experiments complete; paper final draft ready; targeting MLSys 2026 / MobiSys 2027
+**Last Updated:** April 11, 2026 | **Paper:** 20 pages, 0 LaTeX errors | **Status:** All primary experiments complete; paper final draft ready; targeting MLSys 2026 / MobiSys 2027

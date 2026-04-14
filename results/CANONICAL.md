@@ -77,7 +77,7 @@ Per-variant canonical sources (some variants require dedicated reruns; see VERIF
 | x86 PPL (Q2_K 11.73, Q4_K_S 9.74, Q4_K_M 9.75, Q8_0 9.71) | `results/x86_perplexity_results.json` |
 | M4 Metal TPS (Q4_K_S 19.9, Q4_K_M 19.2, Q2_K 17.8, Q8_0 6.4 tok/s) | `results/m4_llama_tps_20260326_001546/` |
 | M4 Metal cliff (flat to +8.5%; Q2_K +8.5%, Q3_K_M +3.4%, others ≤±0.8%; no degradation) | `results/m4_metal_cliff_20260323_015934/` |
-| Pixel Qwen TPS (Q2_K=13.9 fastest, Q6_K=7.25 slowest; non-monotonic ordering replication) | `results/pixel_qwen_tps_20260326_033619/` |
+| Pixel Qwen TPS (Q2_K=16.1 fastest, Q6_K=7.2 slowest at ctx=256, n=5; non-monotonic ordering replication) | `results/pixel_qwen_tps_20260326_033619/` |
 | Pixel Qwen cliff sweep (5 trials, 7 variants × 11 ctx; confirms Q2_K cliff on different model) | `results/pixel_qwen_cliff_filled_20260330_235410/` ✅ canonical |
 
 **Platform metadata:**
