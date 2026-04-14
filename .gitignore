@@ -80,3 +80,11 @@ archive/
 
 # Scratch / temp directory
 tmp/
+
+# Course paper / LaTeX source — not yet public
+report/
+
+# Internal planning and in-progress documents
+PAPER_ROADMAP.md
+VERIFIED_METRICS_MASTER_TABLE.md
+DIRECTION_4_ADAPTIVE_ENGINE.md

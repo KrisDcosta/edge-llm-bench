@@ -4,7 +4,6 @@
 
 [![Dashboard](https://img.shields.io/badge/Dashboard-Live-10B981?style=flat-square)](https://krisdcosta.github.io/291_EAI/)
 [![Dataset](https://img.shields.io/badge/HuggingFace-Dataset-FF6B35?style=flat-square)](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench)
-[![Paper](https://img.shields.io/badge/Paper-17pp%20IEEE-4F8EF7?style=flat-square)](report/report.pdf)
 
 > **Comprehensive benchmarking study:** 7 GGUF K-quant variants (Q2_K–Q8_0) on Google Pixel 6a (Tensor G1 ARM64),
 > with cross-device validation (x86 i5-1235U, Mac M4 Metal) and cross-model validation (Qwen 2.5 1.5B).
@@ -18,7 +17,7 @@
 > Q6_K Pareto-dominated, KV-cache Q8_0 eliminates cliff at cost of −46% baseline throughput, confirmed on Qwen 2.5 1.5B.
 >
 > **Outputs:** 4,062 individual inference measurements across ARM, x86, Metal · 6 quality benchmarks (all 7 variants, standard + imatrix) · WikiText-2 PPL (full corpus, all 7 variants) ·
-> 17 figures · 20-page IEEE paper · Thermal characterization · Cross-model replication
+> 17 analysis figures · Thermal characterization · Cross-model replication (Qwen 2.5 1.5B)
 
 ---
 
@@ -113,15 +112,14 @@
 
 ---
 
-## Paper & Documentation
+## Artifacts
 
-| Document | Status | Location | Notes |
+| Artifact | Status | Location | Notes |
 |----------|--------|----------|-------|
-| **IEEE Paper** | ✅ Complete | `report/report.pdf` | 20 pages; all findings, 0 LaTeX errors |
-| **Conference Roadmap** | ✅ Updated | `PAPER_ROADMAP.md` | Submission plan MLSys/MobiSys/ATC |
-| **Canonical Results** | ✅ Updated | `results/CANONICAL.md` | Maps every table/figure to source data |
-| **Interactive Dashboard** | ✅ Live | [krisdcosta.github.io/291_EAI](https://krisdcosta.github.io/291_EAI/) | Chart.js · GitHub Pages |
-| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 4,062 records · 5 splits |
+| **Interactive Dashboard** | ✅ Live | [krisdcosta.github.io/291_EAI](https://krisdcosta.github.io/291_EAI/) | Chart.js · GitHub Pages · all 7 variants |
+| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 4,062 records · 5 parquet splits |
+| **Canonical Results** | ✅ Updated | `results/CANONICAL.md` | Maps every table/figure to source JSONL |
+| **Plain-English Report** | ✅ Complete | `PROJECT_REPORT_PLAIN_ENGLISH.md` | Full narrative writeup, no jargon |
 
 ---
 
@@ -204,13 +202,8 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 291_EAI/
 ├── README.md                              # This file
-├── PAPER_ROADMAP.md                       # Conference submission roadmap (MLSys/MobiSys/ATC)
-├── VERIFIED_METRICS_MASTER_TABLE.md       # Ground-truth reference for all paper claims
-│
-├── report/
-│   ├── report.tex                         # IEEE paper (LaTeX, 20 pages)
-│   ├── report.pdf                         # Compiled 20-page paper ✅
-│   └── *.aux, *.log                       # LaTeX build artifacts (.gitignored)
+├── CONTRIBUTING.md                        # How to add data, devices, models
+├── PROJECT_REPORT_PLAIN_ENGLISH.md        # Full plain-English project writeup
 │
 ├── data/
 │   ├── wikitext2_full.txt                 # WikiText-2 test corpus (~285K tokens)
@@ -456,4 +449,4 @@ Research project for DSC 291 (Efficient AI). Contact author for usage permission
 
 ---
 
-**Last Updated:** April 11, 2026 | **Paper:** 20 pages, 0 LaTeX errors | **Status:** All primary experiments complete; paper final draft ready; targeting MLSys 2026 / MobiSys 2027
+**Last Updated:** April 14, 2026 | **Status:** All primary experiments complete · Dataset published · Dashboard live
