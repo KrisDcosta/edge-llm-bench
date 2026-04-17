@@ -70,19 +70,40 @@ function renderTpsChart() {
   const device = getToggleValue('tps-device-toggle') || 'all';
   const modelData = _tpsData.data[model] || {};
 
-  const devices = device === 'all'
-    ? DEVICE_COLORS
-    : { [device]: DEVICE_COLORS[device] };
+  const deviceGroup = document.getElementById('tps-device-toggle');
+  if (deviceGroup) {
+    deviceGroup.querySelectorAll('.btn-toggle').forEach(btn => {
+      if (btn.dataset.value === 'all') return;
+      const hasData = Object.values(modelData[btn.dataset.value] || {})
+        .some(v => v?.mean != null);
+      btn.disabled = !hasData;
+      btn.classList.toggle('opacity-40', !hasData);
+      btn.classList.toggle('cursor-not-allowed', !hasData);
+      btn.title = hasData ? '' : `No ${model} Phase 1 TPS data for this device`;
+      if (!hasData && btn.classList.contains('active')) {
+        btn.classList.remove('active');
+        deviceGroup.querySelector('[data-value="all"]')?.classList.add('active');
+      }
+    });
+  }
 
-  const datasets = Object.entries(devices).map(([dev, color]) => {
+  const activeDevice = getToggleValue('tps-device-toggle') || 'all';
+  const devices = activeDevice === 'all'
+    ? DEVICE_COLORS
+    : { [activeDevice]: DEVICE_COLORS[activeDevice] };
+
+  const datasets = Object.entries(devices).flatMap(([dev, color]) => {
     const devData = modelData[dev] || {};
+    const values = VARIANT_ORDER.map(v => devData[v]?.mean ?? null);
+    if (!values.some(v => v != null)) return [];
     return {
       label: dev === 'Pixel6a' ? 'Pixel 6a' : dev === 'M4Mac' ? 'M4 Mac (GPU)' : dev === 'M4Mac_CPU' ? 'M4 Mac (CPU)' : 'x86',
       backgroundColor: color + 'CC',
       borderColor:     color,
       borderWidth: 1.5,
       borderRadius: 4,
-      data: VARIANT_ORDER.map(v => devData[v]?.mean ?? null),
+      data: values,
+      _dev: dev,
       // Error bar data stored as custom property, drawn manually
       _errPos: VARIANT_ORDER.map(v => devData[v]?.std ?? null),
       _errNeg: VARIANT_ORDER.map(v => devData[v]?.std ?? null),
@@ -125,7 +146,7 @@ function renderTpsChart() {
               const ds = item.dataset;
               const n  = _tpsData.data[
                 getToggleValue('tps-model-toggle') || 'Llama'
-              ]?.[Object.keys(devices)[item.datasetIndex]]?.[VARIANT_ORDER[item.dataIndex]]?.n;
+              ]?.[ds._dev]?.[VARIANT_ORDER[item.dataIndex]]?.n;
               return n != null ? `n = ${n} trials` : '';
             },
           },
@@ -567,14 +588,20 @@ function renderHeatmap() {
   const ctxData   = modelData[ctxKey] || {};
   const x86Tps    = _heatmapData.x86_tps?.[model] || {};
 
-  // For Qwen we only have the ctx=256 reference — show it at ctx=256, '—' everywhere else.
+  // x86 Qwen cliff attempts are excluded from Phase 1, so hide x86 for Qwen
+  // instead of rendering dash-filled cells that look like missing evidence.
   const x86HasCliffData = model === 'Llama';
 
   // Update slider label
   const label = document.getElementById('heatmap-ctx-label');
   if (label) label.textContent = ctx ? `ctx=${ctx}` : 'ctx=–';
 
-  const devices  = ['Pixel6a', 'M4Mac', 'x86'];
+  const candidateDevices = x86HasCliffData ? ['Pixel6a', 'M4Mac', 'x86'] : ['Pixel6a', 'M4Mac'];
+  const devices = candidateDevices.filter(d => {
+    const devRows = ctxData[d];
+    if (devRows && VARIANT_ORDER.some(v => devRows[v]?.mean != null)) return true;
+    return d === 'x86' && x86HasCliffData && VARIANT_ORDER.some(v => x86Tps[v] != null);
+  });
   const devLabel = { Pixel6a: 'Pixel 6a', M4Mac: 'M4 Mac (GPU)', x86: 'x86' };
 
   // Collect all values for colour scaling (exclude static x86 fallback at
@@ -629,11 +656,8 @@ function renderHeatmap() {
     const rowHL  = isHL === v ? 'highlighted' : '';
     const cells  = devices.map(d => {
       const hasCtxData  = d === 'x86' && ctxData.x86?.[v]?.mean != null;
-      // Show static ctx=256 value only at ctx=256; at other contexts show '—'
-      // when no cliff-sweep data exists (i.e. Qwen x86)
       const canShowFallback = x86HasCliffData || ctx === 256;
       const isX86Ref    = d === 'x86' && !hasCtxData && x86Tps[v] != null && canShowFallback;
-      const noData      = d === 'x86' && !hasCtxData && !canShowFallback;
 
       const val = d === 'x86'
         ? (hasCtxData ? ctxData.x86[v].mean : canShowFallback ? x86Tps[v] : null)
@@ -641,9 +665,9 @@ function renderHeatmap() {
       const bg  = heatColor(val);
       const n   = d === 'x86' ? ctxData.x86?.[v]?.n : ctxData[d]?.[v]?.n;
       const tt  = isX86Ref
-        ? `title="ctx=256 reference only — run x86_qwen_cliff.py to collect multi-context data"`
+        ? `title="ctx=256 reference only"`
         : (n != null ? `title="n=${n} trials"` : '');
-      return `<td style="background:${noData ? 'transparent' : bg}" ${tt}>
+      return `<td style="background:${bg}" ${tt}>
         ${val != null ? val.toFixed(1) : '—'}
         ${isX86Ref
           ? `<span class="text-gray-500 text-xs"> †</span>`

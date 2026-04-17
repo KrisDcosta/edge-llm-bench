@@ -334,12 +334,11 @@
           <span>Slower</span>
           <div class="heatmap-legend-bar"></div>
           <span>Faster</span>
-          <span class="ml-4 text-gray-600">— = no data at this context</span>
         </div>
         <p class="text-xs text-gray-500 mt-2">
           Llama x86: cliff sweep data available (n=5 trials per context). ·
-          Qwen x86 <span class="text-gray-400">†</span>: ctx=256 reference only — no multi-context sweep collected; value is constant across slider positions.
-          Both models benchmarked on Intel i5-1235U, 6 threads.
+          Qwen x86 cliff attempts are excluded from Phase 1 and hidden from this heatmap rather than shown as empty cells.
+          M4 Qwen appears only at contexts measured in the validated Metal cliff run.
         </p>
       </div>
 
