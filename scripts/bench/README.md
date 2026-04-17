@@ -31,8 +31,8 @@ Scripts are labeled: **Active** (used in paper), **Exploratory** (experimental),
 |--------|--------|-------|
 | `pixel_qwen_tps.sh` | 🔵 Exploratory | Qwen 2.5 1.5B TPS on Pixel — dataset supplement |
 | `pixel_wikitext_ppl.sh` | 🔵 Exploratory | Full WikiText-2 PPL via ADB — Pixel PPL column (Q2_K/Q3_K_M collected; Q4–Q8 pending) |
-| `m4_qwen_tps.sh` | 🔵 Exploratory | Qwen 2.5 1.5B TPS on M4 Metal — dataset supplement |
-| `m4_qwen_cliff.sh` | 🔵 Exploratory | Qwen cliff sweep on M4 Metal — dataset supplement |
+| `m4_qwen_tps.sh` | ✅ Validated extension | Qwen 2.5 1.5B TPS on M4 Metal — canonical run: `results/m4_qwen_tps_20260415_130955/` |
+| `m4_qwen_cliff.sh` | ✅ Validated extension | Qwen cliff sweep on M4 Metal — canonical run: `results/m4_qwen_cliff_20260416_021323/` |
 | `m4_cpu_cliff.sh` | 🔵 Exploratory | Llama 3.2 3B cliff on M4 CPU (ngl=0) — collected 2026-04 |
 | `m4_cpu_tps.sh` | 🔵 Exploratory | Llama 3.2 3B TPS on M4 CPU — collected 2026-04 |
 | `m4_cpu_qwen_cliff.sh` | 🔵 Exploratory | Qwen 2.5 1.5B cliff on M4 CPU — **pending data collection** |
@@ -52,8 +52,9 @@ Scripts ready to run — data not yet collected:
 |---|--------|----------|-----------------|---------|
 | 1 | `x86_qwen_cliff.py` | Windows x86 (i5-1235U) | ~4–6 h | Qwen KV-cache cliff sweep, 11 ctx × 5 trials × 7 variants (TG=128 rerun) |
 | 2 | `pixel_wikitext_ppl.sh Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0` | Pixel 6a via ADB | ~5–7 h | Pixel full-corpus PPL for Q4–Q8 (Q2_K/Q3_K_M already collected) |
-| 3 | `m4_qwen_tps.sh` | M4 Mac | ~30–40 min | Qwen GPU TPS sweep, 4 contexts × 10 trials × 7 variants |
-| 4 | `m4_cpu_qwen_cliff.sh` | M4 Mac | ~2–4 h | Qwen CPU cliff sweep, 13 ctx × 5 trials × 7 variants |
+| 3 | M4 Qwen ingestion promotion | M4 Mac | TBD | TPS and cliff data are validated; parquet/dashboard integration still pending |
+| 4 | `m4_cpu_tps.sh` | M4 Mac | ~90–120 min | M4 CPU TPS rerun under idle conditions |
+| 5 | M4 quality runner redesign | M4 Mac | TBD | Existing runner is invalid because it reloads one model per question |
 
 See **Running Instructions** section below for step-by-step commands.
 
@@ -68,6 +69,8 @@ Quick reference:
 - **Table 2 cliff**: `results/pixel_llama_cliff_filled_20260326_132101/`
 - **Table 3 quality**: `results/quality_scores.json`
 - **Table 4 M4**: `results/m4_llama_tps_20260326_001546/`
+- **M4 Qwen TPS extension**: `results/m4_qwen_tps_20260415_130955/`
+- **M4 Qwen cliff extension**: `results/m4_qwen_cliff_20260416_021323/`
 
 ---
 

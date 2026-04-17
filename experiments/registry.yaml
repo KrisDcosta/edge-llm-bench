@@ -929,20 +929,20 @@ experiments:
     threads: 4
     status: complete
     data_sources:
-      - results/m4_cpu_tps_20260406_203938/tps_Q2_K.jsonl
-      - results/m4_cpu_tps_20260406_203938/tps_Q3_K_M.jsonl
-      - results/m4_cpu_tps_20260406_203938/tps_Q4_K_S.jsonl
-      - results/m4_cpu_tps_20260406_203938/tps_Q4_K_M.jsonl
-      - results/m4_cpu_tps_20260406_203938/tps_Q5_K_M.jsonl
-      - results/m4_cpu_tps_20260406_203938/tps_Q6_K.jsonl
-      - results/m4_cpu_tps_20260406_203938/tps_Q8_0.jsonl
+      - results/m4_cpu_tps_20260415_231524/tps_Q2_K.jsonl
+      - results/m4_cpu_tps_20260415_231524/tps_Q3_K_M.jsonl
+      - results/m4_cpu_tps_20260415_231524/tps_Q4_K_S.jsonl
+      - results/m4_cpu_tps_20260415_231524/tps_Q4_K_M.jsonl
+      - results/m4_cpu_tps_20260415_231524/tps_Q5_K_M.jsonl
+      - results/m4_cpu_tps_20260415_231524/tps_Q6_K.jsonl
+      - results/m4_cpu_tps_20260415_231524/tps_Q8_0.jsonl
     notes: |
-      ✅ COMPLETE (2026-04-06 21:56, runtime 77m 13s).
-      tg128 results (t/s): Q4_K_S=13.16, Q8_0=12.60, Q4_K_M=12.51, Q2_K=12.31,
-        Q3_K_M=11.48, Q5_K_M=10.59, Q6_K=9.29. All n=10, no corrupt values.
-      Key finding: Q8_0 Metal (6.39) is 0.51x SLOWER than M4 CPU (12.60).
-        Q6_K Metal (7.02) is 0.76x CPU (9.29). Metal hurts high-bit variants.
-      Integrated into gpu_vs_cpu_comparison.json and report.tex §8 cross-platform table.
+      ✅ COMPLETE (2026-04-15 23:57, runtime 42m 31s).
+      tg128 results (t/s): Q2_K=27.08, Q4_K_S=25.68, Q3_K_M=23.67, Q4_K_M=22.29,
+        Q8_0=18.80, Q5_K_M=15.80, Q6_K=14.97. All n=10, no corrupt values.
+      Key finding: CPU-only M4 decoding is non-monotonic by quantization level. Q8_0 CPU
+        remains faster than Q8_0 Metal in the validated Phase 1 evidence set.
+      Integrated into dataset/m4_inference.parquet, dashboard JSON, and the canonical release manifest.
 
   # ===========================================================================
   # GROUP 10: GAP-5 / GAP-6 — medium priority strengtheners

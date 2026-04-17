@@ -52,10 +52,13 @@ INFERENCE_COLS = [
     "trial",            # trial index (1-based)
     "threads",          # thread count (null if not varied)
     "decode_tps",       # tokens / second during generation
+    "decode_tps_std",   # stddev for pre-aggregated rows (null for individual trials)
     "prefill_tps",      # tokens / second during prompt processing
+    "prefill_tps_std",  # stddev for pre-aggregated rows (null for individual trials)
     "ttft_s",           # time to first token (seconds)
     "e2e_s",            # end-to-end latency (seconds)
     "n_output_tokens",  # number of generated tokens
+    "n_trials",         # number of trials represented by this row
     "experiment_type",  # cliff_sweep | standard_sweep | thread_sweep | kv_cache_quant | tps_sweep
     "kv_quant",         # KV cache quantization setting, null = default
     "ngl",              # GPU layers offloaded (M4 Metal only)
@@ -118,12 +121,51 @@ def parse_flat(rec: dict, source_file: str, experiment_type: str,
         "trial":           rec.get("trial"),
         "threads":         rec.get("threads"),
         "decode_tps":      decode,
+        "decode_tps_std":  rec.get("decode_std"),
         "prefill_tps":     rec.get("prefill_tps"),
+        "prefill_tps_std": rec.get("prefill_std"),
         "ttft_s":          None,
         "e2e_s":           None,
         "n_output_tokens": rec.get("n_output_tokens"),
+        "n_trials":        rec.get("n_trials", 1),
         "experiment_type": experiment_type,
         "kv_quant":        rec.get("kv_quant"),
+        "ngl":             rec.get("ngl"),
+        "ts":              rec.get("ts"),
+        "source_file":     source_file,
+    }
+
+
+def parse_tps_aggregate(rec: dict, source_file: str, experiment_type: str,
+                        device: str, model: str) -> Optional[dict]:
+    """Parse pre-aggregated llama-bench TPS rows produced by M4/x86 TPS scripts."""
+    if rec.get("test_type") != "tg":
+        return None
+    decode = rec.get("tps_mean")
+    if not decode or decode <= 0:
+        return None
+    variant = rec.get("variant")
+    if not variant:
+        return None
+    return {
+        "device":          device or rec.get("device"),
+        "backend":         rec.get("backend", "CPU"),
+        "model":           model,
+        "variant":         variant,
+        # Pure decode rows use n_prompt=0; keep context_len=0 to make the contract explicit.
+        "context_len":     rec.get("context", 0),
+        "trial":           None,
+        "threads":         rec.get("threads"),
+        "decode_tps":      decode,
+        "decode_tps_std":  rec.get("tps_std"),
+        "prefill_tps":     None,
+        "prefill_tps_std": None,
+        "ttft_s":          None,
+        "e2e_s":           None,
+        "n_output_tokens": rec.get("n_gen"),
+        "n_trials":        rec.get("n_trials", 1),
+        "experiment_type": experiment_type,
+        "kv_quant":        None,
         "ngl":             rec.get("ngl"),
         "ts":              rec.get("ts"),
         "source_file":     source_file,
@@ -157,10 +199,13 @@ def parse_nested_v1(rec: dict, source_file: str) -> Optional[dict]:
         "trial":           rec.get("trial", {}).get("trial_index"),
         "threads":         None,
         "decode_tps":      decode,
+        "decode_tps_std":  None,
         "prefill_tps":     metrics.get("prefill_tps"),
+        "prefill_tps_std": None,
         "ttft_s":          metrics.get("ttft_s"),
         "e2e_s":           metrics.get("e2e_s"),
         "n_output_tokens": rec.get("tokens", {}).get("output_tokens"),
+        "n_trials":        1,
         "experiment_type": "standard_sweep",
         "kv_quant":        None,
         "ngl":             None,
@@ -185,8 +230,46 @@ def collect_pixel(results: Path, verbose: bool) -> list[dict]:
             if verbose:
                 print(f"    {f.name}: +{len(rows)} total so far")
 
-    # 1. Canonical cliff (primary Pixel dataset — n=10, provenance-documented)
-    add_flat(results / "pixel_llama_cliff_filled_canonical_n10", "cliff_sweep")
+    def add_variant_files(directory: Path, etype: str, variants: list[str], model: str = MODEL_LLAMA):
+        if not directory.exists():
+            return
+        for variant in variants:
+            file_path = directory / f"cliff_filled_{variant}.jsonl"
+            if not file_path.exists():
+                if verbose:
+                    print(f"    [warn] missing {file_path.name} in {directory.name}")
+                continue
+            for rec in load_jsonl(file_path, verbose):
+                r = parse_flat(rec, file_path.name, etype, device="Pixel6a", model=model)
+                if r:
+                    rows.append(r)
+            if verbose:
+                print(f"    {file_path.name}: +{len(rows)} total so far")
+
+    # 1. Canonical cliff (primary Pixel dataset — per-variant clean sources only)
+    # Q2_K, Q3_K_M, Q4_K_S, Q8_0 come from the clean n=10 batch.
+    # Q4_K_M, Q5_K_M, and Q6_K require dedicated reruns because the batch baselines are
+    # thermally distorted or otherwise superseded. See results/CANONICAL.md.
+    add_variant_files(
+        results / "pixel_llama_cliff_filled_20260329_162354",
+        "cliff_sweep",
+        ["Q2_K", "Q3_K_M", "Q4_K_S", "Q8_0"],
+    )
+    add_variant_files(
+        results / "pixel_llama_cliff_filled_20260326_132101",
+        "cliff_sweep",
+        ["Q4_K_M"],
+    )
+    add_variant_files(
+        results / "pixel_llama_cliff_filled_20260410_142752",
+        "cliff_sweep",
+        ["Q5_K_M"],
+    )
+    add_variant_files(
+        results / "pixel_llama_cliff_filled_20260330_212946",
+        "cliff_sweep",
+        ["Q6_K"],
+    )
 
     # 2. Thread sweep (Q4_K_M, threads 1/2/4/8, ctx=256)
     add_flat(results / "pixel_threads_q4km_20260406_100148", "thread_sweep")
@@ -194,15 +277,10 @@ def collect_pixel(results: Path, verbose: bool) -> list[dict]:
     # 3. KV cache quantization mitigation
     add_flat(results / "pixel_kvcache_quant_20260331_062405", "kv_cache_quant")
 
-    # 4. Standard sweep — early run-* files (nested schema v1.0)
-    for f in sorted(results.glob("run-*.jsonl")):
-        before = len(rows)
-        for rec in load_jsonl(f, verbose):
-            r = parse_nested_v1(rec, f.name)
-            if r:
-                rows.append(r)
-        if verbose:
-            print(f"    {f.name}: +{len(rows)-before} records")
+    # 4. Standard sweep — canonical Pixel TPS batch
+    # Earlier run-*.jsonl files are kept in /results for audit, but the public dataset
+    # uses the canonical tps directory cited in README.md and results/CANONICAL.md.
+    add_flat(results / "pixel_llama_tps_20260325_120022", "standard_sweep")
 
     # 5. Qwen cross-model validation (Pixel)
     # IMPORTANT: Use ONLY the clean run (235410).
@@ -233,6 +311,17 @@ def collect_m4(results: Path, verbose: bool) -> list[dict]:
                 if r:
                     rows.append(r)
 
+    def add_tps_aggregate(directory: Path, etype: str, model: str):
+        if not directory.exists():
+            if verbose:
+                print(f"    [warn] missing {directory.name}")
+            return
+        for f in sorted(Path(directory).glob("tps_*.jsonl")):
+            for rec in load_jsonl(f, verbose):
+                r = parse_tps_aggregate(rec, f.name, etype, device="M4Mac", model=model)
+                if r:
+                    rows.append(r)
+
     # M4 Metal cliff sweeps — Llama
     for pattern in ("m4_metal_cliff_*", "m4_llama_cliff_*"):
         for d in sorted(results.glob(pattern)):
@@ -246,21 +335,13 @@ def collect_m4(results: Path, verbose: bool) -> list[dict]:
     for d in sorted(results.glob("m4_llama_tps_*")):
         add_flat(d, "tps_sweep")
 
-    # M4 CPU TPS sweeps — Llama (ngl=0, context_len=0, pre-aggregated)
-    for d in sorted(results.glob("m4_cpu_tps_*")):
-        add_flat(d, "standard_sweep")
+    # M4 CPU TPS — Llama, clean idle rerun (ngl=0, n=10, tg128).
+    # Older M4 CPU TPS attempts remain in /results for audit but are not public evidence.
+    add_tps_aggregate(results / "m4_cpu_tps_20260415_231524", "standard_sweep", MODEL_LLAMA)
 
-    # M4 Qwen cross-model cliff (contaminated: all trial=NaN; excluded from dashboard
-    # bake via bake_dashboard_data.py comment, but kept in parquet for audit trail)
-    for pattern in ("m4_metal_qwen_cliff_*", "m4_qwen_cliff_*"):
-        for d in sorted(results.glob(pattern)):
-            add_flat(d, "cliff_sweep", model=MODEL_QWEN)
-    # M4 Qwen TPS sweep — standard_sweep, NOT cliff_sweep.
-    # NOTE: m4_qwen_tps_* files use a pre-aggregated format (tps_mean/tps_std/n_trials)
-    # rather than per-trial decode_tps, so parse_flat currently drops all rows silently.
-    # TODO: add a parse_aggregated_tps() path when ingesting this data is needed.
-    for d in sorted(results.glob("m4_qwen_tps_*")):
-        add_flat(d, "standard_sweep", model=MODEL_QWEN)
+    # M4 Qwen extension — promoted after clean reruns on 2026-04-15/16.
+    add_tps_aggregate(results / "m4_qwen_tps_20260415_130955", "standard_sweep", MODEL_QWEN)
+    add_flat(results / "m4_qwen_cliff_20260416_021323", "cliff_sweep", model=MODEL_QWEN)
 
     return rows
 
@@ -288,10 +369,13 @@ def collect_x86(results: Path) -> list[dict]:
                 "trial":           1,
                 "threads":         meta.get("threads"),
                 "decode_tps":      decode,
+                "decode_tps_std":  None,
                 "prefill_tps":     result.get("prefill_tps"),
+                "prefill_tps_std": None,
                 "ttft_s":          None,
                 "e2e_s":           None,
                 "n_output_tokens": None,
+                "n_trials":        1,
                 "experiment_type": "standard_sweep",
                 "kv_quant":        None,
                 "ngl":             None,
@@ -321,10 +405,13 @@ def collect_x86(results: Path) -> list[dict]:
                     "trial":           rec.get("trial"),
                     "threads":         rec.get("threads"),
                     "decode_tps":      decode,
+                    "decode_tps_std":  rec.get("decode_std"),
                     "prefill_tps":     rec.get("prefill_tps"),
+                    "prefill_tps_std": rec.get("prefill_std"),
                     "ttft_s":          None,
                     "e2e_s":           None,
                     "n_output_tokens": rec.get("n_output_tokens"),
+                    "n_trials":        rec.get("n_trials", 1),
                     "experiment_type": "cliff_sweep",
                     "kv_quant":        None,
                     "ngl":             None,
@@ -358,10 +445,13 @@ def collect_x86(results: Path) -> list[dict]:
                     "trial":           1,
                     "threads":         rec.get("threads"),
                     "decode_tps":      decode,
+                    "decode_tps_std":  rec.get("tps_std"),
                     "prefill_tps":     None,
+                    "prefill_tps_std": None,
                     "ttft_s":          None,
                     "e2e_s":           None,
                     "n_output_tokens": None,
+                    "n_trials":        rec.get("n_trials", 1),
                     "experiment_type": "standard_sweep",
                     "kv_quant":        None,
                     "ngl":             rec.get("ngl", 0),
@@ -395,8 +485,8 @@ def collect_quality(results: Path) -> list[dict]:
         if ":" in key:
             benchmark, variant = key.split(":", 1)
         else:
-            benchmark = "custom_qa"
-            variant   = key
+            # Bare keys are exploratory ad-hoc QA and are not part of the public dataset.
+            continue
 
         # Device: x86_ prefix in benchmark key → x86, otherwise Pixel6a
         device = "x86" if benchmark.startswith("x86_") else "Pixel6a"
@@ -412,6 +502,10 @@ def collect_quality(results: Path) -> list[dict]:
                          .replace("imatrix_", "")      # imatrix_boolq_all7_imatrix → boolq_all7_imatrix
                          .replace("_all7_imatrix", "")  # boolq_all7_imatrix → boolq
                          .replace("_imatrix", ""))      # boolq_imatrix → boolq, truthfulqa_imatrix → truthfulqa
+
+        # Public schema uses the cleaned benchmark name.
+        if benchmark == "arc_easy_fixed":
+            benchmark = "arc_easy"
 
         rows.append({
             "benchmark":   benchmark,
@@ -626,6 +720,14 @@ def main():
             if qwen_etypes == {"cliff_sweep"}:
                 print("  [WARN] pixel_inference: Qwen rows all tagged cliff_sweep — TPS rows should be standard_sweep")
                 issues += 1
+    # M4 Qwen extension should be deliberately present after promotion.
+    if "model" in df_m4.columns:
+        m4_qwen_rows = df_m4[df_m4["model"].str.contains("Qwen", na=False)]
+        qwen_counts = m4_qwen_rows["experiment_type"].value_counts().to_dict()
+        expected_qwen_counts = {"cliff_sweep": 91, "standard_sweep": 7}
+        if qwen_counts != expected_qwen_counts:
+            print(f"  [WARN] m4_inference: M4 Qwen counts mismatch: {qwen_counts}, expected {expected_qwen_counts}")
+            issues += 1
 
     if issues == 0:
         print("  All checks passed ✓")

@@ -44,6 +44,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
+NUMERIC_TO_LETTER = {"1": "A", "2": "B", "3": "C", "4": "D"}
 
 # ---------------------------------------------------------------------------
 # HuggingFace dataset URLs (parquet files, no auth needed for public datasets)
@@ -120,10 +121,12 @@ def download_arc_easy(count: int = 100) -> list[dict]:
         question = row["question"]
         choices_obj = row["choices"]
 
-        # choices is {"text": [...], "label": [...]}
-        labels = choices_obj["label"]   # ["A", "B", "C", "D"]
-        texts  = choices_obj["text"]    # ["answer text", ...]
-        correct_label = row["answerKey"]  # "A", "B", "C", or "D"
+        # choices is {"text": [...], "label": [...]}; ARC sometimes uses
+        # numeric labels, so normalize everything to A/B/C/D.
+        raw_labels = choices_obj["label"]
+        labels = [NUMERIC_TO_LETTER.get(str(lbl), str(lbl)) for lbl in raw_labels]
+        texts = choices_obj["text"]
+        correct_label = NUMERIC_TO_LETTER.get(str(row["answerKey"]), str(row["answerKey"]))
 
         # Build prompt
         choice_lines = "  ".join(f"{lbl}) {txt}" for lbl, txt in zip(labels, texts))

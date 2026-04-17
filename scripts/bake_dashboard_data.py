@@ -105,6 +105,28 @@ def agg(series: pd.Series) -> dict:
     }
 
 
+def agg_rows(df: pd.DataFrame, value_col: str = "decode_tps", std_col: str = "decode_tps_std") -> dict:
+    """Return stats, preserving std/n_trials for pre-aggregated benchmark rows."""
+    if df.empty or value_col not in df.columns:
+        return {"mean": None, "std": None, "min": None, "max": None, "n": 0}
+    s = df[value_col].dropna()
+    if s.empty:
+        return {"mean": None, "std": None, "min": None, "max": None, "n": 0}
+    if len(df) == 1:
+        row = df.iloc[0]
+        n_trials = row.get("n_trials")
+        n = int(n_trials) if pd.notna(n_trials) and int(n_trials) > 0 else 1
+        std = row.get(std_col) if std_col in df.columns else None
+        return {
+            "mean": safe_float(row[value_col]),
+            "std":  safe_float(std),
+            "min":  safe_float(row[value_col]),
+            "max":  safe_float(row[value_col]),
+            "n":    n,
+        }
+    return agg(s)
+
+
 def ordered_variants(variants) -> list[str]:
     seen = set(variants)
     return [v for v in VARIANT_ORDER if v in seen]
@@ -134,7 +156,7 @@ m4_cpu_cliff = m4_llama[
     (m4_llama["ngl"] == 0)
 ]
 
-# M4 CPU TPS sweep (ngl=0, 4 threads, 2026-04-06 run) — used for bar chart baselines
+# M4 CPU TPS sweep (ngl=0, 4 threads, 2026-04-15 clean rerun) — used for bar chart baselines
 # 7 rows: pure decode (n_prompt=0, n_gen=128), n_trials=10 pre-aggregated, context_len=0
 # These are thermally settled reference measurements; cliff_sweep ctx=256 is inflated by
 # CPU boost state (Q4_K_S: 25.19 cliff vs 13.16 TPS sweep).
@@ -143,6 +165,17 @@ m4_cpu_tps_sweep = m4_llama[
     (m4_llama["backend"] == "CPU") &
     (m4_llama["ngl"] == 0) &
     (m4_llama["context_len"] == 0)
+]
+
+m4_qwen_tps_sweep = m4_qwen[
+    (m4_qwen["experiment_type"] == "standard_sweep") &
+    (m4_qwen["backend"] == "Metal") &
+    (m4_qwen["context_len"] == 0)
+]
+
+m4_qwen_cliff = m4_qwen[
+    (m4_qwen["experiment_type"] == "cliff_sweep") &
+    (m4_qwen["backend"] == "Metal")
 ]
 
 # M4 canonical cliff: filter to the single clean benchmark run from 2026-03-23.
@@ -202,7 +235,7 @@ def bake_tps_by_variant():
                 "_all": "Metal GPU, filled-context cliff_sweep at ctx=1024 (canonical run 2026-03-23, n=5)",
             },
             "M4Mac_CPU": {
-                "_all": "CPU (ngl=0, 4 threads), TPS sweep (n_prompt=0, n_gen=128, n=10, 2026-04-06). Thermally settled reference. Cliff sweep ctx=256 excluded — inflated by CPU boost state.",
+                "_all": "CPU (ngl=0, 4 threads), TPS sweep (n_prompt=0, n_gen=128, n=10, 2026-04-15). Clean idle rerun.",
             },
             "x86": {
                 "_all": "cliff_sweep ctx=256, mean of n=5 trials",
@@ -229,31 +262,31 @@ def bake_tps_by_variant():
         pixel_tps = {}
         for v in VARIANT_ORDER:
             if v in _CLIFF_RELIABLE_VARIANTS:
-                grp = p_cliff[p_cliff["variant"] == v]["decode_tps"]
+                grp = p_cliff[p_cliff["variant"] == v]
             else:
-                grp = p_std[p_std["variant"] == v]["decode_tps"]
+                grp = p_std[p_std["variant"] == v]
             if not grp.empty:
-                pixel_tps[v] = agg(grp)
+                pixel_tps[v] = agg_rows(grp)
         model_data["Pixel6a"] = pixel_tps
 
-        # M4 @ ctx=1024 canonical cliff sweep (cleaned, n=5 per variant)
-        # Note: M4 Qwen cliff data in parquet has no trial-numbered rows — falls back
-        # to NaN-trial contaminated rows if Qwen is requested; return empty for Qwen.
+        # M4 @ ctx=1024 canonical cliff sweep for Llama; clean TPS sweep for Qwen.
         m4_tps = {}
         if model_name == MODEL_LLAMA:
             m = m4_cliff[m4_cliff["context_len"] == 1024]
             for v, grp in m.groupby("variant"):
-                m4_tps[v] = agg(grp["decode_tps"])
-        # Qwen M4 cliff data is all NaN-trial contaminated rows — return empty
+                m4_tps[v] = agg_rows(grp)
+        elif model_name == MODEL_QWEN:
+            for v, grp in m4_qwen_tps_sweep.groupby("variant"):
+                m4_tps[v] = agg_rows(grp)
         model_data["M4Mac"] = m4_tps
 
-        # M4Mac CPU — TPS sweep (ngl=0, 4 threads, n=10, 2026-04-06) — Llama only
+        # M4Mac CPU — TPS sweep (ngl=0, 4 threads, n=10, 2026-04-15) — Llama only
         # Uses standard_sweep rows (context_len=0, pure decode) as thermally settled baseline.
         # cliff_sweep ctx=256 excluded: inflated by CPU boost state (Q4_K_S: 25.19 vs 13.16).
         m4_cpu_tps = {}
         if model_name == MODEL_LLAMA:
             for v, grp in m4_cpu_tps_sweep.groupby("variant"):
-                m4_cpu_tps[v] = agg(grp["decode_tps"])
+                m4_cpu_tps[v] = agg_rows(grp)
         model_data["M4Mac_CPU"] = m4_cpu_tps
 
         # x86 @ ctx=256 cliff sweep — use mean of n=5 trials (Llama only; no Qwen on x86)
@@ -265,7 +298,7 @@ def bake_tps_by_variant():
                 (x86["context_len"] == 256)
             ]
             for v, grp in x_cliff256.groupby("variant"):
-                x86_tps[v] = agg(grp["decode_tps"])
+                x86_tps[v] = agg_rows(grp)
         model_data["x86"] = x86_tps
 
         result["data"][model_label] = model_data
@@ -294,6 +327,7 @@ def bake_cliff_curves():
             "x86_Llama":     {"start": 1300, "end": 1400,
                               "label": "x86 KV-cache collapse zone"},
             "M4Mac_Llama":   None,
+            "M4Mac_Qwen":    None,
         },
         "curves": {},
     }
@@ -310,9 +344,8 @@ def bake_cliff_curves():
             (pixel["experiment_type"] == "cliff_sweep")
         ],
         "M4Mac_Llama":     m4_cliff,       # Metal GPU canonical run (ts-filtered, n=5/ctx)
+        "M4Mac_Qwen":      m4_qwen_cliff,  # Metal GPU clean Qwen rerun (2026-04-16, n=5/ctx)
         "M4Mac_CPU_Llama": m4_cpu_cliff,  # CPU (ngl=0, 4 threads, 2026-04-09, n_trials=5 pre-aggregated)
-        # M4Mac Qwen cliff rows all have trial=NaN (contaminated llama-bench rows) — exclude
-        # "M4Mac_Qwen": excluded,
         "x86_Llama":     x86_cliff_df,
     }
 
@@ -324,8 +357,8 @@ def bake_cliff_curves():
             v_df = df[df["variant"] == variant]
             points = []
             for ctx in sorted(v_df["context_len"].dropna().unique()):
-                g = v_df[v_df["context_len"] == ctx]["decode_tps"]
-                stats = agg(g)
+                ctx_df = v_df[v_df["context_len"] == ctx]
+                stats = agg_rows(ctx_df)
                 if stats["mean"] is not None:
                     points.append({"context": int(ctx), **stats})
             series[variant] = points
@@ -426,6 +459,7 @@ def bake_cross_device():
     all_contexts = sorted(set(
         list(pixel_cliff["context_len"].unique()) +
         list(m4_cliff["context_len"].unique()) +
+        list(m4_qwen_cliff["context_len"].dropna().unique()) +
         list(x86_cliff_llama["context_len"].dropna().unique())
     ))
 
@@ -462,9 +496,7 @@ def bake_cross_device():
         ("Llama", pixel_cliff, m4_cliff),
         ("Qwen",
          pixel[(pixel["model"] == MODEL_QWEN) & (pixel["experiment_type"] == "cliff_sweep")],
-         # M4 Qwen cliff rows all have trial=NaN (contaminated llama-bench output rows);
-         # exclude entirely — renders as null/— in heatmap, which is correct.
-         m4.iloc[0:0]),  # empty with same columns
+         m4_qwen_cliff),
     ]:
         x86_src = x86_cliff_llama if model_label == "Llama" else pd.DataFrame()
 
@@ -479,24 +511,24 @@ def bake_cross_device():
                 g = pixel_src[
                     (pixel_src["variant"] == v) &
                     (pixel_src["context_len"] == ctx)
-                ]["decode_tps"]
-                cell["Pixel6a"][v] = agg(g) if not g.empty else None
+                ]
+                cell["Pixel6a"][v] = agg_rows(g) if not g.empty else None
 
                 # M4
                 g = m4_src[
                     (m4_src["variant"] == v) &
                     (m4_src["context_len"] == ctx)
-                ]["decode_tps"]
-                cell["M4Mac"][v] = agg(g) if not g.empty else None
+                ]
+                cell["M4Mac"][v] = agg_rows(g) if not g.empty else None
 
                 # x86 cliff — only where we have real measurements
                 if not x86_src.empty:
                     g = x86_src[
                         (x86_src["variant"] == v) &
                         (x86_src["context_len"] == ctx)
-                    ]["decode_tps"]
+                    ]
                     if not g.empty:
-                        x86_at_ctx[v] = agg(g)
+                        x86_at_ctx[v] = agg_rows(g)
 
             cell["x86"] = x86_at_ctx if x86_at_ctx else None
             ctx_data[ctx_key] = cell
@@ -625,7 +657,8 @@ def bake_perplexity():
 def bake_raw_table():
     cols = ["device", "backend", "model", "variant",
             "context_len", "trial", "threads",
-            "decode_tps", "prefill_tps", "experiment_type",
+            "decode_tps", "decode_tps_std", "prefill_tps", "prefill_tps_std",
+            "n_trials", "experiment_type",
             "kv_quant", "ts"]
 
     frames = []
@@ -637,12 +670,20 @@ def bake_raw_table():
     combined = combined.dropna(subset=["decode_tps", "variant"])
     combined["decode_tps"]  = combined["decode_tps"].apply(safe_float)
     combined["prefill_tps"] = combined["prefill_tps"].apply(safe_float)
+    if "decode_tps_std" in combined.columns:
+        combined["decode_tps_std"] = combined["decode_tps_std"].apply(safe_float)
+    if "prefill_tps_std" in combined.columns:
+        combined["prefill_tps_std"] = combined["prefill_tps_std"].apply(safe_float)
     combined["context_len"] = combined["context_len"].apply(
         lambda x: int(x) if pd.notna(x) else None
     )
     combined["threads"] = combined["threads"].apply(
         lambda x: int(x) if pd.notna(x) else None
     )
+    if "n_trials" in combined.columns:
+        combined["n_trials"] = combined["n_trials"].apply(
+            lambda x: int(x) if pd.notna(x) else None
+        )
 
     # Replace NaN strings
     combined = combined.where(pd.notna(combined), other=None)

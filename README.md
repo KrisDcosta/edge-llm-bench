@@ -16,7 +16,8 @@
 > at ctx≈512, Q3_K_M cliff-attenuated (<±11%), Q2_K HellaSwag collapse (19%), Q4_K_S Pareto-dominant (74% BoolQ),
 > Q6_K Pareto-dominated, KV-cache Q8_0 eliminates cliff at cost of −46% baseline throughput, confirmed on Qwen 2.5 1.5B.
 >
-> **Outputs:** 4,062 individual inference measurements across ARM, x86, Metal · 6 quality benchmarks (all 7 variants, standard + imatrix) · WikiText-2 PPL (full corpus, all 7 variants) ·
+> **Outputs:** 3,253 published inference rows + 142 evaluation rows (3,395 total public records) ·
+> 6 quality benchmarks (standard + imatrix where validated) · WikiText-2 PPL (full corpus, all 7 variants) ·
 > 17 analysis figures · Thermal characterization · Cross-model replication (Qwen 2.5 1.5B)
 
 ---
@@ -33,7 +34,7 @@
 | Q6_K    | 3.53         | 3.17 (−11%)  | −11%   | ≈1024     | 65%  | ⚠️ Slower AND less accurate than Q4_K_M |
 | Q8_0    | 4.52         | 3.71 (−18%)  | −18%   | ≈768      | 68%  | ⚠️ Significant ctx degradation |
 
-*TPS values from `results/pixel_llama_tps_20260325_120022/` (n=10) and cliff from `results/pixel_llama_cliff_filled_canonical_n10/` (n=10)*
+*TPS values from `results/pixel_llama_tps_20260325_120022/` (n=10). Cliff percentages use the per-variant canonical sources documented in `results/CANONICAL.md` and summarized in `artifacts/public_truth_table.md`.*
 *imatrix: max +4% BoolQ (Q6_K); hurts Q2_K (−5%) and Q3_K_M (−8%) — calibration fails below critical bitwidth*
 *† Q2_K HellaSwag: 19% — instruction-following collapse; all responses "No"; not a true accuracy score*
 
@@ -117,13 +118,25 @@
 | Artifact | Status | Location | Notes |
 |----------|--------|----------|-------|
 | **Interactive Dashboard** | ✅ Live | [krisdcosta.github.io/291_EAI](https://krisdcosta.github.io/291_EAI/) | Chart.js · GitHub Pages · all 7 variants |
-| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 4,062 records · 5 parquet splits |
+| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 3,395 records · 5 parquet splits |
 | **Canonical Results** | ✅ Updated | `results/CANONICAL.md` | Maps every table/figure to source JSONL |
+| **Release Truth Table** | ✅ Generated | `artifacts/public_truth_table.md` | Public metric summary + dashboard contract |
 | **Plain-English Report** | ✅ Complete | `PROJECT_REPORT_PLAIN_ENGLISH.md` | Full narrative writeup, no jargon |
 
 ---
 
 ## Reproducing Results
+
+### Canonical Public Release Build
+```bash
+pip install -r requirements.txt
+python3 scripts/build_public_release.py
+```
+
+This is the canonical rebuild path for the public repo. It regenerates the parquet splits,
+re-bakes the dashboard JSON, writes `artifacts/public_release_manifest.json`, writes
+`artifacts/public_truth_table.md`, and fails if docs or dashboard text drift from the
+validated artifact contract.
 
 ### Prerequisites
 - **Primary device:** Google Pixel 6a (or similar ARM64, 6GB+ RAM, Android 13+)
@@ -238,15 +251,17 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 │   ├── CANONICAL.md                       # Maps every paper claim to source directory
 │   ├── quality_scores.json                # All quality scores (ARM, x86, cross-device)
 │   ├── pixel_llama_tps_20260325_120022/   # Pixel TPS sweep (n=10) ← Table 1
-│   ├── pixel_llama_cliff_filled_canonical_n10/  # ARM cliff n=10 ← Table 2 (canonical)
-│   ├── pixel_llama_cliff_filled_20260326_132101/  # ARM cliff n=3 (superseded but cited)
+│   ├── pixel_llama_cliff_filled_20260329_162354/  # ARM cliff canonical batch (Q2/Q3/Q4_S/Q8_0)
+│   ├── pixel_llama_cliff_filled_20260326_132101/  # Q4_K_M clean rerun (canonical for that variant)
+│   ├── pixel_llama_cliff_filled_20260410_142752/  # Q5_K_M clean isolated rerun
+│   ├── pixel_llama_cliff_filled_20260330_212946/  # Q6_K clean solo rerun
 │   ├── pixel_qwen_tps_20260326_033619/    # Qwen TPS (non-monotonic replication)
 │   ├── pixel_qwen_cliff_filled_20260330_235410/  # Qwen cliff (ctx=512 cliff confirmed)
 │   ├── pixel_6a_ppl_final/                # Full WikiText-2 PPL (Q2_K, Q3_K_M)
 │   ├── pixel_power_20260320_173728/       # Battery measurement (fig5)
 │   ├── m4_llama_tps_20260326_001546/      # M4 Metal TPS sweep
-│   ├── m4_metal_cliff_20260323_015934/    # M4 Metal cliff (flat ±2%, no cliff)
-│   ├── x86_llama_cliff_20260329_002333/   # x86 cliff (Q2_K −51% at ctx=2048)
+│   ├── m4_metal_cliff_20260323_015934/    # M4 Metal cliff (flat to +8.5%; no degradation)
+│   ├── x86_llama_cliff_20260408_070924/   # x86 cliff (Q2_K −51% at ctx=2048)
 │   ├── x86_tps_results.json              # x86 TPS (Q2_K 14.05, Q6_K 6.80)
 │   ├── x86_perplexity_results.json       # x86 PPL (Q2_K 11.73, Q8_0 9.71)
 │   └── mac_humaneval_*/                   # Mac HumanEval eval (methodology note: see Limitations)
@@ -349,7 +364,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | Experiment | Status | Trials | Source |
 |-----------|--------|--------|--------|
 | TPS sweep (7 variants, 4 ctx sizes) | ✅ Complete | n=10 | `pixel_llama_tps_20260325_120022/` |
-| KV-cache cliff, Llama 3.2 3B (7 variants, 11 ctx, filled) | ✅ Complete | n=10 | `pixel_llama_cliff_filled_canonical_n10/` |
+| KV-cache cliff, Llama 3.2 3B (7 variants, 11 ctx, filled) | ✅ Complete | mixed canonical runs | `results/CANONICAL.md`, `artifacts/public_truth_table.md` |
 | KV-cache cliff, Qwen 2.5 1.5B (7 variants, 11 ctx, filled) | ✅ Complete | n=5 | `pixel_qwen_cliff_filled_20260330_235410/` |
 | Qwen 2.5 1.5B TPS sweep | ✅ Complete | — | `pixel_qwen_tps_20260326_033619/` |
 | BoolQ accuracy (100q) | ✅ Complete | — | `quality_scores.json` |
@@ -368,9 +383,16 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 
 ### Cross-Device
 
+| Experiment | Status | Trials | Source |
+|-----------|--------|--------|--------|
+| M4 Qwen TPS sweep (Metal, tg128) | ✅ Complete | n=10 | `results/m4_qwen_tps_20260415_130955/` |
+| M4 Qwen cliff sweep (Metal, ctx=1024–2048) | ✅ Complete | n=5 | `results/m4_qwen_cliff_20260416_021323/` |
+| M4 CPU TPS sweep (Llama, tg128) | ✅ Complete | n=10 | `results/m4_cpu_tps_20260415_231524/` |
+| x86 Qwen cliff sweep | ⚠️ Excluded | n=5 attempted | Pushed runs contain missing/zero-throughput rows at larger contexts |
+
 | Device | Status | Key Result | Source |
 |--------|--------|-----------|--------|
-| x86 Intel i5-1235U (AVX2) | ✅ Complete | Q2_K fastest (14.05), Q6_K slowest (6.80); cliff Q2_K −51% at ctx=2048 | `x86_tps_results.json`, `x86_llama_cliff_20260329_002333/` |
+| x86 Intel i5-1235U (AVX2) | ✅ Complete | Q2_K fastest (14.05), Q6_K slowest (6.80); cliff Q2_K −51% at ctx=2048 | `x86_tps_results.json`, `x86_llama_cliff_20260408_070924/` |
 | Mac M4 Metal GPU | ✅ Complete | Q4_K_S fastest (19.88), Q8_0 slowest (6.39); flat cliff ≤±4.3% all variants (no degradation) | `m4_llama_tps_20260326_001546/`, `m4_metal_cliff_20260323_015934/` |
 | x86 Quality (6 benchmarks) | ✅ Complete | Consistent with ARM ordering | `quality_scores.json` keys `x86_*` |
 | x86 PPL | ✅ Complete | Q2_K 11.73, Q8_0 9.71 | `x86_perplexity_results.json` |

@@ -7,6 +7,9 @@ on:
       # Re-deploy when dashboard source or data changes
       - 'dashboard/**'
       - 'dataset/**'
+      - 'results/**'
+      - 'scripts/build_public_release.py'
+      - 'scripts/prepare_dataset.py'
       - 'scripts/bake_dashboard_data.py'
       - '.github/workflows/deploy-dashboard.yml'
   # Allow manual trigger from Actions tab
@@ -40,10 +43,10 @@ jobs:
           cache: pip
 
       - name: Install Python deps
-        run: pip install pandas pyarrow
+        run: pip install -r requirements.txt
 
-      - name: Regenerate dashboard JSON from Parquet
-        run: python3 scripts/bake_dashboard_data.py
+      - name: Rebuild and validate public release
+        run: python3 scripts/build_public_release.py
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -24,7 +24,7 @@ All other result directories under `results/` are exploratory runs or superseded
 are sized N-64 tokens so the KV cache is actually saturated. Earlier runs using
 `-c N` (allocation-only) are in `results/pixel_llama_cliff_20260325_060911/` (superseded).
 
-Per-variant canonical sources (some variants require dedicated reruns; see VERIFIED_METRICS_MASTER_TABLE.md):
+Per-variant canonical sources (some variants require dedicated reruns; see `artifacts/public_truth_table.md`):
 
 | Variant | Source | n | Notes |
 |---------|--------|---|-------|
@@ -79,11 +79,45 @@ Per-variant canonical sources (some variants require dedicated reruns; see VERIF
 | M4 Metal cliff (flat to +8.5%; Q2_K +8.5%, Q3_K_M +3.4%, others ≤±0.8%; no degradation) | `results/m4_metal_cliff_20260323_015934/` |
 | Pixel Qwen TPS (Q2_K=16.1 fastest, Q6_K=7.2 slowest at ctx=256, n=5; non-monotonic ordering replication) | `results/pixel_qwen_tps_20260326_033619/` |
 | Pixel Qwen cliff sweep (5 trials, 7 variants × 11 ctx; confirms Q2_K cliff on different model) | `results/pixel_qwen_cliff_filled_20260330_235410/` ✅ canonical |
+| M4 CPU TPS (Llama, tg128, ngl=0, n=10) | `results/m4_cpu_tps_20260415_231524/` ✅ promoted |
+| M4 Qwen TPS extension (Metal, Qwen 2.5 1.5B, all 7 variants, tg128, n=10) | `results/m4_qwen_tps_20260415_130955/` ✅ promoted |
+| M4 Qwen cliff extension (Metal, Qwen 2.5 1.5B, all 7 variants, 13 ctx, tg128, n=5) | `results/m4_qwen_cliff_20260416_021323/` ✅ promoted |
 
 **Platform metadata:**
 - x86: Intel i5-1235U, 12th Gen, Windows 11, 6 threads, llama-cli CPU-only (ngl=0)
 - M4: MacBook Air M4, Metal GPU (16-core), llama-bench ngl=99, 10 trials
 - Pixel 6a Qwen: ARM CPU, 4 threads, llama-completion, Qwen 2.5 1.5B Instruct GGUF
+
+### M4 Qwen Extension Status — 2026-04-16
+
+M4 Qwen TPS and cliff are validated from clean same-session runs and are now part
+of the public parquet/dashboard. Older M4 Qwen attempts remain archived and excluded.
+
+| Variant | tg128 TPS | Decode CV | Status |
+|---------|----------:|----------:|--------|
+| Q2_K | 36.56 | 3.1% | ✅ Valid |
+| Q3_K_M | 32.18 | 3.7% | ✅ Valid |
+| Q4_K_S | 34.16 | 3.0% | ✅ Valid |
+| Q4_K_M | 32.62 | 4.2% | ✅ Valid |
+| Q5_K_M | 24.83 | 7.1% | ✅ Valid |
+| Q6_K | 28.46 | 1.3% | ✅ Valid |
+| Q8_0 | 21.50 | 1.5% | ✅ Valid |
+
+M4 Qwen cliff summary from `m4_qwen_cliff_20260416_021323/`:
+
+| Variant | ctx=1024 TPS | ctx=2048 TPS | Change | Max CV |
+|---------|-------------:|-------------:|-------:|-------:|
+| Q2_K | 76.61 | 51.53 | -32.7% | 10.9% |
+| Q3_K_M | 50.67 | 43.07 | -15.0% | 11.6% |
+| Q4_K_S | 49.55 | 46.11 | -6.9% | 18.3% |
+| Q4_K_M | 49.13 | 46.46 | -5.5% | 16.8% |
+| Q5_K_M | 40.30 | 37.00 | -8.2% | 10.7% |
+| Q6_K | 39.03 | 37.37 | -4.3% | 14.5% |
+| Q8_0 | 33.64 | 33.97 | +1.0% | 9.7% |
+
+Do not use older M4 Qwen TPS or cliff directories. They were archived because they
+were high-variance, incomplete, generated with the unstable 32-token window, or
+not same-session comparable with the final canonical runs.
 
 ---
 
@@ -100,26 +134,40 @@ These directories exist but are NOT cited in the paper. Kept for audit trail.
 | `m4_llama_cliff_20260325_*/` | ⚠️ Superseded | decode_tps=0 (derived metric parsing failure) |
 | `m4_metal_cliff_20260321_*/` | ⚠️ Superseded | Early M4 cliff runs, incomplete |
 | `m4_metal_cliff_20260323_015934/` | ✅ Cited (§5.4 Metal cliff elimination) | Complete: 7 variants × 13 ctx × 5 trials, all valid |
+| `archive/m4_qwen_superseded_20260415/` | ⚠️ Superseded | Stale M4 Qwen TPS/cliff attempts; see `results/ARCHIVE_MANIFEST.md` |
+| `archive/m4_qwen_superseded_20260416/` | ⚠️ Superseded | Diagnostic M4 Qwen cliff attempts; see `results/ARCHIVE_MANIFEST.md` |
+| `archive/m4_quality_failed_20260415/` | ⚠️ Invalid | M4 quality attempt timed out; no M4 quality result is canonical |
+| `archive/m4_quality_failed_20260416/` | ⚠️ Invalid | M4 quality runner was stable but output collapsed mostly to `A`; no M4 quality result is canonical |
+| `archive/stale_summaries_20260415/` | ⚠️ Superseded | Old project summary JSON files replaced by public manifest/truth table |
 | `pixel_overnight_20260320_021818/` | 🔵 Exploratory | Overnight sweep, pre-final methodology |
 | `pixel_power_20260320_173728/` | ✅ Cited (fig5) | Battery measurement run |
 | `pixel_6a_ppl_final/` | ✅ Cited (Table 1 PPL) | Full WikiText-2 PPL for Q2_K, Q3_K_M |
 
 ---
 
-*Last updated: 2026-04-13*
+*Last updated: 2026-04-17*
 
 ---
 
-## All Runs Complete — No Active Runs
+## Public v1 Status And Pending / Excluded Extension Runs
 
-All primary experiments finished as of 2026-04-02.
+The public release now includes the validated M4 Qwen TPS/cliff extension and the
+clean M4 CPU TPS rerun. Failed or incomplete extension runs remain excluded.
 
 | Completed Run | Final Status |
 |---------------|-------------|
 | `pixel_qwen_cliff_filled_20260330_235410/` | ✅ 7 variants × 55 rows each; complete |
 | `pixel_llama_cliff_filled_canonical_n10/` | ✅ All 7 variants n=10; Q2_K cliff −48% at ctx≈512 |
-| `m4_metal_cliff_20260323_015934/` | ✅ All 7 variants × 13 ctx × 5 trials; flat ±2%, no cliff |
+| `m4_metal_cliff_20260323_015934/` | ✅ All 7 variants × 13 ctx × 5 trials; flat to +8.5%, no degradation |
 | `x86_llama_cliff_20260408_070924/` | ✅ Q2_K −51% at ctx=2048, cliff ctx=1200–1300; 7 variants, TG=128 |
+| `m4_cpu_tps_20260415_231524/` | ✅ M4 CPU Llama TPS validated and promoted |
+| `m4_qwen_tps_20260415_130955/` | ✅ M4 Qwen TPS validated and promoted |
+| `m4_qwen_cliff_20260416_021323/` | ✅ M4 Qwen cliff validated and promoted |
+
+| Pending / blocked run | Status |
+|-----------------------|--------|
+| x86 Qwen cliff | Excluded: pushed runs `20260415_110111` and `20260417_005727` contain missing/zero-throughput rows at larger contexts |
+| M4 quality | Excluded: server runner avoided crashes, but current run collapsed mostly to `A`; needs scoring/prompt redesign before publication |
 
 ### Superseded / Abandoned (not cited)
 
@@ -129,4 +177,8 @@ All primary experiments finished as of 2026-04-02.
 | `pixel_llama_cliff_filled_20260330_172822/` | Deleted — contaminated by orphaned llama-perplexity process |
 | `x86_llama_cliff_20260329_002333/` | Superseded by `20260408_070924/` (TG=64; CV higher; incomplete variant set) |
 | `x86_llama_cliff_20260328_183442/` | Superseded — early test run, incomplete |
+| `x86_qwen_cliff_DESKTOP-D70B_20260412_145905/` | Excluded — invalid/incomplete x86 Qwen cliff attempt |
+| `x86_qwen_cliff_DESKTOP-D70B_20260415_110111/` | Excluded — missing/zero-throughput large-context rows |
+| `x86_qwen_cliff_DESKTOP-D70B_20260417_005727/` | Excluded — missing/zero-throughput large-context rows and unstable cells |
+| `m4_cpu_tps_20260406_203938/` | Superseded by `m4_cpu_tps_20260415_231524/` |
 | `mac_humaneval_*/` | Methodology broken (chat-template incompatibility); archived |

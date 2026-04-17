@@ -24,7 +24,10 @@ MODELS_DIR="local-models/qwen2_5_1_5b_gguf"
 MODEL_PREFIX="Qwen2.5-1.5B-Instruct"
 ALL_VARIANTS=(Q2_K Q3_K_M Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0)
 CTX_SIZES=(1024 1100 1200 1250 1300 1350 1400 1450 1500 1550 1600 1800 2048)
-TG_TOKENS=32
+# 128 tokens gives a stable decode window for derived generation TPS.
+# The previous 32-token window produced high-CV rows, zero decode rows, and
+# impossible derived TPS spikes when pp-only and pp+tg timings were subtracted.
+TG_TOKENS=128
 NUM_TRIALS=5
 NGL=99
 THREADS=4

@@ -42,7 +42,7 @@ Controlled inference benchmark dataset for **7 GGUF K-quant quantization variant
 | Apple M4 Mac | Apple M4 (ARM, 10-core) | 16 GB unified | llama.cpp Metal |
 | HP Pavilion x86 | Intel Core i5-1235U (12th gen) | 16 GB DDR4 | llama.cpp CPU |
 
-**4,062 total records** across 5 splits. All inference records are non-warmup,
+**3,395 total records** across 5 splits. All published inference records are non-warmup,
 success-status runs collected under controlled thermal conditions. Contaminated
 and failed records are archived separately and not included here.
 
@@ -71,7 +71,7 @@ and failed records are archived separately and not included here.
 
 ## Splits
 
-### `pixel_inference` — 2,490 rows
+### `pixel_inference` — 1,819 rows
 Pixel 6a (ARM, CPU backend) inference runs.
 
 | Column | Type | Description |
@@ -84,10 +84,13 @@ Pixel 6a (ARM, CPU backend) inference runs.
 | `trial` | int | Trial index within the experiment |
 | `threads` | int | CPU thread count (null = default 4) |
 | `decode_tps` | float | Decode throughput (tokens/second) |
+| `decode_tps_std` | float | Decode TPS standard deviation for pre-aggregated rows; null for individual-trial rows |
 | `prefill_tps` | float | Prefill throughput (tokens/second) |
+| `prefill_tps_std` | float | Prefill TPS standard deviation for pre-aggregated rows; null for individual-trial rows |
 | `ttft_s` | float | Time to first token (seconds) — populated for standard_sweep only |
 | `e2e_s` | float | End-to-end latency (seconds) — populated for standard_sweep only |
 | `n_output_tokens` | int | Number of generated tokens |
+| `n_trials` | int | Number of trials represented by the row (`1` for individual trial rows; `5`/`10` for aggregated rows) |
 | `experiment_type` | string | `cliff_sweep` \| `standard_sweep` \| `thread_sweep` \| `kv_cache_quant` |
 | `kv_quant` | string | KV cache quantization type (`null` = default, `"q8_0"` = quantized) |
 | `ngl` | int | GPU layers (null for CPU runs) |
@@ -96,28 +99,34 @@ Pixel 6a (ARM, CPU backend) inference runs.
 
 **experiment_type values:**
 - `cliff_sweep` — context length varied to characterise KV-cache collapse (canonical n=10)
-- `standard_sweep` — fixed 4 context windows (256/512/1024/2048), 13 trials, 2 warmup
+- `standard_sweep` — fixed 4 context windows (256/512/1024/2048), canonical TPS sweep
 - `thread_sweep` — Q4\_K\_M at threads=1/2/4/8, ctx=256, 15 trials
 - `kv_cache_quant` — KV cache set to q8\_0 to test collapse mitigation
 
 ---
 
-### `m4_inference` — 1,021 rows
-Apple M4 Mac inference runs. Contains two backend configurations:
+### `m4_inference` — 1,035 rows
+Apple M4 Mac inference runs. Contains Metal GPU and CPU backend configurations:
 
-- **Metal GPU** (931 rows) — `backend = "Metal"`, `ngl = 99`. Includes Llama 3.2 3B and Qwen 2.5 1.5B.
+- **Metal GPU, Llama 3.2 3B** (840 rows) — `backend = "Metal"`, `ngl = 99`.
   Cliff sweep covers ctx=1024–2048 (13 points, n=5 trials). Results: flat profile on Metal
   (all variants within ±9%), confirming no KV-cache cliff on GPU-accelerated inference.
-- **CPU** (90 rows) — `backend = "CPU"`, `ngl = 0`, `threads = 4`. Llama 3.2 3B only.
+- **Metal GPU, Qwen 2.5 1.5B** (98 rows) — promoted clean extension runs:
+  - **TPS sweep** (7 rows, `standard_sweep`, `context_len = 0`): tg128 decode, n=10,
+    `results/m4_qwen_tps_20260415_130955/`. Q2\_K=36.56 tok/s, Q8\_0=21.50 tok/s.
+  - **Cliff sweep** (91 rows, `cliff_sweep`): ctx=1024–2048, 13 contexts × 7 variants,
+    n=5, `results/m4_qwen_cliff_20260416_021323/`. Q2\_K changes −32.7% from
+    ctx=1024→2048; Q8\_0 is flat (+1.0%).
+- **CPU, Llama 3.2 3B** (97 rows) — `backend = "CPU"`, `ngl = 0`, `threads = 4`.
   - **Cliff sweep** (88 rows): ctx=256–2048 (13 points, pre-aggregated n\_trials=5 per ctx).
     Collected 2026-04-09. 3 outlier points excluded (Q5\_K\_M ctx=2048 OOM, Q6\_K ctx=1536
     CV=81%, Q8\_0 ctx=2048 CV=99%). Results: significant context-dependent degradation
     on M4 CPU (Q2\_K −13%, Q3\_K\_M −54%, Q4\_K\_S −53%, Q6\_K −60% from ctx=256→2048).
     Note: ctx=256 cliff baseline may be inflated by CPU boost state at start of each variant's sweep.
   - **TPS sweep** (7 rows, `experiment_type = "standard_sweep"`, `context_len = 0`): pure decode
-    reference (n\_prompt=0, n\_gen=128, n=10 trials, 2026-04-06). Thermally settled baseline.
-    Throughput ordering: Q4\_K\_S (13.16) > Q8\_0 (12.60) > Q4\_K\_M (12.51) > Q2\_K (12.31)
-    > Q3\_K\_M (11.48) > Q5\_K\_M (10.59) > Q6\_K (9.29) tok/s. Non-monotonic: Metal reversal
+    reference (n\_prompt=0, n\_gen=128, n=10 trials, 2026-04-15 clean rerun).
+    Throughput ordering: Q2\_K (27.08) > Q4\_K\_S (25.68) > Q3\_K\_M (23.67) > Q4\_K\_M (22.29)
+    > Q8\_0 (18.80) > Q5\_K\_M (15.80) > Q6\_K (14.97) tok/s. Non-monotonic: Metal reversal
     (Q4\_K\_S fastest) confirmed on M4 CPU as well; Q6\_K remains slowest.
 
 Same columns as `pixel_inference`.
@@ -143,7 +152,7 @@ Same columns as `pixel_inference`. `backend = "CPU"`, `threads = 6`.
 
 ---
 
-### `quality_benchmarks` — 138 rows
+### `quality_benchmarks` — 128 rows
 Accuracy scores on 6 NLP benchmarks for 7 quantization variants across Pixel 6a and x86 i5-1235U,
 including both standard and imatrix-calibrated variants.
 
@@ -160,7 +169,7 @@ including both standard and imatrix-calibrated variants.
 | `status` | string | `"success"` for all included rows |
 
 **Device coverage:**
-- `Pixel6a`: all 6 benchmarks × 7 variants (standard); imatrix calibration for 5 benchmarks × all 7 variants (ARC-Easy excluded — known parser artifact producing 100% for all variants)
+- `Pixel6a`: 44 standard rows + 42 imatrix rows (ARC-Easy imatrix excluded — known parser artifact producing 100% for all variants)
 - `x86`: all 6 benchmarks × 7 variants (standard only; no imatrix)
 
 **Benchmark sample sizes:** 100 questions each (random sample from official test sets).
@@ -271,12 +280,13 @@ print(threads.groupby("threads")["decode_tps"].agg(["mean", "std"]))
 1. **Pixel 6a primary focus** — x86 and M4 coverage is less comprehensive than Pixel;
    x86 has n=5 trials for cliff sweep but no thread sweep, no kv_cache_quant experiments
 2. **x86 Qwen limited to standard_sweep** — Qwen 2.5 1.5B on x86 provides decode TPS reference
-   at ctx=256 only; no cliff sweep, thread sweep, or quality data for Qwen on x86
+   at ctx=256 only. Two cliff reruns were attempted and pushed, but are excluded because the
+   result files contain missing/zero-throughput rows at larger contexts
 3. **Perplexity corpus inconsistency** — see note in perplexity split above
 4. **No power/energy data** — `/proc` interfaces on Pixel 6a are unreliable without root;
    battery drain proxy metrics were collected but not included in this release
-5. **Single model family for quality benchmarks** — quality data (BoolQ, HellaSwag, etc.)
-   collected on Pixel 6a only; no cross-device quality comparison
+5. **Single model family for quality benchmarks** — quality data covers Llama 3.2 3B only;
+   Pixel 6a and x86 rows are included, but there is no validated M4 or Qwen quality split
 6. **llama.cpp version** — builds used llama.cpp circa February–April 2026;
    results may differ with significantly newer versions
 

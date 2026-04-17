@@ -42,19 +42,9 @@
             "correct": 78,
             "total": 100
           },
-          "Q4_K_S": {
-            "accuracy": 81.0,
-            "correct": 81,
-            "total": 100
-          },
           "Q4_K_M": {
             "accuracy": 82.0,
             "correct": 82,
-            "total": 100
-          },
-          "Q5_K_M": {
-            "accuracy": 81.0,
-            "correct": 81,
             "total": 100
           },
           "Q6_K": {
@@ -65,6 +55,16 @@
           "Q8_0": {
             "accuracy": 80.0,
             "correct": 80,
+            "total": 100
+          },
+          "Q4_K_S": {
+            "accuracy": 81.0,
+            "correct": 81,
+            "total": 100
+          },
+          "Q5_K_M": {
+            "accuracy": 81.0,
+            "correct": 81,
             "total": 100
           }
         },
@@ -260,7 +260,43 @@
         }
       },
       "imatrix": {
-        "arc_easy": {},
+        "arc_easy": {
+          "Q2_K": {
+            "accuracy": 71.0,
+            "correct": 71,
+            "total": 100
+          },
+          "Q3_K_M": {
+            "accuracy": 77.0,
+            "correct": 77,
+            "total": 100
+          },
+          "Q4_K_S": {
+            "accuracy": 78.0,
+            "correct": 78,
+            "total": 100
+          },
+          "Q4_K_M": {
+            "accuracy": 83.0,
+            "correct": 83,
+            "total": 100
+          },
+          "Q5_K_M": {
+            "accuracy": 83.0,
+            "correct": 83,
+            "total": 100
+          },
+          "Q6_K": {
+            "accuracy": 80.0,
+            "correct": 80,
+            "total": 100
+          },
+          "Q8_0": {
+            "accuracy": 80.0,
+            "correct": 80,
+            "total": 100
+          }
+        },
         "arc_challenge": {
           "Q2_K": {
             "accuracy": 55.0,

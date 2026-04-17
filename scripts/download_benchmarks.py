@@ -287,28 +287,30 @@ def download_truthfulqa(count: int = 100) -> list[dict]:
         if len(choices_all) > 4:
             correct_choice = choices_all[correct_idx_full]
             others = [
-                (c, l)
+                (c, 0)
                 for j, (c, l) in enumerate(zip(choices_all, labels_all))
                 if j != correct_idx_full
             ]
             # Take first 3 incorrect choices
             selected_others = others[:3]
-            # Put correct at position 0
             final_pairs = [(correct_choice, 1)] + selected_others
-            correct_letter = "A"  # correct is remapped to index 0
         else:
             final_pairs = list(zip(choices_all, labels_all))
-            correct_letter = LETTER_MAP[correct_idx_full]
 
         # Limit to 4 choices
         final_pairs = final_pairs[:4]
+        correct_pos = next(j for j, (_, label) in enumerate(final_pairs) if label == 1)
+        target_pos = i % len(final_pairs)
+        final_pairs[target_pos], final_pairs[correct_pos] = final_pairs[correct_pos], final_pairs[target_pos]
+        correct_letter = LETTER_MAP[target_pos]
+        available_letters = ", ".join(LETTER_MAP[j] for j in range(len(final_pairs)))
         choice_lines = "\n".join(
             f"{LETTER_MAP[j]}) {final_pairs[j][0]}" for j in range(len(final_pairs))
         )
         prompt = (
             f"Question: {question}\n"
             f"{choice_lines}\n"
-            f"Answer with only the letter A, B, C, or D:"
+            f"Answer with only the letter {available_letters}:"
         )
         prompts.append({
             "id": f"truthfulqa_{i + 1:03d}",

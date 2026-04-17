@@ -189,24 +189,25 @@ def load_quality():
 # Hard-coded reference data
 # ─────────────────────────────────────────────
 
-# PPL from COMPLETE_RESULTS_SUMMARY.json (Pixel 6a, WikiText-2 full)
+# PPL source of truth: dataset/perplexity.parquet and results/CANONICAL.md.
+# Q2_K/Q3_K_M are Pixel full-corpus runs; Q4_K_S–Q8_0 are x86 full-corpus runs.
 PPL_DATA = {
-    "Q2_K":   13.29,
-    "Q3_K_M": 11.08,
-    "Q4_K_S": 10.70,
-    "Q4_K_M": 10.71,
-    "Q5_K_M": 10.62,
-    "Q6_K":   10.58,
-    "Q8_0":   10.59,
+    "Q2_K":   13.2885,
+    "Q3_K_M": 11.0832,
+    "Q4_K_S": 9.7414,
+    "Q4_K_M": 9.7466,
+    "Q5_K_M": 9.7680,
+    "Q6_K":   9.7366,
+    "Q8_0":   9.7101,
 }
-PPL_STD = {   # from ±0.08 / ±0.10 in summary
-    "Q2_K":   0.10,
-    "Q3_K_M": 0.08,
-    "Q4_K_S": 0.08,
-    "Q4_K_M": 0.08,
-    "Q5_K_M": 0.08,
-    "Q6_K":   0.08,
-    "Q8_0":   0.08,
+PPL_STD = {
+    "Q2_K":   0.0,
+    "Q3_K_M": 0.0,
+    "Q4_K_S": 0.0,
+    "Q4_K_M": 0.0,
+    "Q5_K_M": 0.0,
+    "Q6_K":   0.0,
+    "Q8_0":   0.0,
 }
 
 # Bits-per-weight (file_bytes * 8 / 3.21e9 params)

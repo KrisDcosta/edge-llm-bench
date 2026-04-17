@@ -8,7 +8,7 @@
 
   <!-- Open Graph -->
   <meta property="og:title" content="Edge LLM Bench" />
-  <meta property="og:description" content="4,000+ controlled LLM inference runs across 7 GGUF variants on ARM, Metal, and x86." />
+  <meta property="og:description" content="3,253 controlled LLM inference runs across 7 GGUF variants on ARM, Metal, and x86." />
   <meta property="og:type" content="website" />
 
   <!-- Tailwind CDN -->
@@ -91,7 +91,7 @@
         <span class="text-accent">on Edge Devices</span>
       </h1>
       <p class="text-lg text-gray-400 mb-8 leading-relaxed">
-        4,000+ controlled inference runs across 7 GGUF K-quant variants on
+        3,253 controlled inference runs across 7 GGUF K-quant variants on
         <span class="device-badge pixel">Pixel 6a</span>,
         <span class="device-badge m4">M4 Mac</span>, and
         <span class="device-badge x86">x86</span>.
@@ -130,7 +130,7 @@
 
     <!-- Stats bar -->
     <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="stat-card"><div class="stat-num">4,062</div><div class="stat-label">Inference Records</div></div>
+      <div class="stat-card"><div class="stat-num">3,395</div><div class="stat-label">Total Records</div></div>
       <div class="stat-card"><div class="stat-num">7</div><div class="stat-label">GGUF Variants</div></div>
       <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Devices</div></div>
       <div class="stat-card"><div class="stat-num">6</div><div class="stat-label">Quality Benchmarks</div></div>
@@ -174,7 +174,7 @@
       </div>
 
       <p class="chart-note">
-        Pixel 6a @ ctx=256 — cliff\_sweep (Q2\_K, Q3\_K\_M, Q4\_K\_S, Q6\_K, Q8\_0) · standard\_sweep (Q4\_K\_M, Q5\_K\_M — thermal burst artifact excluded) · M4 Mac GPU (Metal) @ ctx=1024 canonical cliff sweep (n=5) · M4 Mac CPU — TPS sweep (n\_prompt=0, n\_gen=128, n=10, thermally settled) · x86 mean of 5 trials @ ctx=256
+        Pixel 6a @ ctx=256 — cliff\_sweep (Q2\_K, Q3\_K\_M, Q4\_K\_S, Q6\_K, Q8\_0) · standard\_sweep (Q4\_K\_M, Q5\_K\_M — thermal burst artifact excluded) · M4 Mac GPU (Metal) — Llama ctx=1024 cliff baseline and Qwen tg128 TPS sweep · M4 Mac CPU — clean tg128 TPS sweep (2026-04-15, n=10) · x86 mean of 5 trials @ ctx=256
       </p>
     </div>
   </section>
@@ -198,6 +198,7 @@
             <button class="btn-toggle active" data-value="Pixel6a_Llama">Pixel 6a · Llama</button>
             <button class="btn-toggle" data-value="Pixel6a_Qwen">Pixel 6a · Qwen</button>
             <button class="btn-toggle" data-value="M4Mac_Llama">M4 Mac · Llama</button>
+            <button class="btn-toggle" data-value="M4Mac_Qwen">M4 Mac · Qwen</button>
             <button class="btn-toggle" data-value="x86_Llama">x86 · Llama</button>
           </div>
         </div>
@@ -222,7 +223,7 @@
       </div>
 
       <p class="chart-note">
-        Shaded band marks the per-device cliff onset: ARM ctx=512 (Q2_K, Q5_K_M); x86 ctx=1300–1400. Metal: no band (no cliff observed).
+        Shaded band marks the per-device cliff onset: ARM ctx=512 (Q2_K, Q5_K_M); x86 Llama ctx=1300–1400. Metal: no band; M4 Qwen shows a Q2_K decline but no validated cache-collapse threshold.
         KV-cache quant overlay available for Q3_K_M and Q6_K.
       </p>
     </div>
@@ -382,7 +383,7 @@
         <div class="section-num">06</div>
         <div>
           <h2 class="section-title">Dataset Explorer</h2>
-          <p class="section-sub">Filter and browse all 4,000+ inference records</p>
+          <p class="section-sub">Filter and browse all 3,253 published inference rows</p>
         </div>
       </div>
 
@@ -482,7 +483,7 @@
         <div>
           <div class="text-xs text-gray-500 uppercase tracking-widest mb-3">About</div>
           <p class="text-sm text-gray-500 leading-relaxed">
-            4,000+ inference records across 2 models, 7 GGUF variants and 3 devices.
+            3,253 inference rows across 2 models, 7 GGUF variants and 3 devices.
             All data, scripts, and methodology are open-source.
           </p>
         </div>
