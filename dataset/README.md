@@ -187,14 +187,14 @@ WikiText-2 perplexity scores for Llama 3.2 3B Instruct. Covers both Pixel 6a and
 | `model` | string | Model name |
 | `device` | string | `"Pixel6a"` or `"x86"` |
 | `perplexity` | float | WikiText-2 perplexity (lower = better) |
-| `perplexity_status` | string | `"success"` or `"not_evaluated"` |
-| `corpus` | string | `"wikitext2_full"` (~290K tokens) or `"wikitext2_sample"` (~12K tokens) |
+| `perplexity_status` | string | `"success"` |
+| `corpus` | string | `"wikitext2_full"` |
 | `tokens_approx` | int | Approximate token count used |
 | `note` | string | Measurement notes |
 
-> **All 7 variants have full-corpus PPL values.** Q2\_K and Q3\_K\_M measured on Pixel 6a (full corpus, ~285K tokens).
-> Q4\_K\_S, Q4\_K\_M, Q5\_K\_M, Q6\_K, Q8\_0 measured on x86 i5-1235U (full corpus, ~290K tokens).
-> Pixel 6a also has sample-corpus (~12K tokens) measurements for Q4\_K\_M, Q6\_K, Q8\_0 (retained for reference).
+> **All 7 variants have Pixel 6a full-corpus PPL values** (~285K tokens, 568 chunks).
+> The split also includes x86 i5-1235U full-corpus PPL for all 7 variants as supplementary
+> cross-device reference; dashboard/report headline PPL uses the Pixel 6a rows.
 
 ---
 
@@ -282,10 +282,9 @@ print(threads.groupby("threads")["decode_tps"].agg(["mean", "std"]))
 2. **x86 Qwen limited to standard_sweep** — Qwen 2.5 1.5B on x86 provides decode TPS reference
    at ctx=256 only. Two cliff reruns were attempted and pushed, but are excluded because the
    result files contain missing/zero-throughput rows at larger contexts
-3. **Perplexity corpus inconsistency** — see note in perplexity split above
-4. **No power/energy data** — `/proc` interfaces on Pixel 6a are unreliable without root;
+3. **No power/energy data** — `/proc` interfaces on Pixel 6a are unreliable without root;
    battery drain proxy metrics were collected but not included in this release
-5. **Single model family for quality benchmarks** — quality data covers Llama 3.2 3B only;
+4. **Single model family for quality benchmarks** — quality data covers Llama 3.2 3B only;
    Pixel 6a and x86 rows are included, but there is no validated M4 or Qwen quality split
 6. **llama.cpp version** — builds used llama.cpp circa February–April 2026;
    results may differ with significantly newer versions

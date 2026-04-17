@@ -353,7 +353,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | Q8_0    | 68%   | 80%      | 56%           | 43%       | 47%  | 58%        | 10.59‡ |
 
 † Q2_K HellaSwag: instruction-following collapse — all responses "No"; not a true accuracy score.
-‡ PPL for Q4_K_S through Q8_0 measured on full WikiText-2 corpus (~290K tokens) on x86; Q2_K and Q3_K_M measured on Pixel 6a.
+‡ PPL measured on Pixel 6a full WikiText-2 corpus (~285K tokens, 568 chunks) for all seven variants.
 
 ---
 
@@ -373,7 +373,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | HellaSwag accuracy (100q) | ✅ Complete | — | `quality_scores.json` |
 | MMLU accuracy (100q) | ✅ Complete | — | `quality_scores.json` |
 | TruthfulQA accuracy (100q) | ✅ Complete | — | `quality_scores.json` |
-| WikiText-2 PPL (full corpus, ~290K tokens) | ✅ All 7 variants | — | `pixel_6a_ppl_final/` (Q2_K, Q3_K_M); `x86_perplexity_results.json` (Q4_K_S–Q8_0) |
+| WikiText-2 PPL (full corpus, ~285K tokens) | ✅ All 7 variants | — | `pixel_6a_ppl_final/` |
 | imatrix calibration (5 variants, BoolQ) | ✅ Complete | — | `quality_scores.json` |
 | KV-cache Q8_0 mitigation | ✅ Complete | n=5 | `quality_scores.json` |
 | Battery/power measurement | ✅ Complete | — | `pixel_power_20260320_173728/` |
@@ -406,7 +406,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | **Flash Attention not supported on Tensor G1** | ✅ Documented | llama.cpp `-fa` flag returns "unsupported backend"; Tensor G1 lacks HW FA support |
 | **GSM8K/HumanEval methodology broken** | ⚠️ Archived | Mac `--single-turn` with few-shot prompt → chat template wraps entire prompt as user turn; model echoes few-shot context; results near-zero accuracy; archived in `archive/broken_evals/`; not a blocker (optional eval) |
 | **P-core affinity mask bug** | ✅ Documented | `--cpu-mask 0x0F` targets little cores (cpu0–3, 1803 MHz), NOT P-cores. Tensor G1 layout: cpu0-3=little, cpu4-5=medium (2253 MHz), cpu6-7=P-cores (2802 MHz). Correct mask: `0xC0` (P-only) or `0xF0` (P+M). P-core affinity data is invalid — not cited in paper |
-| **WikiText-2 PPL cross-device** | ✅ Complete | Q2_K, Q3_K_M on Pixel full corpus; Q4_K_S–Q8_0 on x86 full corpus (~290K tokens). All values shown in Quality Results table. |
+| **WikiText-2 PPL cross-device** | ✅ Complete | Pixel full-corpus PPL is canonical for all 7 variants; x86 full-corpus PPL is retained as supplementary cross-device reference. |
 | **Q2_K HellaSwag collapse** | ✅ Documented | 19% score is instruction-following failure, not accuracy; all responses "No"; documented as regime failure in paper |
 | **imatrix hurts at low bpw** | ✅ Documented | Q2_K (−5%), Q3_K_M (−8%) BoolQ; paper recommends imatrix only at ≥4 bpw |
 | **Thermal throttling on sustained load** | ✅ Characterized | Onset ~60s; plateau 4.72–4.96 t/s (−43%); 5-min cooldown protocol mitigates in benchmarks |

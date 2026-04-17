@@ -15,7 +15,7 @@
       "status": "success",
       "corpus": "wikitext2_full",
       "tokens_approx": 285000,
-      "note": null,
+      "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)",
       "device": "Pixel6a"
     },
     {
@@ -24,54 +24,54 @@
       "status": "success",
       "corpus": "wikitext2_full",
       "tokens_approx": 285000,
-      "note": null,
+      "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)",
       "device": "Pixel6a"
     },
     {
       "variant": "Q4_K_S",
-      "perplexity": 9.7414,
+      "perplexity": 10.7005,
       "status": "success",
       "corpus": "wikitext2_full",
-      "tokens_approx": 290817,
-      "note": "Measured on x86 i5-1235U (full WikiText-2 corpus, ~290K tokens)",
-      "device": "x86"
+      "tokens_approx": 285000,
+      "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)",
+      "device": "Pixel6a"
     },
     {
       "variant": "Q4_K_M",
-      "perplexity": 9.7466,
+      "perplexity": 10.7128,
       "status": "success",
       "corpus": "wikitext2_full",
-      "tokens_approx": 290817,
-      "note": "Measured on x86 i5-1235U (full WikiText-2 corpus, ~290K tokens)",
-      "device": "x86"
+      "tokens_approx": 285000,
+      "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)",
+      "device": "Pixel6a"
     },
     {
       "variant": "Q5_K_M",
-      "perplexity": 9.768,
+      "perplexity": 10.6243,
       "status": "success",
       "corpus": "wikitext2_full",
-      "tokens_approx": 290817,
-      "note": "Measured on x86 i5-1235U (full WikiText-2 corpus, ~290K tokens)",
-      "device": "x86"
+      "tokens_approx": 285000,
+      "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)",
+      "device": "Pixel6a"
     },
     {
       "variant": "Q6_K",
-      "perplexity": 9.7366,
+      "perplexity": 10.5841,
       "status": "success",
       "corpus": "wikitext2_full",
-      "tokens_approx": 290817,
-      "note": "Measured on x86 i5-1235U (full WikiText-2 corpus, ~290K tokens)",
-      "device": "x86"
+      "tokens_approx": 285000,
+      "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)",
+      "device": "Pixel6a"
     },
     {
       "variant": "Q8_0",
-      "perplexity": 9.7101,
+      "perplexity": 10.5894,
       "status": "success",
       "corpus": "wikitext2_full",
-      "tokens_approx": 290817,
-      "note": "Measured on x86 i5-1235U (full WikiText-2 corpus, ~290K tokens)",
-      "device": "x86"
+      "tokens_approx": 285000,
+      "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)",
+      "device": "Pixel6a"
     }
   ],
-  "corpus_warning": "All 7 variants on full WikiText-2 corpus (~290K tokens). Q2_K & Q3_K_M measured on Pixel 6a; others on x86 i5-1235U."
+  "corpus_warning": "All 7 variants measured on Pixel 6a full WikiText-2 corpus (~285K tokens, 568 chunks)."
 }

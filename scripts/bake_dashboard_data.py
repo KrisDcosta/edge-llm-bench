@@ -636,8 +636,11 @@ def bake_perplexity():
     sample_variants = [d["variant"] for d in result["data"]
                        if d.get("corpus") == "wikitext2_sample"]
     if not sample_variants:
-        corpus_note = ("All 7 variants on full WikiText-2 corpus (~290K tokens). "
-                       "Q2_K & Q3_K_M measured on Pixel 6a; others on x86 i5-1235U.")
+        devices = {d.get("device") for d in result["data"] if d.get("perplexity") is not None}
+        if devices == {"Pixel6a"}:
+            corpus_note = "All 7 variants measured on Pixel 6a full WikiText-2 corpus (~285K tokens, 568 chunks)."
+        else:
+            corpus_note = "All 7 variants have full WikiText-2 corpus PPL; see tooltip for measurement device."
     else:
         corpus_note = (
             f"Full corpus (~290K tokens): {', '.join(full_variants)}. "

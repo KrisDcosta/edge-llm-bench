@@ -3,42 +3,80 @@
     "perplexity": 13.2885,
     "perplexity_status": "success",
     "corpus": "wikitext2_full",
-    "tokens_approx": 285000
+    "tokens_approx": 285000,
+    "n_chunks": 568,
+    "n_ctx": 512,
+    "standard_error": 0.09725,
+    "source_file": "results/pixel_6a_ppl_final/ppl_full_Q2_K.txt",
+    "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)"
   },
   "Q3_K_M": {
     "perplexity": 11.0832,
     "perplexity_status": "success",
     "corpus": "wikitext2_full",
-    "tokens_approx": 285000
+    "tokens_approx": 285000,
+    "n_chunks": 568,
+    "n_ctx": 512,
+    "standard_error": 0.07996,
+    "source_file": "results/pixel_6a_ppl_final/ppl_full_Q3_K_M.txt",
+    "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)"
   },
   "Q4_K_M": {
-    "perplexity": 9.7553,
+    "perplexity": 10.7128,
     "perplexity_status": "success",
-    "corpus": "wikitext2_sample",
-    "corpus_bytes": 12014
+    "corpus": "wikitext2_full",
+    "corpus_bytes": 12014,
+    "tokens_approx": 285000,
+    "n_chunks": 568,
+    "n_ctx": 512,
+    "standard_error": 0.07662,
+    "source_file": "results/pixel_6a_ppl_final/ppl_full_Q4_K_M.txt",
+    "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)"
   },
   "Q4_K_S": {
-    "perplexity": null,
-    "perplexity_status": "not_evaluated",
-    "corpus": null,
-    "note": "Q4_K_S perplexity not collected — variant added after initial perplexity sweep. Re-run scheduled."
+    "perplexity": 10.7005,
+    "perplexity_status": "success",
+    "corpus": "wikitext2_full",
+    "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)",
+    "tokens_approx": 285000,
+    "n_chunks": 568,
+    "n_ctx": 512,
+    "standard_error": 0.07633,
+    "source_file": "results/pixel_6a_ppl_final/ppl_full_Q4_K_S.txt"
   },
   "Q5_K_M": {
-    "perplexity": null,
-    "perplexity_status": "not_evaluated",
-    "corpus": null,
-    "note": "Q5_K_M perplexity not collected — variant added after initial perplexity sweep. Re-run scheduled."
+    "perplexity": 10.6243,
+    "perplexity_status": "success",
+    "corpus": "wikitext2_full",
+    "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)",
+    "tokens_approx": 285000,
+    "n_chunks": 568,
+    "n_ctx": 512,
+    "standard_error": 0.07588,
+    "source_file": "results/pixel_6a_ppl_final/ppl_full_Q5_K_M.txt"
   },
   "Q6_K": {
-    "perplexity": 9.752,
+    "perplexity": 10.5841,
     "perplexity_status": "success",
-    "corpus": "wikitext2_sample",
-    "corpus_bytes": 12014
+    "corpus": "wikitext2_full",
+    "corpus_bytes": 12014,
+    "tokens_approx": 285000,
+    "n_chunks": 568,
+    "n_ctx": 512,
+    "standard_error": 0.07549,
+    "source_file": "results/pixel_6a_ppl_final/ppl_full_Q6_K.txt",
+    "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)"
   },
   "Q8_0": {
-    "perplexity": 9.7044,
+    "perplexity": 10.5894,
     "perplexity_status": "success",
-    "corpus": "wikitext2_sample",
-    "corpus_bytes": 12014
+    "corpus": "wikitext2_full",
+    "corpus_bytes": 12014,
+    "tokens_approx": 285000,
+    "n_chunks": 568,
+    "n_ctx": 512,
+    "standard_error": 0.07563,
+    "source_file": "results/pixel_6a_ppl_final/ppl_full_Q8_0.txt",
+    "note": "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)"
   }
 }

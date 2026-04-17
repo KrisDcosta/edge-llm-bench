@@ -374,6 +374,31 @@ def validate(manifest: dict, pixel, m4, x86, quality, ppl, dashboard) -> list[st
     if set(quality["benchmark"].unique()) != EXPECTED_BENCHMARKS:
         failures.append("quality_benchmarks.parquet benchmark set drifted from expected 6-task contract")
 
+    pixel_ppl = ppl[ppl["device"] == "Pixel6a"]
+    pixel_ppl_full = pixel_ppl[
+        (pixel_ppl["perplexity_status"] == "success") &
+        (pixel_ppl["corpus"] == "wikitext2_full") &
+        (pixel_ppl["perplexity"].notna())
+    ]
+    if set(pixel_ppl_full["variant"].unique()) != set(VARIANT_ORDER):
+        failures.append("perplexity.parquet must contain Pixel full-corpus PPL for all 7 variants")
+
+    if pixel_ppl["corpus"].isin(["wikitext2_sample"]).any() or pixel_ppl["perplexity"].isna().any():
+        failures.append("Pixel perplexity rows must not contain sample-corpus or null PPL values")
+
+    dashboard_ppl = dashboard["perplexity"]["data"]
+    if len(dashboard_ppl) != len(VARIANT_ORDER):
+        failures.append("dashboard/perplexity.json must expose exactly one canonical row per variant")
+    for row in dashboard_ppl:
+        if (
+            row.get("device") != "Pixel6a" or
+            row.get("corpus") != "wikitext2_full" or
+            row.get("status") != "success" or
+            row.get("perplexity") is None
+        ):
+            failures.append("dashboard/perplexity.json must use Pixel full-corpus PPL for every variant")
+            break
+
     m4_qwen = m4[m4["model"] == MODEL_QWEN]
     m4_qwen_counts = m4_qwen["experiment_type"].value_counts().to_dict()
     if m4_qwen_counts != {"cliff_sweep": 91, "standard_sweep": 7}:

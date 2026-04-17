@@ -527,11 +527,13 @@ Fix: parse only the text *after* the instruction marker. Corrected values: 76–
 |---------|---------|---------|
 | Q2_K   | 13.29 | 11.73 |
 | Q3_K_M | 11.08 | 10.16 |
-| Q4_K_M | 9.76  | 9.75  |
-| Q6_K   | 9.75  | 9.74  |
-| Q8_0   | 9.70  | 9.71  |
+| Q4_K_S | 10.70 | 9.74 |
+| Q4_K_M | 10.71 | 9.75 |
+| Q5_K_M | 10.62 | 9.77 |
+| Q6_K   | 10.58 | 9.74 |
+| Q8_0   | 10.59 | 9.71 |
 
-PPL follows bit-width monotonically (lower bits = higher perplexity), but the differences among Q4–Q8 variants are tiny (<0.08 PPL). The big jump is Q2_K and Q3_K_M vs everything else.
+ARM PPL is now full-corpus Pixel 6a for all seven variants (~285K tokens, 568 chunks). x86 PPL is retained as supplementary cross-device reference. PPL follows bit-width roughly monotonically (lower bits = higher perplexity), but the differences among Q4–Q8 variants are tiny; the big jump is Q2_K and Q3_K_M vs everything else.
 
 ---
 

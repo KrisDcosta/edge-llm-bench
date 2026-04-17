@@ -15,8 +15,8 @@ All other result directories under `results/` are exploratory runs or superseded
 | Decode TPS (±std) at ctx=256 | `results/pixel_llama_tps_20260325_120022/` |
 | Prefill TPS, TTFT, E2E | `results/pixel_llama_tps_20260325_120022/` |
 | BoolQ accuracy + Wilson CI | `results/quality_scores.json` keys `boolq:*` |
-| PPL Q2_K, Q3_K_M (Pixel, full corpus ~285K tok) | `results/perplexity_scores.json` via `pixel_6a_ppl_final/` |
-| PPL Q4_K_S–Q8_0 (x86, full corpus ~290K tok) | `results/x86_perplexity_results.json` |
+| PPL, all 7 variants (Pixel, full corpus ~285K tok, 568 chunks) | `results/perplexity_scores.json` via `pixel_6a_ppl_final/` |
+| Supplementary x86 PPL, all 7 variants (full corpus ~290K tok) | `results/x86_perplexity_results.json` |
 
 ### Table 2 — KV-Cache Cliff (filled-context sweep)
 
@@ -141,7 +141,7 @@ These directories exist but are NOT cited in the paper. Kept for audit trail.
 | `archive/stale_summaries_20260415/` | ⚠️ Superseded | Old project summary JSON files replaced by public manifest/truth table |
 | `pixel_overnight_20260320_021818/` | 🔵 Exploratory | Overnight sweep, pre-final methodology |
 | `pixel_power_20260320_173728/` | ✅ Cited (fig5) | Battery measurement run |
-| `pixel_6a_ppl_final/` | ✅ Cited (Table 1 PPL) | Full WikiText-2 PPL for Q2_K, Q3_K_M |
+| `pixel_6a_ppl_final/` | ✅ Cited (Table 1 PPL) | Full WikiText-2 PPL for all 7 variants |
 
 ---
 

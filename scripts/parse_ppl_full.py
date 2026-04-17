@@ -3,41 +3,64 @@
 Parse full-corpus WikiText-2 perplexity results from device output files.
 
 Usage:
-    python3 scripts/parse_ppl_full.py results/
+    python3 scripts/parse_ppl_full.py results/pixel_6a_ppl_final \
+        --scores-file results/perplexity_scores.json --require-all
     
     This script:
     1. Reads ppl_full_*.txt files from the results directory (pulled from device)
     2. Extracts the "Final estimate" perplexity value from each
     3. Updates results/perplexity_scores.json with full-corpus values
-    4. Preserves existing partial-corpus entries
+    4. Preserves extra metadata such as chunk count and standard error
 """
 
+import argparse
 import re
 import json
 import sys
 from pathlib import Path
 
+VARIANT_ORDER = ["Q2_K", "Q3_K_M", "Q4_K_S", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0"]
+TOKENS_APPROX = 285000
+
+
 def extract_ppl_from_file(filepath):
-    """Extract perplexity value from device output file."""
+    """Extract final perplexity, standard error, and chunk count."""
     try:
         with open(filepath, 'r') as f:
             content = f.read()
-        
-        # Look for "Final estimate ... : X.XXXX"
-        match = re.search(r'Final estimate.*?:\s*([\d.]+)', content, re.IGNORECASE | re.DOTALL)
-        if match:
-            ppl_value = float(match.group(1))
-            return ppl_value
-        else:
+
+        match = re.search(
+            r'Final estimate:\s*PPL\s*=\s*([0-9.]+)\s*\+/-\s*([0-9.]+)',
+            content,
+            re.IGNORECASE,
+        )
+        if not match:
             print(f"Warning: Could not find 'Final estimate' in {filepath}")
             return None
+
+        chunks = re.search(r'calculating perplexity over\s+(\d+)\s+chunks', content)
+        n_ctx = re.search(r'n_ctx=(\d+)', content)
+        return {
+            "perplexity": float(match.group(1)),
+            "standard_error": float(match.group(2)),
+            "n_chunks": int(chunks.group(1)) if chunks else None,
+            "n_ctx": int(n_ctx.group(1)) if n_ctx else None,
+        }
     except Exception as e:
         print(f"Error reading {filepath}: {e}")
         return None
 
+
 def main():
-    results_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("results")
-    
+    parser = argparse.ArgumentParser(description="Parse full-corpus WikiText-2 PPL outputs")
+    parser.add_argument("results_dir", nargs="?", default="results/pixel_6a_ppl_final")
+    parser.add_argument("--scores-file", default="results/perplexity_scores.json")
+    parser.add_argument("--require-all", action="store_true", help="fail unless all 7 canonical variants are parsed")
+    args = parser.parse_args()
+
+    results_dir = Path(args.results_dir)
+    scores_file = Path(args.scores_file)
+
     # Find all ppl_full_*.txt files
     ppl_files = list(results_dir.glob("ppl_full_*.txt"))
     
@@ -54,13 +77,14 @@ def main():
         if not match:
             print(f"Warning: Could not parse variant from {ppl_file.name}")
             continue
-        
+
         variant = match.group(1)
-        ppl_value = extract_ppl_from_file(ppl_file)
-        
-        if ppl_value is not None:
-            results[variant] = ppl_value
-            print(f"✓ {variant}: {ppl_value:.4f}")
+        parsed = extract_ppl_from_file(ppl_file)
+
+        if parsed is not None:
+            parsed["source_file"] = str(ppl_file)
+            results[variant] = parsed
+            print(f"✓ {variant}: {parsed['perplexity']:.4f} +/- {parsed['standard_error']:.5f}")
         else:
             print(f"✗ {variant}: FAILED TO PARSE")
     
@@ -68,34 +92,45 @@ def main():
         print("No results were successfully parsed.")
         sys.exit(1)
     
-    # Load existing perplexity scores
-    scores_file = results_dir / "perplexity_scores.json"
+    if args.require_all:
+        missing = sorted(set(VARIANT_ORDER) - set(results))
+        if missing:
+            print(f"Missing full-corpus PPL files for: {missing}", file=sys.stderr)
+            sys.exit(1)
+
     if scores_file.exists():
         with open(scores_file, 'r') as f:
             existing_scores = json.load(f)
     else:
         existing_scores = {}
-    
+
     # Update with new full-corpus values
-    for variant, ppl_value in results.items():
+    for variant, parsed in results.items():
         if variant not in existing_scores:
             existing_scores[variant] = {}
-        
-        existing_scores[variant]["perplexity"] = ppl_value
+
+        existing_scores[variant]["perplexity"] = parsed["perplexity"]
         existing_scores[variant]["perplexity_status"] = "success"
         existing_scores[variant]["corpus"] = "wikitext2_full"
-        existing_scores[variant]["corpus_bytes"] = 1268800  # ~285K tokens ≈ 1.2 MB
-    
+        existing_scores[variant]["tokens_approx"] = TOKENS_APPROX
+        existing_scores[variant]["n_chunks"] = parsed["n_chunks"]
+        existing_scores[variant]["n_ctx"] = parsed["n_ctx"]
+        existing_scores[variant]["standard_error"] = parsed["standard_error"]
+        existing_scores[variant]["source_file"] = parsed["source_file"]
+        existing_scores[variant]["note"] = "Measured on Pixel 6a (full WikiText-2 corpus, 568 chunks)"
+
     # Write updated scores
+    scores_file.parent.mkdir(parents=True, exist_ok=True)
     with open(scores_file, 'w') as f:
         json.dump(existing_scores, f, indent=2)
-    
+        f.write("\n")
+
     print(f"\n✓ Updated {scores_file}")
     print(f"  Total variants with full-corpus PPL: {len(results)}")
-    
+
     # Summary
     print("\n=== Final PPL Summary ===")
-    for variant in sorted(existing_scores.keys()):
+    for variant in VARIANT_ORDER:
         if "perplexity" in existing_scores[variant]:
             ppl = existing_scores[variant]["perplexity"]
             corpus = existing_scores[variant].get("corpus", "?")

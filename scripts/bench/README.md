@@ -30,7 +30,7 @@ Scripts are labeled: **Active** (used in paper), **Exploratory** (experimental),
 | Script | Status | Notes |
 |--------|--------|-------|
 | `pixel_qwen_tps.sh` | 🔵 Exploratory | Qwen 2.5 1.5B TPS on Pixel — dataset supplement |
-| `pixel_wikitext_ppl.sh` | 🔵 Exploratory | Full WikiText-2 PPL via ADB — Pixel PPL column (Q2_K/Q3_K_M collected; Q4–Q8 pending) |
+| `pixel_wikitext_ppl.sh` | ✅ Validated | Full WikiText-2 PPL via ADB — canonical Pixel rows: `results/pixel_6a_ppl_final/` |
 | `m4_qwen_tps.sh` | ✅ Validated extension | Qwen 2.5 1.5B TPS on M4 Metal — canonical run: `results/m4_qwen_tps_20260415_130955/` |
 | `m4_qwen_cliff.sh` | ✅ Validated extension | Qwen cliff sweep on M4 Metal — canonical run: `results/m4_qwen_cliff_20260416_021323/` |
 | `m4_cpu_cliff.sh` | 🔵 Exploratory | Llama 3.2 3B cliff on M4 CPU (ngl=0) — collected 2026-04 |
@@ -51,10 +51,8 @@ Scripts ready to run — data not yet collected:
 | # | Script | Platform | Expected Runtime | Purpose |
 |---|--------|----------|-----------------|---------|
 | 1 | `x86_qwen_cliff.py` | Windows x86 (i5-1235U) | ~4–6 h | Qwen KV-cache cliff sweep, 11 ctx × 5 trials × 7 variants (TG=128 rerun) |
-| 2 | `pixel_wikitext_ppl.sh Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0` | Pixel 6a via ADB | ~5–7 h | Pixel full-corpus PPL for Q4–Q8 (Q2_K/Q3_K_M already collected) |
-| 3 | M4 Qwen ingestion promotion | M4 Mac | TBD | TPS and cliff data are validated; parquet/dashboard integration still pending |
-| 4 | `m4_cpu_tps.sh` | M4 Mac | ~90–120 min | M4 CPU TPS rerun under idle conditions |
-| 5 | M4 quality runner redesign | M4 Mac | TBD | Existing runner is invalid because it reloads one model per question |
+| 2 | M4 quality runner redesign | M4 Mac | TBD | Existing server runner avoided crashes but collapsed mostly to one answer label |
+| 3 | NEON/simpleperf counter pass | Pixel 6a via ADB | TBD | Mechanistic evidence for dequant/cache explanation |
 
 See **Running Instructions** section below for step-by-step commands.
 
@@ -150,12 +148,11 @@ python3 scripts/bake_dashboard_data.py
 
 ---
 
-### 2. Pixel 6a Full-Corpus PPL for Q4–Q8
+### 2. Pixel 6a Full-Corpus PPL
 
-**Why:** Q2_K and Q3_K_M already have Pixel full-corpus PPL (~285K tokens).
-Q4_K_S, Q4_K_M, Q5_K_M, Q6_K, Q8_0 currently use x86 values (~290K tokens).
-Collecting Pixel values enables cross-device PPL consistency check and removes
-the corpus-device mismatch note from the dashboard.
+**Status:** Complete. Canonical source: `results/pixel_6a_ppl_final/`.
+
+Use these commands only to reproduce or replace the canonical run.
 
 **Platform:** Pixel 6a via ADB (Mac host)
 
@@ -185,23 +182,24 @@ done
 
 **Run:**
 ```bash
-# Q4_K_S, Q4_K_M, Q5_K_M, Q6_K, Q8_0 only (Q2_K and Q3_K_M already collected)
-bash scripts/bench/pixel_wikitext_ppl.sh Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0
+# All 7 variants
+bash scripts/bench/pixel_wikitext_ppl.sh Q2_K Q3_K_M Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0
 
 # Each variant takes ~60–90 min; total ~5–7 h
 # Thermal note: keep device screen off, not charging, on flat surface
 # Resume if interrupted:
-bash scripts/bench/pixel_wikitext_ppl.sh --resume Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0
+bash scripts/bench/pixel_wikitext_ppl.sh --resume Q2_K Q3_K_M Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0
 ```
 
 **Output:** `results/pixel_wikitext_ppl_<ts>/ppl_<VARIANT>.json`
 
-**After collecting:** copy JSON files into `results/` and run:
+**After collecting:** copy full output files to `results/pixel_6a_ppl_final/` as
+`ppl_full_<VARIANT>.txt`, then run:
 ```bash
-python3 scripts/prepare_dataset.py
-python3 scripts/bake_dashboard_data.py
+python3 scripts/parse_ppl_full.py results/pixel_6a_ppl_final --scores-file results/perplexity_scores.json --require-all
+python3 scripts/build_public_release.py
 ```
-The pipeline auto-selects full-corpus Pixel values over x86 values when both exist.
+The dashboard/report select full-corpus Pixel values over x86 values when both exist.
 
 ---
 
