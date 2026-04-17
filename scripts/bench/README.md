@@ -36,6 +36,7 @@ Scripts are labeled: **Active** (used in paper), **Exploratory** (experimental),
 | `m4_cpu_cliff.sh` | 🔵 Exploratory | Llama 3.2 3B cliff on M4 CPU (ngl=0) — collected 2026-04 |
 | `m4_cpu_tps.sh` | 🔵 Exploratory | Llama 3.2 3B TPS on M4 CPU — collected 2026-04 |
 | `m4_cpu_qwen_cliff.sh` | 🔵 Exploratory | Qwen 2.5 1.5B cliff on M4 CPU — **pending data collection** |
+| `quality_eval_m4_server.py` | 🔵 Exploratory | M4 quality evaluation via persistent llama-server — patched for MCQ label-collapse guard |
 | `x86_llama_tps.sh` | 🔵 Exploratory | x86 CPU decode TPS reference — 7 variants at ctx=256 |
 | `x86_qwen_cliff.py` | 🔵 Exploratory | Qwen 2.5 1.5B cliff on x86 — **pending rerun** (v2: TG=128) |
 | `x86_qwen_tps.sh` | 🔵 Exploratory | Qwen 2.5 1.5B TPS on x86 — ctx=256 reference |
@@ -51,7 +52,7 @@ Scripts ready to run — data not yet collected:
 | # | Script | Platform | Expected Runtime | Purpose |
 |---|--------|----------|-----------------|---------|
 | 1 | `x86_qwen_cliff.py` | Windows x86 (i5-1235U) | ~4–6 h | Qwen KV-cache cliff sweep, 11 ctx × 5 trials × 7 variants (TG=128 rerun) |
-| 2 | M4 quality runner redesign | M4 Mac | TBD | Existing server runner avoided crashes but collapsed mostly to one answer label |
+| 2 | `quality_eval_m4_server.py` | M4 Mac | ~1–2 h per variant for all 6 datasets | M4 quality rerun using persistent llama-server, one variant at a time |
 | 3 | NEON/simpleperf counter pass | Pixel 6a via ADB | TBD | Mechanistic evidence for dequant/cache explanation |
 
 See **Running Instructions** section below for step-by-step commands.
@@ -148,7 +149,72 @@ python3 scripts/bake_dashboard_data.py
 
 ---
 
-### 2. Pixel 6a Full-Corpus PPL
+### 2. M4 Quality Evaluation Re-run
+
+**Why:** The original local M4 quality runner loaded the model once per question
+and caused memory pressure. The first server attempt was stable, but direct
+`A/B/C/D` constrained generation collapsed mostly to `A`. The patched server
+runner keeps one model loaded per variant, prefixes MCQ answers with `Answer:`,
+and fails if one choice label dominates suspiciously.
+
+**Platform:** M4 Mac.
+
+**Prerequisites:**
+```bash
+which llama-server
+ls local-models/llama3_2_3b_gguf/Llama-3.2-3B-Instruct-Q2_K.gguf
+```
+
+**Smoke test before a full run:**
+```bash
+python3 scripts/quality_eval_m4_server.py \
+  --dataset data/arc_easy_100.yaml \
+  --tag arc_easy_smoke \
+  --limit 20 \
+  --output results/quality_metrics_m4_server_smoke.json \
+  Q2_K
+```
+
+Expected smoke-test checks:
+- `status=success`
+- Mixed `choice_prediction_distribution`, not mostly one label
+- No `choice_label_collapse`
+
+**Run one variant at a time:**
+```bash
+for DATASET in boolq arc_easy arc_challenge hellaswag mmlu truthfulqa; do
+  python3 scripts/quality_eval_m4_server.py \
+    --dataset data/${DATASET}_100.yaml \
+    --tag ${DATASET} \
+    Q2_K
+done
+```
+
+Then repeat the loop for `Q3_K_M`, `Q4_K_S`, `Q4_K_M`, `Q5_K_M`, `Q6_K`, and
+`Q8_0`. Do not use `--all` until one full variant has completed cleanly.
+
+**Output:** `results/quality_metrics_m4_server.json`
+
+**Validation after each variant:**
+```bash
+python3 - <<'PY'
+import json
+d = json.load(open("results/quality_metrics_m4_server.json"))
+for key in sorted(d):
+    r = d[key]
+    if r.get("status") != "success":
+        print("CHECK", key, r.get("status"))
+    if r.get("choice_label_collapse"):
+        print("COLLAPSE", key, r.get("choice_prediction_distribution"))
+PY
+```
+
+These rows are not integrated into the public dashboard until all six datasets
+and all seven variants pass validation.
+
+---
+
+### 3. Pixel 6a Full-Corpus PPL
 
 **Status:** Complete. Canonical source: `results/pixel_6a_ppl_final/`.
 
@@ -203,7 +269,7 @@ The dashboard/report select full-corpus Pixel values over x86 values when both e
 
 ---
 
-### 3. Qwen M4 GPU TPS Sweep
+### 4. Qwen M4 GPU TPS Sweep
 
 **Why:** Establishes Qwen 2.5 1.5B Metal baseline TPS across context lengths.
 Complements existing Llama M4 Metal TPS data for cross-model comparison on GPU.
@@ -252,7 +318,7 @@ python3 scripts/bake_dashboard_data.py
 
 ---
 
-### 4. M4 CPU Qwen Cliff Sweep
+### 5. M4 CPU Qwen Cliff Sweep
 
 **Why:** Characterises KV-cache cliff behaviour for Qwen 2.5 1.5B on M4 CPU
 (no Metal GPU). Complements Llama M4 CPU cliff data and Qwen M4 Metal cliff data.

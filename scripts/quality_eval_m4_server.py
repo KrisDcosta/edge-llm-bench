@@ -54,11 +54,12 @@ def get_model_path(variant: str) -> Path:
     return MODELS_DIR / f"Llama-3.2-3B-Instruct-{variant}.gguf"
 
 
-def format_llama3_instruct(user_message: str) -> str:
+def format_llama3_instruct(user_message: str, assistant_prefix: str = "") -> str:
     return (
         "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n"
         f"{user_message}"
         "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        f"{assistant_prefix}"
     )
 
 
@@ -123,15 +124,27 @@ def score_answer(model_output: str, expected: str, answer_type: str) -> bool:
     return score_substring(model_output, expected)
 
 
-def choice_grammar_for_prompt(prompt: str) -> str:
-    labels = [label for label in ("A", "B", "C", "D") if re.search(rf"\b{label}\)", prompt)]
-    if not labels:
-        labels = ["A", "B", "C", "D"]
-    quoted = " | ".join(f'"{label}"' for label in labels)
-    return f"root ::= ({quoted})"
-
-
-def extract_answer(content: str) -> str:
+def extract_answer(content: str, answer_type: str) -> str:
+    content = content.strip()
+    if answer_type == "choice":
+        if match := re.match(r"^([ABCD])(?:[.):\s]|$)", content, re.IGNORECASE):
+            return match.group(1).upper()
+        if match := re.search(
+            r"(?:\banswer\s*(?:is\s*)?:?\s*|\bthe\s+(?:correct\s+)?answer\s+is\s+|\()"
+            r"([ABCD])\b",
+            content[:200],
+            re.IGNORECASE,
+        ):
+            return match.group(1).upper()
+    if answer_type == "yesno":
+        if match := re.match(r"^(yes|no)(?:[.,!?\s]|$)", content, re.IGNORECASE):
+            return match.group(1).capitalize()
+        if match := re.search(
+            r"(?:\banswer\s*(?:is\s*)?:?\s*|\bthe\s+answer\s+is\s+)(yes|no)\b",
+            content[:200],
+            re.IGNORECASE,
+        ):
+            return match.group(1).capitalize()
     lines = [line.strip() for line in content.splitlines() if line.strip()]
     return (lines[0] if lines else content.strip())[:500]
 
@@ -231,8 +244,12 @@ def stop_server(proc: subprocess.Popen) -> None:
 
 def request_completion(base_url: str, prompt: str, answer_type: str,
                        n_tokens: int, timeout_s: int) -> str | None:
+    # Multiple-choice generation is biased if the model must emit A/B/C/D
+    # immediately after the assistant header. Prefixing "Answer:" turns the
+    # task into a normal answer-completion next-token decision.
+    assistant_prefix = "Answer: " if answer_type == "choice" else ""
     payload = {
-        "prompt": format_llama3_instruct(prompt),
+        "prompt": format_llama3_instruct(prompt, assistant_prefix=assistant_prefix),
         "n_predict": n_tokens,
         "temperature": 0.0,
         "seed": 42,
@@ -242,8 +259,6 @@ def request_completion(base_url: str, prompt: str, answer_type: str,
     }
     if answer_type == "yesno":
         payload["grammar"] = YESNO_GRAMMAR
-    elif answer_type == "choice":
-        payload["grammar"] = choice_grammar_for_prompt(prompt)
     response = http_json("POST", base_url + "/completion", payload, timeout=timeout_s)
     if not response:
         return None
@@ -253,7 +268,7 @@ def request_completion(base_url: str, prompt: str, answer_type: str,
         content = choice.get("text") or choice.get("message", {}).get("content")
     if not isinstance(content, str):
         return None
-    return extract_answer(content)
+    return extract_answer(content, answer_type)
 
 
 def wilson_ci(correct: int, total: int) -> float | None:
@@ -277,7 +292,20 @@ def build_result(variant: str, args: argparse.Namespace, prompts: list[dict[str,
         categories[cat]["total"] += 1
         if q.get("correct"):
             categories[cat]["correct"] += 1
-    return {
+    choice_outputs = [
+        q.get("model_output", "").strip().upper()
+        for q in per_question
+        if q.get("status") == "success"
+        and q.get("answer_type") == "choice"
+        and q.get("model_output", "").strip().upper() in {"A", "B", "C", "D"}
+    ]
+    choice_distribution = {label: choice_outputs.count(label) for label in ("A", "B", "C", "D")}
+    choice_label_collapse = False
+    if len(choice_outputs) >= 20:
+        max_share = max(choice_distribution.values()) / len(choice_outputs)
+        choice_label_collapse = max_share > args.max_choice_label_share
+
+    result = {
         "variant": variant,
         "tag": args.tag,
         "status": status,
@@ -296,6 +324,13 @@ def build_result(variant: str, args: argparse.Namespace, prompts: list[dict[str,
         },
         "per_question": per_question,
     }
+    if choice_outputs:
+        result["choice_prediction_distribution"] = choice_distribution
+        result["choice_label_collapse"] = choice_label_collapse
+        result["max_choice_label_share"] = round(
+            max(choice_distribution.values()) / len(choice_outputs), 3
+        )
+    return result
 
 
 def save_results(path: Path, results: dict[str, Any]) -> None:
@@ -390,7 +425,17 @@ def evaluate_variant(args: argparse.Namespace, variant: str, prompts: list[dict[
                     f"{variant}: aborting after {consecutive_failures} consecutive failures"
                 )
 
-        results[key] = build_result(variant, args, prompts, per_question, "success")
+        final = build_result(variant, args, prompts, per_question, "success")
+        if final.get("choice_label_collapse") and not args.allow_choice_collapse:
+            final["status"] = "failed_label_collapse"
+            results[key] = final
+            save_results(output_path, results)
+            raise RuntimeError(
+                f"{variant}: suspicious choice-label collapse "
+                f"({final['choice_prediction_distribution']}, "
+                f"max_share={final['max_choice_label_share']})"
+            )
+        results[key] = final
         save_results(output_path, results)
     finally:
         stop_server(proc)
@@ -413,6 +458,17 @@ def main() -> int:
     parser.add_argument("--server-io-timeout", type=int, default=600)
     parser.add_argument("--request-timeout", type=int, default=120)
     parser.add_argument("--max-consecutive-failures", type=int, default=5)
+    parser.add_argument(
+        "--max-choice-label-share",
+        type=float,
+        default=0.80,
+        help="Fail choice evals when one predicted label exceeds this share",
+    )
+    parser.add_argument(
+        "--allow-choice-collapse",
+        action="store_true",
+        help="Record but do not fail suspicious choice-label collapse",
+    )
     args = parser.parse_args()
 
     variants = ALL_VARIANTS if args.all or not args.variants else args.variants
