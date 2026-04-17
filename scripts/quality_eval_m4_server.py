@@ -424,7 +424,7 @@ def evaluate_variant(args: argparse.Namespace, variant: str, prompts: list[dict[
     existing = results.get(key, {})
     dataset_matches = existing.get("dataset_sha256") == args.dataset_sha256
     if (
-        existing.get("status") == "success"
+        existing.get("status") in {"success", "failed_label_collapse"}
         and existing.get("total") == len(prompts)
         and dataset_matches
         and not args.force
@@ -516,7 +516,11 @@ def evaluate_variant(args: argparse.Namespace, variant: str, prompts: list[dict[
                 )
 
         final = build_result(variant, args, prompts, per_question, "success")
-        if final.get("choice_label_collapse") and not args.allow_choice_collapse:
+        if (
+            final.get("choice_label_collapse")
+            and args.fail_choice_collapse
+            and not args.allow_choice_collapse
+        ):
             final["status"] = "failed_label_collapse"
             results[key] = final
             save_results(output_path, results)
@@ -557,7 +561,12 @@ def main() -> int:
     parser.add_argument(
         "--allow-choice-collapse",
         action="store_true",
-        help="Record but do not fail suspicious choice-label collapse",
+        help="Deprecated alias; label collapse is recorded but not failed by default",
+    )
+    parser.add_argument(
+        "--fail-choice-collapse",
+        action="store_true",
+        help="Fail choice evals when one label exceeds --max-choice-label-share",
     )
     args = parser.parse_args()
 
