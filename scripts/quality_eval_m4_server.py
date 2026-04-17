@@ -325,6 +325,7 @@ def wilson_ci(correct: int, total: int) -> float | None:
 
 def build_result(variant: str, args: argparse.Namespace, prompts: list[dict[str, Any]],
                  per_question: list[dict[str, Any]], status: str) -> dict[str, Any]:
+    per_question = normalize_per_question_rows(prompts, per_question)
     correct = sum(1 for q in per_question if q.get("correct"))
     total = len(per_question)
     categories: dict[str, dict[str, int]] = {}
@@ -375,6 +376,41 @@ def build_result(variant: str, args: argparse.Namespace, prompts: list[dict[str,
     return result
 
 
+def normalize_per_question_rows(
+    prompts: list[dict[str, Any]],
+    rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Apply current answer extraction/scoring to stored per-question rows."""
+    prompts_by_id = {prompt["id"]: prompt for prompt in prompts}
+    normalized: list[dict[str, Any]] = []
+    for row in rows:
+        new_row = dict(row)
+        prompt = prompts_by_id.get(str(row.get("prompt_id")))
+        output = row.get("model_output")
+        answer_type = row.get("answer_type", prompt.get("answer_type", "substring") if prompt else "substring")
+
+        if (
+            prompt
+            and row.get("status") == "success"
+            and isinstance(output, str)
+            and answer_type == "choice"
+        ):
+            new_row["model_output"] = extract_answer(output, "choice", prompt["prompt"])
+
+        if prompt and row.get("status") == "success" and isinstance(new_row.get("model_output"), str):
+            new_row["correct"] = score_answer(
+                new_row["model_output"],
+                str(prompt["answer"]),
+                answer_type,
+            )
+            new_row["expected"] = prompt["answer"]
+            new_row["answer_type"] = answer_type
+            new_row["category"] = prompt.get("category", new_row.get("category", "unknown"))
+
+        normalized.append(new_row)
+    return normalized
+
+
 def save_results(path: Path, results: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
@@ -393,12 +429,24 @@ def evaluate_variant(args: argparse.Namespace, variant: str, prompts: list[dict[
         and dataset_matches
         and not args.force
     ):
+        repaired = build_result(
+            variant,
+            args,
+            prompts,
+            existing.get("per_question", []),
+            "success",
+        )
+        if repaired != existing:
+            results[key] = repaired
+            save_results(output_path, results)
+            print(f"  [{variant}] repaired existing complete result in {output_path}")
         print(f"  [{variant}] skip complete result in {output_path}")
         return
 
+    existing_rows = normalize_per_question_rows(prompts, existing.get("per_question", []))
     completed_by_id = {
         q["prompt_id"]: q
-        for q in existing.get("per_question", [])
+        for q in existing_rows
         if q.get("status") == "success" and dataset_matches and not args.force
     }
     per_question = [completed_by_id[p["id"]] for p in prompts if p["id"] in completed_by_id]
