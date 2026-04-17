@@ -36,7 +36,7 @@ Scripts are labeled: **Active** (used in paper), **Exploratory** (experimental),
 | `m4_cpu_cliff.sh` | 🔵 Exploratory | Llama 3.2 3B cliff on M4 CPU (ngl=0) — collected 2026-04 |
 | `m4_cpu_tps.sh` | 🔵 Exploratory | Llama 3.2 3B TPS on M4 CPU — collected 2026-04 |
 | `m4_cpu_qwen_cliff.sh` | 🔵 Exploratory | Qwen 2.5 1.5B cliff on M4 CPU — **pending data collection** |
-| `quality_eval_m4_server.py` | 🔵 Exploratory | M4 quality evaluation via persistent llama-server — patched for MCQ label-collapse guard |
+| `quality_eval_m4_server.py` | ✅ Validated extension | M4 quality evaluation via persistent llama-server — complete run: `results/quality_metrics_m4_server.json` |
 | `x86_llama_tps.sh` | 🔵 Exploratory | x86 CPU decode TPS reference — 7 variants at ctx=256 |
 | `x86_qwen_cliff.py` | 🔵 Exploratory | Qwen 2.5 1.5B cliff on x86 — **pending rerun** (v2: TG=128) |
 | `x86_qwen_tps.sh` | 🔵 Exploratory | Qwen 2.5 1.5B TPS on x86 — ctx=256 reference |
@@ -52,8 +52,7 @@ Scripts ready to run — data not yet collected:
 | # | Script | Platform | Expected Runtime | Purpose |
 |---|--------|----------|-----------------|---------|
 | 1 | `x86_qwen_cliff.py` | Windows x86 (i5-1235U) | ~4–6 h | Qwen KV-cache cliff sweep, 11 ctx × 5 trials × 7 variants (TG=128 rerun) |
-| 2 | `quality_eval_m4_server.py` | M4 Mac | ~1–2 h per variant for all 6 datasets | M4 quality rerun using persistent llama-server, one variant at a time |
-| 3 | NEON/simpleperf counter pass | Pixel 6a via ADB | TBD | Mechanistic evidence for dequant/cache explanation |
+| 2 | NEON/simpleperf counter pass | Pixel 6a via ADB | TBD | Mechanistic evidence for dequant/cache explanation |
 
 See **Running Instructions** section below for step-by-step commands.
 
@@ -151,6 +150,10 @@ python3 scripts/bake_dashboard_data.py
 
 ### 2. M4 Quality Evaluation Re-run
 
+**Status:** Complete. Canonical source: `results/quality_metrics_m4_server.json`.
+
+Use these commands only to reproduce or replace the canonical run.
+
 **Why:** The original local M4 quality runner loaded the model once per question
 and caused memory pressure. The first server attempt was stable, but direct
 `A/B/C/D` constrained generation collapsed mostly to `A`. The patched server
@@ -209,8 +212,9 @@ for key in sorted(d):
 PY
 ```
 
-These rows are not integrated into the public dashboard until all six datasets
-and all seven variants pass validation.
+These rows are validated as a Phase 1.1 extension artifact. They are not yet
+integrated into the public dashboard/parquet release until the quality schema is
+explicitly promoted to include `M4Mac` rows.
 
 ---
 

@@ -137,7 +137,7 @@ These directories exist but are NOT cited in the paper. Kept for audit trail.
 | `archive/m4_qwen_superseded_20260415/` | ⚠️ Superseded | Stale M4 Qwen TPS/cliff attempts; see `results/ARCHIVE_MANIFEST.md` |
 | `archive/m4_qwen_superseded_20260416/` | ⚠️ Superseded | Diagnostic M4 Qwen cliff attempts; see `results/ARCHIVE_MANIFEST.md` |
 | `archive/m4_quality_failed_20260415/` | ⚠️ Invalid | M4 quality attempt timed out; no M4 quality result is canonical |
-| `archive/m4_quality_failed_20260416/` | ⚠️ Invalid | M4 quality runner was stable but output collapsed mostly to `A`; no M4 quality result is canonical |
+| `archive/m4_quality_failed_20260416/` | ⚠️ Invalid | Early server runner was stable but output collapsed mostly to `A`; superseded by `quality_metrics_m4_server.json` |
 | `archive/stale_summaries_20260415/` | ⚠️ Superseded | Old project summary JSON files replaced by public manifest/truth table |
 | `pixel_overnight_20260320_021818/` | 🔵 Exploratory | Overnight sweep, pre-final methodology |
 | `pixel_power_20260320_173728/` | ✅ Cited (fig5) | Battery measurement run |
@@ -163,11 +163,12 @@ clean M4 CPU TPS rerun. Failed or incomplete extension runs remain excluded.
 | `m4_cpu_tps_20260415_231524/` | ✅ M4 CPU Llama TPS validated and promoted |
 | `m4_qwen_tps_20260415_130955/` | ✅ M4 Qwen TPS validated and promoted |
 | `m4_qwen_cliff_20260416_021323/` | ✅ M4 Qwen cliff validated and promoted |
+| `quality_metrics_m4_server.json` | ✅ Phase 1.1 extension artifact: M4 quality, 7 variants × 6 benchmarks × 100 prompts |
 
 | Pending / blocked run | Status |
 |-----------------------|--------|
 | x86 Qwen cliff | Excluded: pushed runs `20260415_110111` and `20260417_005727` contain missing/zero-throughput rows at larger contexts |
-| M4 quality | Excluded: server runner avoided crashes, but current run collapsed mostly to `A`; needs scoring/prompt redesign before publication |
+| M4 quality dashboard/dataset promotion | Collected and validated as `quality_metrics_m4_server.json`; not yet promoted into public parquet/dashboard schema |
 
 ### Superseded / Abandoned (not cited)
 

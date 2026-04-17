@@ -46,7 +46,7 @@ The most popular format for doing this on consumer hardware is called **GGUF** (
 
 **The intuitive assumption** everyone makes is: more bits = higher quality AND slower (because bigger model), while fewer bits = lower quality AND faster. **This project proves that assumption is wrong in both directions.**
 
-The validated public release currently contains **3,395 public records**: 3,253 inference rows, 128 quality-benchmark rows, and 14 perplexity rows. These are the rows used by the dashboard, dataset, and public claims. M4 Qwen TPS/cliff and the clean M4 CPU TPS rerun are now promoted. x86 Qwen cliff and M4 quality are still excluded because they did not pass validation.
+The validated public release currently contains **3,395 public records**: 3,253 inference rows, 128 quality-benchmark rows, and 14 perplexity rows. These are the rows used by the dashboard, dataset, and public claims. M4 Qwen TPS/cliff and the clean M4 CPU TPS rerun are now promoted. x86 Qwen cliff is still excluded because pushed reruns did not pass validation. M4 quality has now been collected and validated as a Phase 1.1 extension artifact, but it is not yet promoted into the public parquet/dashboard schema.
 
 Across the validated release, we found:
 - **Speed order on ARM CPU:** Q2_K fastest, Q6_K *slowest* — Q8_0 is not the slowest despite being 3× larger
@@ -254,11 +254,11 @@ llama.cpp has an optional FlashAttention implementation. We tested with the stan
 
 ### Decision 6: Public quality eval on CPU only
 
-Quality evaluation (BoolQ, HellaSwag, etc.) in the public release was run on ARM and x86 only. A local M4 quality attempt was started but terminated because it overloaded the laptop, and the saved outputs are timeouts rather than valid model answers. It is not part of the public release and is not used for any claim in this report.
+Quality evaluation (BoolQ, HellaSwag, etc.) in the public release was run on ARM and x86 only. A later M4 quality rerun using a persistent `llama-server` runner completed successfully for all 7 variants × 6 datasets × 100 prompts and is stored in `results/quality_metrics_m4_server.json`. It is validated as Phase 1.1 evidence, but it is not yet part of the public parquet/dashboard release until the quality schema is explicitly promoted to include `M4Mac` rows.
 
 **Rationale:** Quality scores should mostly be determined by model weights and quantization, not by the inference backend. A GGUF file run on ARM vs Metal should produce the same answer under deterministic decoding unless backend-level numerical differences change a borderline output.
 
-**Caveat:** We verified this assumption for Q4_K_M by spot-checking 10 BoolQ questions; results matched within rounding. Full M4 quality should still be validated before being published.
+**Caveat:** Full M4 quality is now available as an extension artifact. It should be promoted only after updating ingestion, dataset documentation, dashboard controls, and report tables together so public claims use one schema.
 
 ---
 
@@ -708,7 +708,7 @@ START
 
 10. **x86 Qwen cliff is not public-release evidence.** The pushed x86 Qwen cliff reruns contain missing/zero-throughput rows at larger contexts and high-CV cells, so they are excluded from the dataset, dashboard, and report claims.
 
-11. **M4 quality is not currently valid.** The attempted M4 quality run timed out question-by-question and was terminated due system load. No M4 quality claims are made in this report. Quality should be added only after the runner is redesigned to avoid reloading the model for every question and all seven variants complete cleanly.
+11. **M4 quality is validated but not yet public-release schema.** The old attempts failed, but the redesigned persistent `llama-server` runner completed all seven variants cleanly. These rows are valid Phase 1.1 evidence and should be promoted in one coordinated update to ingestion, dashboard, dataset README, and report tables.
 
 ---
 
@@ -732,7 +732,7 @@ This section documents every significant data problem encountered and how it was
 | M4 Qwen cliff invalid | Older attempts had impossible values and zero decode rows | Run used only 32 decode tokens, too unstable for cliff measurement | Re-ran with 128 decode tokens, n=5 | `m4_qwen_cliff_20260416_021323` promoted |
 | x86 Qwen cliff invalid | Missing rows, zero rows, high variance | x86 reruns did not complete all large-context cells cleanly | Exclude pushed x86 Qwen cliff directories from ingestion | No x86 Qwen cliff claims |
 | M4 CPU TPS rerun validated | Earlier CPU TPS references were inconsistent | macOS scheduling / background load likely affected measurements | Use clean 2026-04-15 tg128 rerun | `m4_cpu_tps_20260415_231524` promoted |
-| M4 quality attempt failed | Old run timed out; server rerun mostly predicted `A` | First runner reloaded a multi-GB model per question; second runner exposed prompt/scoring label bias | Archive `quality_metrics_m4.json` and `quality_metrics_m4_server.json`; redesign prompts/scoring before rerun | No M4 quality numbers are public-release evidence |
+| M4 quality attempt failed | Old run timed out; early server rerun mostly predicted `A` | First runner reloaded a multi-GB model per question; second runner exposed prompt/scoring label bias | Replaced with persistent `llama-server`, assistant-side `Answer:` prefix, option-text mapping, and label-collapse metadata | M4 quality is now validated as Phase 1.1 extension evidence, not yet promoted into public parquet/dashboard |
 
 ---
 
