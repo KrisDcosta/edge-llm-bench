@@ -124,7 +124,47 @@ def score_answer(model_output: str, expected: str, answer_type: str) -> bool:
     return score_substring(model_output, expected)
 
 
-def extract_answer(content: str, answer_type: str) -> str:
+def parse_choice_options(prompt: str) -> dict[str, str]:
+    """Extract A-D option text from compact MCQ prompts."""
+    pattern = re.compile(
+        r"\b([ABCD])\)\s*(.*?)(?=\s+\b[ABCD]\)\s*|\s+Answer\s+with|$)",
+        re.DOTALL,
+    )
+    return {
+        match.group(1).upper(): re.sub(r"\s+", " ", match.group(2)).strip(" .")
+        for match in pattern.finditer(prompt)
+    }
+
+
+def normalize_choice_text(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", text.lower())
+
+
+def map_option_text_to_label(model_output: str, prompt: str) -> str | None:
+    """Map generated option text back to A-D when the model emits content."""
+    output_norm = normalize_choice_text(model_output)
+    if not output_norm:
+        return None
+
+    candidates: list[tuple[int, str]] = []
+    for label, option_text in parse_choice_options(prompt).items():
+        option_norm = normalize_choice_text(option_text)
+        if not option_norm:
+            continue
+        if output_norm == option_norm:
+            candidates.append((1000 + len(option_norm), label))
+        elif len(output_norm) >= 2 and option_norm.startswith(output_norm):
+            candidates.append((500 + len(output_norm), label))
+        elif len(option_norm) >= 2 and output_norm.startswith(option_norm):
+            candidates.append((400 + len(option_norm), label))
+
+    if not candidates:
+        return None
+    candidates.sort(reverse=True)
+    return candidates[0][1]
+
+
+def extract_answer(content: str, answer_type: str, prompt: str) -> str:
     content = content.strip()
     if answer_type == "choice":
         if match := re.match(r"^([ABCD])(?:[.):\s]|$)", content, re.IGNORECASE):
@@ -136,6 +176,8 @@ def extract_answer(content: str, answer_type: str) -> str:
             re.IGNORECASE,
         ):
             return match.group(1).upper()
+        if mapped := map_option_text_to_label(content, prompt):
+            return mapped
     if answer_type == "yesno":
         if match := re.match(r"^(yes|no)(?:[.,!?\s]|$)", content, re.IGNORECASE):
             return match.group(1).capitalize()
@@ -268,7 +310,7 @@ def request_completion(base_url: str, prompt: str, answer_type: str,
         content = choice.get("text") or choice.get("message", {}).get("content")
     if not isinstance(content, str):
         return None
-    return extract_answer(content, answer_type)
+    return extract_answer(content, answer_type, prompt)
 
 
 def wilson_ci(correct: int, total: int) -> float | None:
