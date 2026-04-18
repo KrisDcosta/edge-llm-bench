@@ -65,6 +65,7 @@
 #   bash scripts/bench/pixel_neon_perf.sh Q2_K Q6_K         # subset
 #   bash scripts/bench/pixel_neon_perf.sh --ctx 256,512,768 # custom contexts
 #   bash scripts/bench/pixel_neon_perf.sh --trials 1 --tokens 8 Q2_K # smoke test
+#   bash scripts/bench/pixel_neon_perf.sh --timeout 900      # per-run timeout seconds
 #   bash scripts/bench/pixel_neon_perf.sh --all-variants     # all 7 variants
 #   bash scripts/bench/pixel_neon_perf.sh --resume           # skip done variants
 #
@@ -105,6 +106,7 @@ DEFAULT_CTXS=(256 512)
 NUM_TRIALS=3      # n=3 sufficient to verify ordering; increase to 5 for paper
 OUTPUT_TOKENS=128 # large enough for stable measurement; decode dominates
 THREADS=4         # match TPS benchmark for fair comparison
+RUN_TIMEOUT=900   # seconds per simpleperf-wrapped generation
 PROMPT="Write"    # single-word prompt → minimal prefill contamination
 
 # PMU events: try hardware events first, fall back to basic
@@ -148,12 +150,21 @@ while [ "$#" -gt 0 ]; do
             OUTPUT_TOKENS="$2"
             shift 2
             ;;
+        --timeout)
+            [ "$#" -lt 2 ] && printf 'Missing value for --timeout\n' >&2 && exit 1
+            RUN_TIMEOUT="$2"
+            shift 2
+            ;;
         --trials=*)
             NUM_TRIALS="${arg#--trials=}"
             shift
             ;;
         --tokens=*)
             OUTPUT_TOKENS="${arg#--tokens=}"
+            shift
+            ;;
+        --timeout=*)
+            RUN_TIMEOUT="${arg#--timeout=}"
             shift
             ;;
         --ctx)
@@ -185,7 +196,7 @@ hr
 log "Pixel 6a  —  NEON/PMU Perf Counter Sweep  (Phase 2A)"
 log "Variants : ${VARIANTS[*]}"
 log "Contexts : ${CTX_SIZES[*]}"
-log "Trials   : ${NUM_TRIALS}  |  Output tokens: ${OUTPUT_TOKENS}  |  Prompt: '${PROMPT}'"
+log "Trials   : ${NUM_TRIALS}  |  Output tokens: ${OUTPUT_TOKENS}  |  Timeout: ${RUN_TIMEOUT}s  |  Prompt: '${PROMPT}'"
 log "Results  : ${RESULTS_DIR}"
 hr
 
@@ -359,6 +370,7 @@ for VARIANT in "${VARIANTS[@]}"; do
             # Do not pass --duration 0: Pixel simpleperf rejects it as invalid.
             # stderr from llama-completion + simpleperf summary both captured.
             REMOTE_CMD="export LD_LIBRARY_PATH=${DEVICE_DIR} && \
+                timeout ${RUN_TIMEOUT} \
                 ${SIMPLEPERF_BIN} stat \
                     -e ${ACTIVE_EVENTS} \
                     -- ${LLAMA_BIN} \
@@ -367,7 +379,9 @@ for VARIANT in "${VARIANTS[@]}"; do
                         -n ${OUTPUT_TOKENS} \
                         -p '${PROMPT}' \
                         -t ${THREADS} \
-                        --no-mmap 2>&1"
+                        -no-cnv \
+                        --no-mmap \
+                        </dev/null 2>&1"
             if RAW=$(adb shell "$REMOTE_CMD" 2>&1); then
                 RC=0
             else
