@@ -44,7 +44,12 @@ def safe_int(value) -> int:
 
 
 def row_tokens(row: dict) -> int:
-    return safe_int(row.get("n_output_tokens")) or 128
+    output_tokens = safe_int(row.get("n_output_tokens")) or 128
+    if row.get("prompt_mode") == "filled_context":
+        prompt_tokens = safe_int(row.get("prompt_eval_tokens")) or safe_int(row.get("prompt_tokens_approx"))
+        if prompt_tokens > 0:
+            return prompt_tokens + output_tokens
+    return output_tokens
 
 
 def rounded(value: float | None, digits: int = 4) -> float | None:
@@ -81,7 +86,7 @@ def aggregate(rows: list[dict]) -> dict:
                 r for r in rows
                 if r.get("variant") == variant
                 and safe_int(r.get("context")) == ctx
-                and r.get("status") != "adb_error"
+                and r.get("status") not in {"adb_error", "command_error"}
             ]
             good_decode = [safe_float(r.get("decode_tps")) for r in cr if safe_float(r.get("decode_tps")) > 0]
             cycles = [safe_int(r.get("cycles")) / row_tokens(r) for r in cr if safe_int(r.get("cycles")) > 0]
@@ -89,6 +94,9 @@ def aggregate(rows: list[dict]) -> dict:
             l1 = [safe_int(r.get("l1d_refill")) / row_tokens(r) for r in cr if safe_int(r.get("l1d_refill")) > 0]
             l2 = [safe_int(r.get("l2d_refill")) / row_tokens(r) for r in cr if safe_int(r.get("l2d_refill")) > 0]
             stall = [safe_int(r.get("stall_backend")) / row_tokens(r) for r in cr if safe_int(r.get("stall_backend")) > 0]
+            prompt_eval_tokens = [safe_int(r.get("prompt_eval_tokens")) for r in cr if safe_int(r.get("prompt_eval_tokens")) > 0]
+            prompt_tokens_approx = [safe_int(r.get("prompt_tokens_approx")) for r in cr if safe_int(r.get("prompt_tokens_approx")) > 0]
+            prompt_modes = sorted({str(r.get("prompt_mode", "short_prompt")) for r in cr})
 
             cycles_mean = mean(cycles)
             instrs_mean = mean(instrs)
@@ -110,6 +118,9 @@ def aggregate(rows: list[dict]) -> dict:
                 "l1d_refill_per_token": rounded(mean(l1)),
                 "l2d_refill_per_token": rounded(mean(l2)),
                 "stall_backend_per_token": rounded(stall_mean),
+                "prompt_mode": ",".join(prompt_modes) if prompt_modes else None,
+                "prompt_eval_tokens_mean": rounded(mean(prompt_eval_tokens), 1),
+                "prompt_tokens_approx_mean": rounded(mean(prompt_tokens_approx), 1),
                 "ipc": rounded(ipc),
                 "stall_backend_pct": rounded(stall_pct),
             }
@@ -119,12 +130,14 @@ def aggregate(rows: list[dict]) -> dict:
                 validation.append(f"{variant} ctx={ctx}: fewer than 3 decode-success trials")
             if tps_cv is not None and tps_cv > 0.20:
                 validation.append(f"{variant} ctx={ctx}: decode CV {tps_cv:.1%} > 20%")
+            if "filled_context" in prompt_modes and cell["prompt_eval_tokens_mean"] is None:
+                validation.append(f"{variant} ctx={ctx}: filled-context run has no parsed prompt_eval_tokens")
 
     hypotheses = compute_hypotheses(cells)
     return {
         "variants": variants,
         "contexts": contexts,
-        "tokens_per_run": "per-row n_output_tokens",
+        "tokens_per_run": "filled_context uses prompt_eval_tokens + n_output_tokens; short_prompt uses n_output_tokens",
         "cells": cells,
         "hypotheses": hypotheses,
         "validation_warnings": validation,
@@ -179,15 +192,16 @@ def write_markdown(summary: dict, out_path: Path) -> None:
         "",
         "## Per-Token Counter Table",
         "",
-        "| Variant | Ctx | n | TPS | CV | IPC | Instr/tok | L2 refill/tok | Backend stall % |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| Variant | Ctx | Mode | Prompt toks | n | TPS | CV | IPC | Instr/tok | L2 refill/tok | Backend stall % |",
+        "|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
 
     for variant in summary["variants"]:
         for ctx in summary["contexts"]:
             cell = summary["cells"][variant][str(ctx)]
             lines.append(
-                f"| {variant} | {ctx} | {cell['n_decode_success']} | "
+                f"| {variant} | {ctx} | {cell['prompt_mode'] or 'n/a'} | "
+                f"{fmt(cell['prompt_eval_tokens_mean'], 0)} | {cell['n_decode_success']} | "
                 f"{fmt(cell['decode_tps_mean'])} | {fmt((cell['decode_tps_cv'] or 0) * 100, 1)}% | "
                 f"{fmt(cell['ipc'], 3)} | {fmt(cell['instructions_per_token'], 0)} | "
                 f"{fmt(cell['l2d_refill_per_token'], 0)} | {fmt(cell['stall_backend_pct'], 1)}% |"

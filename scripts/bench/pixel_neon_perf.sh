@@ -30,9 +30,12 @@
 #
 # METHODOLOGY
 # -----------
-#   • Short prompt (single word) → 128 decode tokens at each context size
-#   • simpleperf stat wraps entire llama-completion run; decode dominates
-#     (128 decode >> 1-token prefill in all variants)
+#   • Default mode: short prompt (single word) → 128 decode tokens at each context size
+#   • Filled-context mode: --filled-context writes a prompt file sized to
+#     approximately ctx - output_tokens - margin tokens, then passes it via -f.
+#     Use this mode when testing KV-cache overflow/cliff mechanisms.
+#   • simpleperf stat wraps entire llama-completion run; filled-context mode
+#     includes larger prefill work, so interpret counters as whole-run PMU proxies.
 #   • n=3 trials per (variant, context) — enough to verify ordering claim
 #   • Two context sizes: ctx=256 (fresh, below cliff), ctx=512 (just past cliff)
 #   • 5 variants covering the extremes + middle: Q2_K, Q3_K_M, Q4_K_M, Q6_K, Q8_0
@@ -65,6 +68,7 @@
 #   bash scripts/bench/pixel_neon_perf.sh Q2_K Q6_K         # subset
 #   bash scripts/bench/pixel_neon_perf.sh --ctx 256,512,768 # custom contexts
 #   bash scripts/bench/pixel_neon_perf.sh --trials 1 --tokens 8 Q2_K # smoke test
+#   bash scripts/bench/pixel_neon_perf.sh --filled-context Q2_K Q6_K # KV-filled PMU sweep
 #   bash scripts/bench/pixel_neon_perf.sh --timeout 900      # per-run timeout seconds
 #   bash scripts/bench/pixel_neon_perf.sh --all-variants     # all 7 variants
 #   bash scripts/bench/pixel_neon_perf.sh --resume           # skip done variants
@@ -74,7 +78,7 @@
 #   results/pixel_neon_perf_{ts}/probe_results.json
 #   results/pixel_neon_perf_{ts}.log
 #
-# RUNTIME: ~45 min (5 variants × 2 ctx × 3 trials × ~1.5 min/run)
+# RUNTIME: ~45 min short-prompt mode (5 variants × 2 ctx × 3 trials × ~1.5 min/run)
 #
 # NOTES
 #   • Requires simpleperf on device (/system/bin/simpleperf); ships with
@@ -108,6 +112,22 @@ OUTPUT_TOKENS=128 # large enough for stable measurement; decode dominates
 THREADS=4         # match TPS benchmark for fair comparison
 RUN_TIMEOUT=900   # seconds per simpleperf-wrapped generation
 PROMPT="Write"    # single-word prompt → minimal prefill contamination
+FILLED_CONTEXT=0
+PROMPT_TOKEN_MARGIN=16
+
+# Repeated "A" tokens keep filled-context prompt generation predictable enough
+# for PMU smoke/mechanism runs without fragile long shell quoting.
+generate_filled_prompt_file() {
+    local target_tokens=$1
+    local output_file=$2
+    local i=0
+    : > "$output_file"
+    while [ "$i" -lt "$target_tokens" ]; do
+        printf ' A' >> "$output_file"
+        i=$(( i + 1 ))
+    done
+    printf '\n' >> "$output_file"
+}
 
 # PMU events: try hardware events first, fall back to basic
 # Cortex-X1 PMU event codes: l1d_cache_refill=0x03, l2d_cache_refill=0x17, stall_backend=0x24
@@ -140,6 +160,12 @@ while [ "$#" -gt 0 ]; do
     case "$arg" in
         --resume)       RESUME=1; shift ;;
         --all-variants) USE_ALL_VARIANTS=1; shift ;;
+        --filled-context) FILLED_CONTEXT=1; shift ;;
+        --prompt-margin)
+            [ "$#" -lt 2 ] && printf 'Missing value for --prompt-margin\n' >&2 && exit 1
+            PROMPT_TOKEN_MARGIN="$2"
+            shift 2
+            ;;
         --trials)
             [ "$#" -lt 2 ] && printf 'Missing value for --trials\n' >&2 && exit 1
             NUM_TRIALS="$2"
@@ -165,6 +191,10 @@ while [ "$#" -gt 0 ]; do
             ;;
         --timeout=*)
             RUN_TIMEOUT="${arg#--timeout=}"
+            shift
+            ;;
+        --prompt-margin=*)
+            PROMPT_TOKEN_MARGIN="${arg#--prompt-margin=}"
             shift
             ;;
         --ctx)
@@ -196,7 +226,12 @@ hr
 log "Pixel 6a  —  NEON/PMU Perf Counter Sweep  (Phase 2A)"
 log "Variants : ${VARIANTS[*]}"
 log "Contexts : ${CTX_SIZES[*]}"
-log "Trials   : ${NUM_TRIALS}  |  Output tokens: ${OUTPUT_TOKENS}  |  Timeout: ${RUN_TIMEOUT}s  |  Prompt: '${PROMPT}'"
+if [ "$FILLED_CONTEXT" -eq 1 ]; then
+    log "Prompt   : filled_context via prompt files  |  margin: ${PROMPT_TOKEN_MARGIN} tokens"
+else
+    log "Prompt   : short_prompt '${PROMPT}'"
+fi
+log "Trials   : ${NUM_TRIALS}  |  Output tokens: ${OUTPUT_TOKENS}  |  Timeout: ${RUN_TIMEOUT}s"
 log "Results  : ${RESULTS_DIR}"
 hr
 
@@ -219,6 +254,28 @@ for V in "${VARIANTS[@]}"; do
 done
 [ "$MISSING" -gt 0 ] && log "❌ FATAL: $MISSING model(s) missing." && exit 1
 log "✅ All ${#VARIANTS[@]} model(s) present"
+
+# ── Prompt preparation ───────────────────────────────────────────────────────
+PROMPT_MODE="short_prompt"
+if [ "$FILLED_CONTEXT" -eq 1 ]; then
+    PROMPT_MODE="filled_context"
+    log ""
+    log "Preparing filled-context prompt files..."
+    for CTX in "${CTX_SIZES[@]}"; do
+        TARGET_PROMPT_TOKENS=$(( CTX - OUTPUT_TOKENS - PROMPT_TOKEN_MARGIN ))
+        if [ "$TARGET_PROMPT_TOKENS" -lt 1 ]; then
+            log "❌ FATAL: ctx=${CTX} too small for --filled-context with output_tokens=${OUTPUT_TOKENS} and margin=${PROMPT_TOKEN_MARGIN}."
+            log "   Increase --ctx, reduce --tokens, or reduce --prompt-margin."
+            exit 1
+        fi
+        LOCAL_PROMPT="${RESULTS_DIR}/prompt_ctx${CTX}.txt"
+        REMOTE_PROMPT="${DEVICE_DIR}/neon_prompt_${TS}_ctx${CTX}.txt"
+        generate_filled_prompt_file "$TARGET_PROMPT_TOKENS" "$LOCAL_PROMPT"
+        adb push "$LOCAL_PROMPT" "$REMOTE_PROMPT" >/dev/null
+        BYTES=$(wc -c < "$LOCAL_PROMPT" | tr -d ' ')
+        log "  ctx=${CTX}: target_prompt_tokens≈${TARGET_PROMPT_TOKENS}, file=${REMOTE_PROMPT}, bytes=${BYTES}"
+    done
+fi
 
 # ── Probe: simpleperf availability ────────────────────────────────────────────
 log ""
@@ -366,6 +423,16 @@ for VARIANT in "${VARIANTS[@]}"; do
 
             log "  [${CURRENT_RUN}/${TOTAL_RUNS} eta=${ETA}s]  ${VARIANT}  ctx=${CTX}  trial=${TRIAL}  ..."
 
+            PROMPT_TOKENS_APPROX=1
+            PROMPT_FILE_REMOTE=""
+            if [ "$FILLED_CONTEXT" -eq 1 ]; then
+                PROMPT_TOKENS_APPROX=$(( CTX - OUTPUT_TOKENS - PROMPT_TOKEN_MARGIN ))
+                PROMPT_FILE_REMOTE="${DEVICE_DIR}/neon_prompt_${TS}_ctx${CTX}.txt"
+                PROMPT_INPUT_ARG="-f ${PROMPT_FILE_REMOTE}"
+            else
+                PROMPT_INPUT_ARG="-p '${PROMPT}'"
+            fi
+
             # Run simpleperf stat wrapping llama-completion.
             # Do not pass --duration 0: Pixel simpleperf rejects it as invalid.
             # stderr from llama-completion + simpleperf summary both captured.
@@ -377,7 +444,7 @@ for VARIANT in "${VARIANTS[@]}"; do
                         -m ${MODEL_PATH} \
                         -c ${CTX} \
                         -n ${OUTPUT_TOKENS} \
-                        -p '${PROMPT}' \
+                        ${PROMPT_INPUT_ARG} \
                         -t ${THREADS} \
                         -no-cnv \
                         --no-mmap \
@@ -421,6 +488,17 @@ PY
                 | grep -oE "[0-9]+\.[0-9]+ tokens per second" \
                 | awk '{print $1}' | head -1 || echo "0")
             [ -z "$DECODE_TPS" ] && DECODE_TPS="0"
+            PREFILL_TPS=$(printf '%s\n' "$RAW" \
+                | grep -E "(common_perf_print|llama_perf_context_print):.*prompt eval time" \
+                | grep -oE "[0-9]+\.[0-9]+ tokens per second" \
+                | awk '{print $1}' | head -1 || echo "0")
+            [ -z "$PREFILL_TPS" ] && PREFILL_TPS="0"
+            PROMPT_EVAL_TOKENS=$(printf '%s\n' "$RAW" \
+                | grep -E "(common_perf_print|llama_perf_context_print):.*prompt eval time" \
+                | grep -oE "/[[:space:]]*[0-9]+ tokens" \
+                | grep -oE "[0-9]+" \
+                | head -1 || echo "0")
+            [ -z "$PROMPT_EVAL_TOKENS" ] && PROMPT_EVAL_TOKENS="0"
 
             # Parse simpleperf stat output
             # simpleperf stat output format:
@@ -454,8 +532,9 @@ PY
             [ -z "$STALL_BE" ]   && STALL_BE="0"
             [ -z "$ELAPSED_MS" ] && ELAPSED_MS="0"
 
-            printf '{"variant":"%s","context":%d,"trial":%d,"decode_tps":%s,"elapsed_ms":%s,"cycles":%s,"instructions":%s,"l1d_refill":%s,"l2d_refill":%s,"stall_backend":%s,"n_output_tokens":%d,"active_events":"%s","device":"Pixel6a","cpu":"CortexX1","model":"%s","threads":%d,"ts":"%s"}\n' \
-                "$VARIANT" "$CTX" "$TRIAL" "$DECODE_TPS" "$ELAPSED_MS" \
+            printf '{"variant":"%s","context":%d,"trial":%d,"status":"success","prompt_mode":"%s","prompt_tokens_approx":%d,"prompt_eval_tokens":%s,"prompt_file":"%s","prefill_tps":%s,"decode_tps":%s,"elapsed_ms":%s,"cycles":%s,"instructions":%s,"l1d_refill":%s,"l2d_refill":%s,"stall_backend":%s,"n_output_tokens":%d,"active_events":"%s","device":"Pixel6a","cpu":"CortexX1","model":"%s","threads":%d,"ts":"%s"}\n' \
+                "$VARIANT" "$CTX" "$TRIAL" "$PROMPT_MODE" "$PROMPT_TOKENS_APPROX" \
+                "$PROMPT_EVAL_TOKENS" "$PROMPT_FILE_REMOTE" "$PREFILL_TPS" "$DECODE_TPS" "$ELAPSED_MS" \
                 "$CYCLES" "$INSTRS" "$L1D_REFILL" "$L2D_REFILL" "$STALL_BE" \
                 "$OUTPUT_TOKENS" "$ACTIVE_EVENTS" \
                 "${MODEL_PREFIX}-${VARIANT}" "$THREADS" \
@@ -467,11 +546,19 @@ PY
                 IPC=$(python3 -c "print(f'{int(\"${INSTRS}\")/int(\"${CYCLES}\"):.3f}')" 2>/dev/null || echo "N/A")
             fi
             L2_PER_TOK="N/A"
+            COUNTER_DENOM="$OUTPUT_TOKENS"
+            if [ "$FILLED_CONTEXT" -eq 1 ] && [ "$PROMPT_EVAL_TOKENS" != "0" ] 2>/dev/null; then
+                COUNTER_DENOM=$(( PROMPT_EVAL_TOKENS + OUTPUT_TOKENS ))
+            fi
             if [ "$L2D_REFILL" != "0" ] 2>/dev/null; then
-                L2_PER_TOK=$(python3 -c "print(f'{int(\"${L2D_REFILL}\")/${OUTPUT_TOKENS}:.0f}')" 2>/dev/null || echo "N/A")
+                L2_PER_TOK=$(python3 -c "print(f'{int(\"${L2D_REFILL}\")/${COUNTER_DENOM}:.0f}')" 2>/dev/null || echo "N/A")
             fi
 
-            log "    decode=${DECODE_TPS} t/s  IPC=${IPC}  l2_miss/tok=${L2_PER_TOK}"
+            if [ "$FILLED_CONTEXT" -eq 1 ]; then
+                log "    prompt_eval=${PROMPT_EVAL_TOKENS} tok  prefill=${PREFILL_TPS} t/s  decode=${DECODE_TPS} t/s  IPC=${IPC}  l2_miss/tok=${L2_PER_TOK}"
+            else
+                log "    decode=${DECODE_TPS} t/s  IPC=${IPC}  l2_miss/tok=${L2_PER_TOK}"
+            fi
         done
     done
 
@@ -506,6 +593,14 @@ def mean_safe(vals):
 
 def fmt(v, fmt_str):
     return fmt_str.format(v) if v is not None else "   N/A"
+
+def row_tokens(row):
+    output_tokens = int(row.get("n_output_tokens") or N_TOKENS)
+    if row.get("prompt_mode") == "filled_context":
+        prompt_tokens = int(row.get("prompt_eval_tokens") or row.get("prompt_tokens_approx") or 0)
+        if prompt_tokens > 0:
+            return prompt_tokens + output_tokens
+    return output_tokens
 
 # Load all data
 data_by_variant = {}
@@ -542,17 +637,17 @@ for variant in variants:
     rows = data_by_variant[variant]
 
     for ctx in ctx_list:
-        ctx_rows = [r for r in rows if r.get("context") == ctx and r.get("status") != "adb_error"]
+        ctx_rows = [r for r in rows if r.get("context") == ctx and r.get("status") not in {"adb_error", "command_error"}]
         if not ctx_rows:
             print(f"{variant:<10}  {ctx:>5}  {'no data':>7}")
             continue
 
         tps_vals  = [float(r["decode_tps"]) for r in ctx_rows if float(r.get("decode_tps", 0)) > 0]
-        cyc_vals  = [int(r["cycles"]) / N_TOKENS for r in ctx_rows if int(r.get("cycles", 0)) > 0]
-        ins_vals  = [int(r["instructions"]) / N_TOKENS for r in ctx_rows if int(r.get("instructions", 0)) > 0]
-        l1_vals   = [int(r["l1d_refill"]) / N_TOKENS for r in ctx_rows if int(r.get("l1d_refill", 0)) > 0]
-        l2_vals   = [int(r["l2d_refill"]) / N_TOKENS for r in ctx_rows if int(r.get("l2d_refill", 0)) > 0]
-        stl_vals  = [int(r["stall_backend"]) / N_TOKENS for r in ctx_rows if int(r.get("stall_backend", 0)) > 0]
+        cyc_vals  = [int(r["cycles"]) / row_tokens(r) for r in ctx_rows if int(r.get("cycles", 0)) > 0]
+        ins_vals  = [int(r["instructions"]) / row_tokens(r) for r in ctx_rows if int(r.get("instructions", 0)) > 0]
+        l1_vals   = [int(r["l1d_refill"]) / row_tokens(r) for r in ctx_rows if int(r.get("l1d_refill", 0)) > 0]
+        l2_vals   = [int(r["l2d_refill"]) / row_tokens(r) for r in ctx_rows if int(r.get("l2d_refill", 0)) > 0]
+        stl_vals  = [int(r["stall_backend"]) / row_tokens(r) for r in ctx_rows if int(r.get("stall_backend", 0)) > 0]
 
         tps  = mean_safe(tps_vals)
         cyc  = mean_safe(cyc_vals)
@@ -599,9 +694,9 @@ else:
 # H2: Q2_K L2 miss rate ctx=512 vs ctx=256
 if "Q2_K" in data_by_variant:
     q2k_rows = data_by_variant["Q2_K"]
-    q2k_256_l2 = [int(r["l2d_refill"]) / N_TOKENS for r in q2k_rows
+    q2k_256_l2 = [int(r["l2d_refill"]) / row_tokens(r) for r in q2k_rows
                   if r.get("context") == 256 and int(r.get("l2d_refill", 0)) > 0]
-    q2k_512_l2 = [int(r["l2d_refill"]) / N_TOKENS for r in q2k_rows
+    q2k_512_l2 = [int(r["l2d_refill"]) / row_tokens(r) for r in q2k_rows
                   if r.get("context") == 512 and int(r.get("l2d_refill", 0)) > 0]
     mu_256 = mean_safe(q2k_256_l2)
     mu_512 = mean_safe(q2k_512_l2)
@@ -621,9 +716,9 @@ for v in ["Q2_K", "Q3_K_M"]:
         continue
     rows = data_by_variant[v]
     for ctxa, ctxb in [(256, 512)]:
-        stl_a = [int(r["stall_backend"]) / N_TOKENS for r in rows
+        stl_a = [int(r["stall_backend"]) / row_tokens(r) for r in rows
                  if r.get("context") == ctxa and int(r.get("stall_backend", 0)) > 0]
-        stl_b = [int(r["stall_backend"]) / N_TOKENS for r in rows
+        stl_b = [int(r["stall_backend"]) / row_tokens(r) for r in rows
                  if r.get("context") == ctxb and int(r.get("stall_backend", 0)) > 0]
         mu_a = mean_safe(stl_a)
         mu_b = mean_safe(stl_b)
@@ -658,14 +753,14 @@ for variant in variants:
     if variant not in data_by_variant or variant != "Q2_K":
         continue
     rows = [r for r in data_by_variant[variant] if r.get("context") == 256]
-    ins_vals = [int(r["instructions"]) / N_TOKENS for r in rows if int(r.get("instructions", 0)) > 0]
+    ins_vals = [int(r["instructions"]) / row_tokens(r) for r in rows if int(r.get("instructions", 0)) > 0]
     q2k_256_ins = mean_safe(ins_vals)
 
 for variant in variants:
     if variant not in data_by_variant:
         continue
     rows = [r for r in data_by_variant[variant] if r.get("context") == 256]
-    ins_vals = [int(r["instructions"]) / N_TOKENS for r in rows if int(r.get("instructions", 0)) > 0]
+    ins_vals = [int(r["instructions"]) / row_tokens(r) for r in rows if int(r.get("instructions", 0)) > 0]
     mu_ins = mean_safe(ins_vals)
     if mu_ins and q2k_256_ins and q2k_256_ins > 0:
         ratio = mu_ins / q2k_256_ins
@@ -680,9 +775,8 @@ print("LaTeX table snippet for §6 (copy to paper after validation):")
 print(f"{'─'*80}")
 print(r"\begin{table}[h]")
 print(r"\small\centering")
-print(r"\caption{ARM Cortex-X1 PMU counters per decode token (ctx=256, n=" +
-      "3 trials). Validates mechanistic claims: Q6\\_K dequant overhead "
-      r"(3$\times$ instructions) and KV-cache cliff (L2 miss spike ctx=256$\to$512).}")
+print(r"\caption{ARM Cortex-X1 PMU counters per measured token (ctx=256, n=" +
+      "3 trials). Filled-context runs normalize by prompt-eval plus generated tokens.}")
 print(r"\label{tab:pmu_counters}")
 print(r"\begin{tabular}{@{}lccccc@{}}")
 print(r"\toprule")
@@ -694,17 +788,18 @@ for variant in variants:
         print(f"% {variant}: no data")
         continue
     rows = [r for r in data_by_variant[variant] if r.get("context") == 256
-            and r.get("status") != "adb_error"]
+            and r.get("status") not in {"adb_error", "command_error"}]
     if not rows:
         continue
     tps_v  = mean_safe([float(r["decode_tps"]) for r in rows if float(r.get("decode_tps",0))>0])
     cyc_v  = mean_safe([int(r["cycles"]) for r in rows if int(r.get("cycles",0))>0])
-    ins_v  = mean_safe([int(r["instructions"]) for r in rows if int(r.get("instructions",0))>0])
-    l2_v   = mean_safe([int(r["l2d_refill"]) / N_TOKENS for r in rows if int(r.get("l2d_refill",0))>0])
+    ins_raw_v = mean_safe([int(r["instructions"]) for r in rows if int(r.get("instructions",0))>0])
+    ins_v  = mean_safe([int(r["instructions"]) / row_tokens(r) for r in rows if int(r.get("instructions",0))>0])
+    l2_v   = mean_safe([int(r["l2d_refill"]) / row_tokens(r) for r in rows if int(r.get("l2d_refill",0))>0])
     stl_v  = mean_safe([int(r["stall_backend"]) for r in rows if int(r.get("stall_backend",0))>0])
-    ipc_v  = (ins_v / cyc_v) if (ins_v and cyc_v and cyc_v > 0) else None
+    ipc_v  = (ins_raw_v / cyc_v) if (ins_raw_v and cyc_v and cyc_v > 0) else None
     stlp_v = (stl_v / cyc_v * 100) if (stl_v and cyc_v and cyc_v > 0) else None
-    ins_k  = (ins_v / N_TOKENS / 1000) if ins_v else None
+    ins_k  = (ins_v / 1000) if ins_v else None
     print(f"  {variant:<10} & "
           f"{fmt(tps_v, '{:.2f}'):>5} & "
           f"{fmt(ipc_v, '{:.3f}'):>5} & "
@@ -728,8 +823,9 @@ log "DONE  |  runtime: $(( ELAPSED/60 ))m $(( ELAPSED%60 ))s  |  results: ${RESU
 log ""
 log "Next steps:"
 log "  1. Check hypothesis validation above against pre-experiment predictions"
-log "  2. If H1 ratio ∉ [1.5×, 6.0×] — investigate kernel source (llama.cpp commit 1a29907)"
-log "  3. If H2 ratio < 1.5× — KV cliff may be prefetch-mediated; inspect simpleperf record"
-log "  4. Copy LaTeX table snippet into report §6 after validating numbers"
-log "  5. Run with --all-variants for supplementary material"
+log "  2. For KV-cache H2, only use runs with prompt_mode=filled_context and prompt_eval_tokens near ctx-output_tokens"
+log "  3. If H1 ratio ∉ [1.5×, 6.0×] — investigate kernel source (llama.cpp commit 1a29907)"
+log "  4. If H2 ratio < 1.5× in filled_context mode — KV cliff may be prefetch-mediated; inspect simpleperf record"
+log "  5. Copy LaTeX table snippet into report §6 after validating numbers"
+log "  6. Run with --all-variants --filled-context for supplementary material"
 hr
