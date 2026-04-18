@@ -290,7 +290,7 @@ def truth_table_markdown(manifest: dict) -> str:
         f"| Perplexity rows | {fmt_int(split_counts['perplexity'])} |",
         f"| Total inference rows | {fmt_int(manifest['inference_total'])} |",
         f"| Total published records | {fmt_int(manifest['total_records'])} |",
-        f"| Quality device split | Pixel6a={quality_devices.get('Pixel6a', 0)}, x86={quality_devices.get('x86', 0)} |",
+        f"| Quality device split | Pixel6a={quality_devices.get('Pixel6a', 0)}, M4Mac={quality_devices.get('M4Mac', 0)}, x86={quality_devices.get('x86', 0)} |",
         "",
         "## Pixel Llama Core Metrics",
         "",
@@ -340,6 +340,7 @@ def truth_table_markdown(manifest: dict) -> str:
         "## Release Notes",
         "",
         "- M4 Qwen rows are promoted from `results/m4_qwen_tps_20260415_130955/` and `results/m4_qwen_cliff_20260416_021323/` after validation. Older M4 Qwen attempts remain archived and excluded.",
+        "- M4 quality rows are promoted from `results/quality_metrics_m4_server.json` after persistent `llama-server` validation across 7 variants × 6 benchmarks × 100 prompts.",
         "- x86 Qwen cliff reruns remain excluded because the pushed result files contain missing/zero-throughput rows at larger contexts.",
         "- Q4_K_M and Q5_K_M display TPS use thermally settled `standard_sweep` baselines; cliff percentages use canonical filled-context baselines.",
         "- Raw result provenance remains in `results/`, with mapping documented in `results/CANONICAL.md`.",
@@ -365,14 +366,28 @@ def validate(manifest: dict, pixel, m4, x86, quality, ppl, dashboard) -> list[st
     if len(dashboard["raw_table"]["rows"]) != manifest["inference_total"]:
         failures.append("dashboard/raw_table.json row count does not match published inference total")
 
-    if set(quality["device"].unique()) != {"Pixel6a", "x86"}:
-        failures.append("quality_benchmarks.parquet device set must be exactly {Pixel6a, x86}")
+    if set(quality["device"].unique()) != {"Pixel6a", "M4Mac", "x86"}:
+        failures.append("quality_benchmarks.parquet device set must be exactly {Pixel6a, M4Mac, x86}")
 
     if quality["benchmark"].str.startswith("x86_").any():
         failures.append("quality_benchmarks.parquet still contains x86_ benchmark prefixes")
 
     if set(quality["benchmark"].unique()) != EXPECTED_BENCHMARKS:
         failures.append("quality_benchmarks.parquet benchmark set drifted from expected 6-task contract")
+
+    m4_quality = quality[
+        (quality["device"] == "M4Mac") &
+        (quality["model"] == MODEL_LLAMA) &
+        (quality["calibration"] == "standard")
+    ]
+    if len(m4_quality) != len(VARIANT_ORDER) * len(EXPECTED_BENCHMARKS):
+        failures.append("M4 quality rows must cover 7 variants × 6 benchmarks")
+    if set(m4_quality["variant"].unique()) != set(VARIANT_ORDER):
+        failures.append("M4 quality rows do not cover all 7 variants")
+    if set(m4_quality["benchmark"].unique()) != EXPECTED_BENCHMARKS:
+        failures.append("M4 quality rows do not cover all 6 benchmarks")
+    if (m4_quality["status"] != "success").any() or (m4_quality["total"] != 100).any():
+        failures.append("M4 quality rows must all be status=success with total=100")
 
     pixel_ppl = ppl[ppl["device"] == "Pixel6a"]
     pixel_ppl_full = pixel_ppl[

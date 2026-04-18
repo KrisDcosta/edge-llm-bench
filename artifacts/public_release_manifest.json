@@ -1,16 +1,17 @@
 {
-  "generated_at_utc": "2026-04-17T23:17:59+00:00",
+  "generated_at_utc": "2026-04-18T00:17:38+00:00",
   "build_command": "python3 scripts/build_public_release.py",
   "split_counts": {
     "pixel_inference": 1819,
     "m4_inference": 1035,
     "x86_inference": 399,
-    "quality_benchmarks": 128,
+    "quality_benchmarks": 170,
     "perplexity": 14
   },
   "inference_total": 3253,
-  "total_records": 3395,
+  "total_records": 3437,
   "quality_devices": {
+    "M4Mac": 42,
     "Pixel6a": 86,
     "x86": 42
   },
@@ -43,6 +44,7 @@
     ],
     "quality_devices": [
       "Pixel6a",
+      "M4Mac",
       "x86"
     ]
   },

@@ -439,18 +439,33 @@ function initQualityChart(data) {
 function renderQualityChart() {
   const bm    = document.getElementById('quality-benchmark-select')?.value || 'boolq';
   const dev   = getToggleValue('quality-device-toggle') || 'Pixel6a';
-  const calib = getToggleValue('quality-calib-toggle')  || 'standard';
+  let calib = getToggleValue('quality-calib-toggle')  || 'standard';
 
-  // M4 quality is hardware-independent — use Pixel6a data and show note
   const isM4 = dev === 'M4Mac';
-  const dataKey = isM4 ? 'Pixel6a' : dev;
   document.getElementById('quality-m4-note')?.classList.toggle('hidden', !isM4);
+
+  const devData = _qualityData.data[dev] || {};
+  const hasImatrix = Object.keys(devData.imatrix?.[bm] || {}).length > 0;
+  const calibGroup = document.getElementById('quality-calib-toggle');
+  if (calibGroup) {
+    calibGroup.querySelectorAll('.btn-toggle').forEach(btn => {
+      const needsImatrix = btn.dataset.value === 'imatrix' || btn.dataset.value === 'both';
+      btn.disabled = needsImatrix && !hasImatrix;
+      btn.classList.toggle('opacity-40', btn.disabled);
+      btn.classList.toggle('cursor-not-allowed', btn.disabled);
+      btn.title = btn.disabled ? 'No validated imatrix rows for this device/benchmark' : '';
+    });
+    if (!hasImatrix && (calib === 'imatrix' || calib === 'both')) {
+      calibGroup.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+      calibGroup.querySelector('[data-value="standard"]')?.classList.add('active');
+      calib = 'standard';
+    }
+  }
 
   // Show imatrix partial note when imatrix selected (only BoolQ has data)
   const showImatrixNote = (calib === 'imatrix' || calib === 'both') && bm !== 'boolq';
   document.getElementById('quality-imatrix-note')?.classList.toggle('hidden', !showImatrixNote);
 
-  const devData = _qualityData.data[dataKey] || {};
   const datasets = [];
 
   if (calib === 'both') {
@@ -482,8 +497,8 @@ function renderQualityChart() {
     });
   }
 
-  const bmLabel = (_qualityData.benchmark_labels?.[bm] || bm) +
-    (isM4 ? '  (Pixel 6a values — hardware-independent)' : '');
+  const devLabel = dev === 'Pixel6a' ? 'Pixel 6a' : dev === 'M4Mac' ? 'M4 Mac' : 'x86';
+  const bmLabel = `${_qualityData.benchmark_labels?.[bm] || bm} — ${devLabel}`;
   const ctx = document.getElementById('chart-quality');
   if (!ctx) return;
   if (_qualityChart) _qualityChart.destroy();

@@ -16,7 +16,7 @@
 > at ctx≈512, Q3_K_M cliff-attenuated (<±11%), Q2_K HellaSwag collapse (19%), Q4_K_S Pareto-dominant (74% BoolQ),
 > Q6_K Pareto-dominated, KV-cache Q8_0 eliminates cliff at cost of −46% baseline throughput, confirmed on Qwen 2.5 1.5B.
 >
-> **Outputs:** 3,253 published inference rows + 142 evaluation rows (3,395 total public records) ·
+> **Outputs:** 3,253 published inference rows + 184 evaluation rows (3,437 total public records) ·
 > 6 quality benchmarks (standard + imatrix where validated) · WikiText-2 PPL (full corpus, all 7 variants) ·
 > 17 analysis figures · Thermal characterization · Cross-model replication (Qwen 2.5 1.5B)
 
@@ -118,7 +118,7 @@
 | Artifact | Status | Location | Notes |
 |----------|--------|----------|-------|
 | **Interactive Dashboard** | ✅ Live | [krisdcosta.github.io/291_EAI](https://krisdcosta.github.io/291_EAI/) | Chart.js · GitHub Pages · all 7 variants |
-| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 3,395 records · 5 parquet splits |
+| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 3,437 records · 5 parquet splits |
 | **Canonical Results** | ✅ Updated | `results/CANONICAL.md` | Maps every table/figure to source JSONL |
 | **Release Truth Table** | ✅ Generated | `artifacts/public_truth_table.md` | Public metric summary + dashboard contract |
 | **Plain-English Report** | ✅ Complete | `PROJECT_REPORT_PLAIN_ENGLISH.md` | Full narrative writeup, no jargon |
@@ -394,6 +394,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 |--------|--------|-----------|--------|
 | x86 Intel i5-1235U (AVX2) | ✅ Complete | Q2_K fastest (14.05), Q6_K slowest (6.80); cliff Q2_K −51% at ctx=2048 | `x86_tps_results.json`, `x86_llama_cliff_20260408_070924/` |
 | Mac M4 Metal GPU | ✅ Complete | Q4_K_S fastest (19.88), Q8_0 slowest (6.39); flat cliff ≤±4.3% all variants (no degradation) | `m4_llama_tps_20260326_001546/`, `m4_metal_cliff_20260323_015934/` |
+| M4 Quality (6 benchmarks) | ✅ Complete | 7 variants × 6 benchmarks × 100 prompts, persistent llama-server runner | `quality_metrics_m4_server.json` |
 | x86 Quality (6 benchmarks) | ✅ Complete | Consistent with ARM ordering | `quality_scores.json` keys `x86_*` |
 | x86 PPL | ✅ Complete | Q2_K 11.73, Q8_0 9.71 | `x86_perplexity_results.json` |
 
@@ -471,4 +472,4 @@ Research project for DSC 291 (Efficient AI). Contact author for usage permission
 
 ---
 
-**Last Updated:** April 14, 2026 | **Status:** All primary experiments complete · Dataset published · Dashboard live
+**Last Updated:** April 17, 2026 | **Status:** All primary experiments complete · Dataset published · Dashboard live

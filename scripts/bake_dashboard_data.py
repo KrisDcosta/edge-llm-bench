@@ -370,7 +370,7 @@ def bake_cliff_curves():
 # ══════════════════════════════════════════════════════════════════════════════
 # Chart 3 — quality_scores.json
 # Grouped bar: accuracy per benchmark × variant
-# Separates Pixel and x86; standard vs imatrix calibration
+# Separates Pixel, M4, and x86; standard vs imatrix calibration
 # ══════════════════════════════════════════════════════════════════════════════
 
 def bake_quality_scores():
@@ -412,11 +412,11 @@ def bake_quality_scores():
         "benchmarks": benchmarks,
         "benchmark_labels": {b: BENCHMARK_DISPLAY[b] for b in benchmarks},
         "variants": VARIANT_ORDER,
-        "devices": ["Pixel6a", "x86"],
+        "devices": ["Pixel6a", "M4Mac", "x86"],
         "data": {},
     }
 
-    for device in ["Pixel6a", "x86"]:
+    for device in result["devices"]:
         device_data = {"standard": {}, "imatrix": {}}
         dq = q[q["device_resolved"] == device]
 

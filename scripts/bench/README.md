@@ -212,9 +212,8 @@ for key in sorted(d):
 PY
 ```
 
-These rows are validated as a Phase 1.1 extension artifact. They are not yet
-integrated into the public dashboard/parquet release until the quality schema is
-explicitly promoted to include `M4Mac` rows.
+These rows are promoted into `dataset/quality_benchmarks.parquet` and the
+dashboard quality toggle as `device=M4Mac`.
 
 ---
 

@@ -42,7 +42,7 @@ Controlled inference benchmark dataset for **7 GGUF K-quant quantization variant
 | Apple M4 Mac | Apple M4 (ARM, 10-core) | 16 GB unified | llama.cpp Metal |
 | HP Pavilion x86 | Intel Core i5-1235U (12th gen) | 16 GB DDR4 | llama.cpp CPU |
 
-**3,395 total records** across 5 splits. All published inference records are non-warmup,
+**3,437 total records** across 5 splits. All published inference records are non-warmup,
 success-status runs collected under controlled thermal conditions. Contaminated
 and failed records are archived separately and not included here.
 
@@ -152,15 +152,15 @@ Same columns as `pixel_inference`. `backend = "CPU"`, `threads = 6`.
 
 ---
 
-### `quality_benchmarks` — 128 rows
-Accuracy scores on 6 NLP benchmarks for 7 quantization variants across Pixel 6a and x86 i5-1235U,
-including both standard and imatrix-calibrated variants.
+### `quality_benchmarks` — 170 rows
+Accuracy scores on 6 NLP benchmarks for 7 quantization variants across Pixel 6a, Apple M4,
+and x86 i5-1235U, including both standard and imatrix-calibrated variants where validated.
 
 | Column | Type | Description |
 |---|---|---|
 | `benchmark` | string | `arc_challenge` \| `arc_easy` \| `boolq` \| `hellaswag` \| `mmlu` \| `truthfulqa` |
 | `variant` | string | GGUF quantization variant |
-| `device` | string | `"Pixel6a"` or `"x86"` |
+| `device` | string | `"Pixel6a"`, `"M4Mac"`, or `"x86"` |
 | `model` | string | Model name |
 | `calibration` | string | `"standard"` or `"imatrix"` (importance-weighted) |
 | `accuracy_pct` | float | Accuracy percentage (0–100) |
@@ -170,6 +170,7 @@ including both standard and imatrix-calibrated variants.
 
 **Device coverage:**
 - `Pixel6a`: 44 standard rows + 42 imatrix rows (ARC-Easy imatrix excluded — known parser artifact producing 100% for all variants)
+- `M4Mac`: all 6 benchmarks × 7 variants (standard only; persistent llama-server runner)
 - `x86`: all 6 benchmarks × 7 variants (standard only; no imatrix)
 
 **Benchmark sample sizes:** 100 questions each (random sample from official test sets).
@@ -285,7 +286,7 @@ print(threads.groupby("threads")["decode_tps"].agg(["mean", "std"]))
 3. **No power/energy data** — `/proc` interfaces on Pixel 6a are unreliable without root;
    battery drain proxy metrics were collected but not included in this release
 4. **Single model family for quality benchmarks** — quality data covers Llama 3.2 3B only;
-   Pixel 6a and x86 rows are included, but there is no validated M4 or Qwen quality split
+   Pixel 6a, M4 Mac, and x86 rows are included, but there is no validated Qwen quality split
 6. **llama.cpp version** — builds used llama.cpp circa February–April 2026;
    results may differ with significantly newer versions
 

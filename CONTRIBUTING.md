@@ -109,7 +109,7 @@ The dataset is published at [KrisDcosta/edge-llm-bench](https://huggingface.co/d
 ```bash
 python scripts/build_public_release.py     # rebuild parquets + dashboard + release manifest
 # Then push to HuggingFace via the HF Hub CLI or web UI
-huggingface-cli upload KrisDcosta/edge-llm-bench dataset/ --repo-type dataset
+hf upload KrisDcosta/edge-llm-bench dataset/ --repo-type dataset
 ```
 
 ---

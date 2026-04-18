@@ -467,57 +467,101 @@ def collect_quality(results: Path) -> list[dict]:
     path = results / "quality_scores.json"
     if not path.exists():
         print("  [warn] quality_scores.json not found")
-        return rows
+    else:
+        data = load_json(path)
+        for key, entry in data.items():
+            if not isinstance(entry, dict):
+                continue
+            acc = entry.get("accuracy_pct")
+            if acc is None:
+                continue
+            # Skip any stale zero entries that slipped through
+            if acc == 0.0 and entry.get("total", 0) > 0:
+                print(f"  [skip] quality entry '{key}': accuracy=0% with n={entry['total']} — likely evaluation failure")
+                continue
 
-    data = load_json(path)
-    for key, entry in data.items():
-        if not isinstance(entry, dict):
-            continue
-        acc = entry.get("accuracy_pct")
-        if acc is None:
-            continue
-        # Skip any stale zero entries that slipped through
-        if acc == 0.0 and entry.get("total", 0) > 0:
-            print(f"  [skip] quality entry '{key}': accuracy=0% with n={entry['total']} — likely evaluation failure")
-            continue
+            # Parse composite key  "benchmark:variant"  or bare  "variant"
+            if ":" in key:
+                benchmark, variant = key.split(":", 1)
+            else:
+                # Bare keys are exploratory ad-hoc QA and are not part of the public dataset.
+                continue
 
-        # Parse composite key  "benchmark:variant"  or bare  "variant"
-        if ":" in key:
-            benchmark, variant = key.split(":", 1)
-        else:
-            # Bare keys are exploratory ad-hoc QA and are not part of the public dataset.
-            continue
+            # Device: x86_ prefix in benchmark key → x86, otherwise Pixel6a
+            device = "x86" if benchmark.startswith("x86_") else "Pixel6a"
+            # Strip x86_ prefix from benchmark name for clean public schema
+            if benchmark.startswith("x86_"):
+                benchmark = benchmark[len("x86_"):]
 
-        # Device: x86_ prefix in benchmark key → x86, otherwise Pixel6a
-        device = "x86" if benchmark.startswith("x86_") else "Pixel6a"
-        # Strip x86_ prefix from benchmark name for clean public schema
-        if benchmark.startswith("x86_"):
-            benchmark = benchmark[len("x86_"):]
+            # imatrix entries have "imatrix" in the benchmark prefix or suffix
+            calibration = "imatrix" if "imatrix" in benchmark.lower() else "standard"
+            # Normalise imatrix benchmark name — strip all imatrix decorators
+            if calibration == "imatrix":
+                benchmark = (benchmark
+                             .replace("imatrix_", "")      # imatrix_boolq_all7_imatrix → boolq_all7_imatrix
+                             .replace("_all7_imatrix", "")  # boolq_all7_imatrix → boolq
+                             .replace("_imatrix", ""))      # boolq_imatrix → boolq, truthfulqa_imatrix → truthfulqa
 
-        # imatrix entries have "imatrix" in the benchmark prefix or suffix
-        calibration = "imatrix" if "imatrix" in benchmark.lower() else "standard"
-        # Normalise imatrix benchmark name — strip all imatrix decorators
-        if calibration == "imatrix":
-            benchmark = (benchmark
-                         .replace("imatrix_", "")      # imatrix_boolq_all7_imatrix → boolq_all7_imatrix
-                         .replace("_all7_imatrix", "")  # boolq_all7_imatrix → boolq
-                         .replace("_imatrix", ""))      # boolq_imatrix → boolq, truthfulqa_imatrix → truthfulqa
+            # Public schema uses the cleaned benchmark name.
+            if benchmark == "arc_easy_fixed":
+                benchmark = "arc_easy"
 
-        # Public schema uses the cleaned benchmark name.
-        if benchmark == "arc_easy_fixed":
-            benchmark = "arc_easy"
+            rows.append({
+                "benchmark":   benchmark,
+                "variant":     variant,
+                "device":      device,
+                "model":       MODEL_LLAMA,
+                "calibration": calibration,
+                "accuracy_pct": acc,
+                "correct":     entry.get("correct"),
+                "total":       entry.get("total"),
+                "status":      entry.get("status", "success"),
+            })
 
-        rows.append({
-            "benchmark":   benchmark,
-            "variant":     variant,
-            "device":      device,
-            "model":       MODEL_LLAMA,
-            "calibration": calibration,
-            "accuracy_pct": acc,
-            "correct":     entry.get("correct"),
-            "total":       entry.get("total"),
-            "status":      entry.get("status", "success"),
-        })
+    m4_path = results / "quality_metrics_m4_server.json"
+    if not m4_path.exists():
+        print("  [warn] quality_metrics_m4_server.json not found — M4 quality rows missing")
+    else:
+        m4_data = load_json(m4_path)
+        expected = 7 * 6
+        if len(m4_data) != expected:
+            print(f"  [warn] M4 quality has {len(m4_data)} entries, expected {expected}")
+
+        for key, entry in m4_data.items():
+            if not isinstance(entry, dict):
+                continue
+            acc = entry.get("accuracy_pct")
+            if acc is None:
+                continue
+            if ":" in key:
+                benchmark, variant = key.split(":", 1)
+            else:
+                benchmark = entry.get("tag")
+                variant = entry.get("variant")
+            if not benchmark or not variant:
+                print(f"  [skip] M4 quality entry '{key}': missing benchmark or variant")
+                continue
+            if benchmark == "arc_easy_fixed":
+                benchmark = "arc_easy"
+
+            status = entry.get("status", "success")
+            total = entry.get("total")
+            expected_total = entry.get("expected_total", total)
+            if status != "success" or total != expected_total:
+                print(f"  [skip] M4 quality entry '{key}': status={status}, total={total}, expected={expected_total}")
+                continue
+
+            rows.append({
+                "benchmark":   benchmark,
+                "variant":     variant,
+                "device":      "M4Mac",
+                "model":       MODEL_LLAMA,
+                "calibration": "standard",
+                "accuracy_pct": acc,
+                "correct":     entry.get("correct"),
+                "total":       total,
+                "status":      status,
+            })
 
     # Deduplicate: keep the last (most recent) entry per (device, benchmark, variant, calibration).
     # Device must be in the key so that Pixel6a arc_easy and x86 arc_easy are not collapsed.

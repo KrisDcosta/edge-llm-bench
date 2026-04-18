@@ -34,9 +34,9 @@ From the validated release manifest:
 | `pixel_inference.parquet` | 1,819 |
 | `m4_inference.parquet` | 1,035 |
 | `x86_inference.parquet` | 399 |
-| `quality_benchmarks.parquet` | 128 |
+| `quality_benchmarks.parquet` | 170 |
 | `perplexity.parquet` | 14 |
-| **Total published records** | **3,395** |
+| **Total published records** | **3,437** |
 
 Additional release-contract checks:
 
@@ -44,7 +44,7 @@ Additional release-contract checks:
 |---|---|
 | Published inference rows | 3,253 |
 | Dashboard `raw_table.json` rows | 3,253 |
-| Quality device split | Pixel6a=86, x86=42 |
+| Quality device split | Pixel6a=86, M4Mac=42, x86=42 |
 | Pixel Qwen rows | 522 |
 | Pixel Qwen split | cliff\_sweep=385, standard\_sweep=137 |
 | M4 Qwen rows | 98 |
@@ -70,9 +70,9 @@ Additional release-contract checks:
 
 ## Remaining Caveats
 
-- The Hugging Face dataset card was re-uploaded and verified against the new counts (`3,395` total records).
+- The Hugging Face dataset card was re-uploaded and verified at commit `d22d68d055c0a8e4a384f14f3332f293da3e21ba` against the new counts (`3,437` total records).
 - The dashboard is generated and validated locally; GitHub Pages will reflect this after the updated build is pushed.
-- M4 quality remains excluded. The server-based runner avoided crashes, but the current run mostly predicted `A`, so it is not quality evidence.
+- M4 quality is now included from `results/quality_metrics_m4_server.json`; older failed M4 quality attempts remain archived and excluded.
 
 ## Recommended Release Checklist
 
