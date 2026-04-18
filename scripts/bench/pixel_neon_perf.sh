@@ -64,6 +64,7 @@
 #   bash scripts/bench/pixel_neon_perf.sh                   # all 5 variants
 #   bash scripts/bench/pixel_neon_perf.sh Q2_K Q6_K         # subset
 #   bash scripts/bench/pixel_neon_perf.sh --ctx 256,512,768 # custom contexts
+#   bash scripts/bench/pixel_neon_perf.sh --trials 1 --tokens 8 Q2_K # smoke test
 #   bash scripts/bench/pixel_neon_perf.sh --all-variants     # all 7 variants
 #   bash scripts/bench/pixel_neon_perf.sh --resume           # skip done variants
 #
@@ -137,6 +138,24 @@ while [ "$#" -gt 0 ]; do
     case "$arg" in
         --resume)       RESUME=1; shift ;;
         --all-variants) USE_ALL_VARIANTS=1; shift ;;
+        --trials)
+            [ "$#" -lt 2 ] && printf 'Missing value for --trials\n' >&2 && exit 1
+            NUM_TRIALS="$2"
+            shift 2
+            ;;
+        --tokens)
+            [ "$#" -lt 2 ] && printf 'Missing value for --tokens\n' >&2 && exit 1
+            OUTPUT_TOKENS="$2"
+            shift 2
+            ;;
+        --trials=*)
+            NUM_TRIALS="${arg#--trials=}"
+            shift
+            ;;
+        --tokens=*)
+            OUTPUT_TOKENS="${arg#--tokens=}"
+            shift
+            ;;
         --ctx)
             [ "$#" -lt 2 ] && printf 'Missing value for --ctx\n' >&2 && exit 1
             IFS=',' read -ra CTX_SIZES <<< "$2"
@@ -290,7 +309,7 @@ printf '{"perf_event_paranoid":%s,"active_events":"%s","simpleperf_path":"%s","p
 
 # ── Determine whether we have cache miss events ───────────────────────────────
 HAS_CACHE_EVENTS=0
-if printf '%s' "$ACTIVE_EVENTS" | grep -qE "l2-cache-misses|r17|l2d_cache"; then
+if printf '%s' "$ACTIVE_EVENTS" | grep -qE "cache-misses|l2-cache-misses|r17|l2d_cache"; then
     HAS_CACHE_EVENTS=1
     log "✅ L2 cache miss events available — full mechanistic analysis possible"
 else
@@ -336,30 +355,55 @@ for VARIANT in "${VARIANTS[@]}"; do
 
             log "  [${CURRENT_RUN}/${TOTAL_RUNS} eta=${ETA}s]  ${VARIANT}  ctx=${CTX}  trial=${TRIAL}  ..."
 
-            # Run simpleperf stat wrapping llama-completion
-            # stderr from llama-completion + simpleperf summary both captured
-            RAW=$(adb shell "export LD_LIBRARY_PATH=${DEVICE_DIR} && \
+            # Run simpleperf stat wrapping llama-completion.
+            # Do not pass --duration 0: Pixel simpleperf rejects it as invalid.
+            # stderr from llama-completion + simpleperf summary both captured.
+            REMOTE_CMD="export LD_LIBRARY_PATH=${DEVICE_DIR} && \
                 ${SIMPLEPERF_BIN} stat \
                     -e ${ACTIVE_EVENTS} \
-                    --duration 0 \
                     -- ${LLAMA_BIN} \
                         -m ${MODEL_PATH} \
                         -c ${CTX} \
                         -n ${OUTPUT_TOKENS} \
                         -p '${PROMPT}' \
                         -t ${THREADS} \
-                        --no-mmap 2>&1" 2>/dev/null || echo "ADB_ERROR")
+                        --no-mmap 2>&1"
+            if RAW=$(adb shell "$REMOTE_CMD" 2>&1); then
+                RC=0
+            else
+                RC=$?
+            fi
 
-            if printf '%s' "$RAW" | grep -q "ADB_ERROR"; then
-                warn "ADB error on ${VARIANT} ctx=${CTX} trial=${TRIAL}"
-                printf '{"variant":"%s","context":%d,"trial":%d,"status":"adb_error","ts":"%s"}\n' \
-                    "$VARIANT" "$CTX" "$TRIAL" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$OUTPUT_FILE"
+            if [ "$RC" -ne 0 ]; then
+                warn "Command error rc=${RC} on ${VARIANT} ctx=${CTX} trial=${TRIAL}"
+                DEBUG_FILE="${RESULTS_DIR}/debug_${VARIANT}_ctx${CTX}_trial${TRIAL}.txt"
+                {
+                    printf 'remote_cmd=%s\n' "$REMOTE_CMD"
+                    printf 'return_code=%s\n\n' "$RC"
+                    printf '%s\n' "$RAW"
+                } > "$DEBUG_FILE"
+                python3 - "$VARIANT" "$CTX" "$TRIAL" "$RC" "$DEBUG_FILE" << 'PY' >> "$OUTPUT_FILE"
+import datetime
+import json
+import sys
+
+variant, ctx, trial, rc, debug_file = sys.argv[1:]
+print(json.dumps({
+    "variant": variant,
+    "context": int(ctx),
+    "trial": int(trial),
+    "status": "command_error",
+    "return_code": int(rc),
+    "debug_file": debug_file,
+    "ts": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+}))
+PY
                 continue
             fi
 
             # Extract decode TPS from llama.cpp output (for cross-reference)
             DECODE_TPS=$(printf '%s\n' "$RAW" \
-                | grep -E "common_perf_print:.*eval time" | grep -v "prompt" \
+                | grep -E "(common_perf_print|llama_perf_context_print):.*eval time" | grep -v "prompt" \
                 | grep -oE "[0-9]+\.[0-9]+ tokens per second" \
                 | awk '{print $1}' | head -1 || echo "0")
             [ -z "$DECODE_TPS" ] && DECODE_TPS="0"
@@ -430,20 +474,18 @@ log "  H2: l2d_refill/token(Q2_K,ctx=512) ≈ 2-5× l2d_refill/token(Q2_K,ctx=25
 log "  H3: Q3_K_M stall_backend delta (ctx=256→512) < Q2_K delta (compute-masking)"
 hr
 
-python3 - "$RESULTS_DIR" "${VARIANTS[@]}" "${CTX_SIZES[@]}" << 'PYEOF'
+python3 - "$RESULTS_DIR" "$OUTPUT_TOKENS" "${VARIANTS[@]}" "${CTX_SIZES[@]}" << 'PYEOF'
 import json, glob, sys, statistics
 from collections import defaultdict
 
 results_dir = sys.argv[1]
-variants    = sys.argv[2:2+5]  # up to 5 variants (may be all 7 with --all-variants)
+N_TOKENS = int(sys.argv[2])
 # Parse variants and contexts from args
-all_args = sys.argv[2:]
+all_args = sys.argv[3:]
 known_variants = ["Q2_K","Q3_K_M","Q4_K_S","Q4_K_M","Q5_K_M","Q6_K","Q8_0"]
 variants = [a for a in all_args if a in known_variants]
 ctx_args = [a for a in all_args if a.isdigit()]
 ctx_list = [int(c) for c in ctx_args] if ctx_args else [256, 512]
-
-N_TOKENS = 128  # OUTPUT_TOKENS from shell script
 
 def mean_safe(vals):
     return statistics.mean(vals) if vals else None

@@ -19,7 +19,6 @@ import sys
 from pathlib import Path
 
 VARIANT_ORDER = ["Q2_K", "Q3_K_M", "Q4_K_S", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0"]
-TOKENS_PER_RUN = 128
 
 
 def mean(values: list[float]) -> float | None:
@@ -42,6 +41,10 @@ def safe_int(value) -> int:
         return int(value)
     except (TypeError, ValueError):
         return 0
+
+
+def row_tokens(row: dict) -> int:
+    return safe_int(row.get("n_output_tokens")) or 128
 
 
 def rounded(value: float | None, digits: int = 4) -> float | None:
@@ -81,11 +84,11 @@ def aggregate(rows: list[dict]) -> dict:
                 and r.get("status") != "adb_error"
             ]
             good_decode = [safe_float(r.get("decode_tps")) for r in cr if safe_float(r.get("decode_tps")) > 0]
-            cycles = [safe_int(r.get("cycles")) / TOKENS_PER_RUN for r in cr if safe_int(r.get("cycles")) > 0]
-            instrs = [safe_int(r.get("instructions")) / TOKENS_PER_RUN for r in cr if safe_int(r.get("instructions")) > 0]
-            l1 = [safe_int(r.get("l1d_refill")) / TOKENS_PER_RUN for r in cr if safe_int(r.get("l1d_refill")) > 0]
-            l2 = [safe_int(r.get("l2d_refill")) / TOKENS_PER_RUN for r in cr if safe_int(r.get("l2d_refill")) > 0]
-            stall = [safe_int(r.get("stall_backend")) / TOKENS_PER_RUN for r in cr if safe_int(r.get("stall_backend")) > 0]
+            cycles = [safe_int(r.get("cycles")) / row_tokens(r) for r in cr if safe_int(r.get("cycles")) > 0]
+            instrs = [safe_int(r.get("instructions")) / row_tokens(r) for r in cr if safe_int(r.get("instructions")) > 0]
+            l1 = [safe_int(r.get("l1d_refill")) / row_tokens(r) for r in cr if safe_int(r.get("l1d_refill")) > 0]
+            l2 = [safe_int(r.get("l2d_refill")) / row_tokens(r) for r in cr if safe_int(r.get("l2d_refill")) > 0]
+            stall = [safe_int(r.get("stall_backend")) / row_tokens(r) for r in cr if safe_int(r.get("stall_backend")) > 0]
 
             cycles_mean = mean(cycles)
             instrs_mean = mean(instrs)
@@ -121,7 +124,7 @@ def aggregate(rows: list[dict]) -> dict:
     return {
         "variants": variants,
         "contexts": contexts,
-        "tokens_per_run": TOKENS_PER_RUN,
+        "tokens_per_run": "per-row n_output_tokens",
         "cells": cells,
         "hypotheses": hypotheses,
         "validation_warnings": validation,
@@ -163,6 +166,10 @@ def fmt(value, digits: int = 2) -> str:
     return f"{value:.{digits}f}"
 
 
+def fmt_ratio(value) -> str:
+    return "n/a" if value is None else f"{value:.2f}x"
+
+
 def write_markdown(summary: dict, out_path: Path) -> None:
     lines = [
         "# NEON / Simpleperf Summary",
@@ -192,10 +199,10 @@ def write_markdown(summary: dict, out_path: Path) -> None:
         "",
         "| Check | Ratio | Expected |",
         "|---|---:|---|",
-        f"| Q6_K / Q2_K L2 refill per token at ctx=256 | {fmt(summary['hypotheses']['h1_q6_vs_q2_l2_refill_ctx256'])}x | 1.5x to 6.0x, directionally near 3x |",
-        f"| Q2_K L2 refill ctx=512 / ctx=256 | {fmt(summary['hypotheses']['h2_q2_l2_refill_ctx512_vs_256'])}x | >=1.5x if L2 overflow drives cliff |",
-        f"| Q6_K / Q2_K instructions per token at ctx=256 | {fmt(summary['hypotheses']['q6_vs_q2_instructions_ctx256'])}x | >1.0x, directionally high |",
-        f"| Q8_0 / Q2_K instructions per token at ctx=256 | {fmt(summary['hypotheses']['q8_vs_q2_instructions_ctx256'])}x | >1.0x, data-volume dominated |",
+        f"| Q6_K / Q2_K L2 refill per token at ctx=256 | {fmt_ratio(summary['hypotheses']['h1_q6_vs_q2_l2_refill_ctx256'])} | 1.5x to 6.0x, directionally near 3x |",
+        f"| Q2_K L2 refill ctx=512 / ctx=256 | {fmt_ratio(summary['hypotheses']['h2_q2_l2_refill_ctx512_vs_256'])} | >=1.5x if L2 overflow drives cliff |",
+        f"| Q6_K / Q2_K instructions per token at ctx=256 | {fmt_ratio(summary['hypotheses']['q6_vs_q2_instructions_ctx256'])} | >1.0x, directionally high |",
+        f"| Q8_0 / Q2_K instructions per token at ctx=256 | {fmt_ratio(summary['hypotheses']['q8_vs_q2_instructions_ctx256'])} | >1.0x, data-volume dominated |",
         "",
         "## Validation Warnings",
         "",
