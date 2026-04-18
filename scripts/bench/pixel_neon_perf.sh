@@ -132,14 +132,23 @@ USE_ALL_VARIANTS=0
 VARIANTS=()
 CTX_SIZES=()
 
-for arg in "$@"; do
+while [ "$#" -gt 0 ]; do
+    arg="$1"
     case "$arg" in
-        --resume)       RESUME=1 ;;
-        --all-variants) USE_ALL_VARIANTS=1 ;;
-        --ctx)          : ;; # handled below
-        Q2_K|Q3_K_M|Q4_K_S|Q4_K_M|Q5_K_M|Q6_K|Q8_0) VARIANTS+=("$arg") ;;
+        --resume)       RESUME=1; shift ;;
+        --all-variants) USE_ALL_VARIANTS=1; shift ;;
+        --ctx)
+            [ "$#" -lt 2 ] && printf 'Missing value for --ctx\n' >&2 && exit 1
+            IFS=',' read -ra CTX_SIZES <<< "$2"
+            shift 2
+            ;;
         --ctx=*)
             IFS=',' read -ra CTX_SIZES <<< "${arg#--ctx=}"
+            shift
+            ;;
+        Q2_K|Q3_K_M|Q4_K_S|Q4_K_M|Q5_K_M|Q6_K|Q8_0)
+            VARIANTS+=("$arg")
+            shift
             ;;
         *) printf 'Unknown argument: %s\n' "$arg" >&2; exit 1 ;;
     esac
@@ -651,6 +660,10 @@ print(r"\end{tabular}")
 print(r"\end{table}")
 
 PYEOF
+
+log ""
+log "Writing machine-readable NEON summary..."
+python3 scripts/analyze/analyze_neon_perf.py "$RESULTS_DIR" | tee -a "$LOGFILE"
 
 ELAPSED=$(( $(date +%s) - START_S ))
 log ""

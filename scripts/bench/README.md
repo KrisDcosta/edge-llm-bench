@@ -38,7 +38,8 @@ Scripts are labeled: **Active** (used in paper), **Exploratory** (experimental),
 | `m4_cpu_qwen_cliff.sh` | 🔵 Exploratory | Qwen 2.5 1.5B cliff on M4 CPU — **pending data collection** |
 | `quality_eval_m4_server.py` | ✅ Validated extension | M4 quality evaluation via persistent llama-server — complete run: `results/quality_metrics_m4_server.json` |
 | `x86_llama_tps.sh` | 🔵 Exploratory | x86 CPU decode TPS reference — 7 variants at ctx=256 |
-| `x86_qwen_cliff.py` | 🔵 Exploratory | Qwen 2.5 1.5B cliff on x86 — **pending rerun** (v2: TG=128) |
+| `x86_qwen_cliff.py` | 🔵 Exploratory | Qwen 2.5 1.5B cliff on x86 — **pending clean rerun** (TG=128, retry/resume hardened) |
+| `pixel_neon_perf.sh` | 🔵 Exploratory | Pixel 6a simpleperf/PMU pass for NEON/cache evidence |
 | `x86_qwen_tps.sh` | 🔵 Exploratory | Qwen 2.5 1.5B TPS on x86 — ctx=256 reference |
 | `pixel_imatrix_quality.sh` | 🔵 Exploratory | imatrix calibrated quality benchmarks — all 7 variants × 5 benchmarks |
 | `pixel_llama_fa_mitigation.sh` | ⛔ Blocked | Flash Attention unsupported on this llama-completion binary build |
@@ -52,7 +53,7 @@ Scripts ready to run — data not yet collected:
 | # | Script | Platform | Expected Runtime | Purpose |
 |---|--------|----------|-----------------|---------|
 | 1 | `x86_qwen_cliff.py` | Windows x86 (i5-1235U) | ~4–6 h | Qwen KV-cache cliff sweep, 11 ctx × 5 trials × 7 variants (TG=128 rerun) |
-| 2 | NEON/simpleperf counter pass | Pixel 6a via ADB | TBD | Mechanistic evidence for dequant/cache explanation |
+| 2 | `pixel_neon_perf.sh` | Pixel 6a via ADB | ~45 min default | Mechanistic evidence for dequant/cache explanation |
 
 See **Running Instructions** section below for step-by-step commands.
 
@@ -99,8 +100,12 @@ bash scripts/bench/m4_llama_tps.sh
 
 ### 1. x86 Qwen Cliff Re-run (Windows x86)
 
-**Why:** Previous run used `TG_TOKENS=32` — too short for Windows scheduler noise (CV 50–80%).
-v2 uses `TG_TOKENS=128` (~6.4s decode window → CV <15%).
+**Why:** Previous runs were not publishable. `TG_TOKENS=32` was too short for
+Windows scheduler noise, and later TG=128 runs still produced intermittent
+`missing_rows` cells when `llama-bench` failed to emit both pp-only and pp+tg
+JSON rows. The current runner retries each context, writes debug output under
+`_debug/`, supports row-level `--resume`, and exits nonzero if any cell remains
+invalid.
 
 **Platform:** HP Pavilion x86 (or any Windows i5+ machine with llama.cpp built)
 
@@ -134,11 +139,19 @@ py -3 scripts/bench/x86_qwen_cliff.py
 
 # Subset if needed:
 py -3 scripts/bench/x86_qwen_cliff.py Q2_K Q3_K_M
-# Resume interrupted run:
-py -3 scripts/bench/x86_qwen_cliff.py --resume
+
+# Resume/rerun failed cells inside an existing result directory:
+py -3 scripts/bench/x86_qwen_cliff.py ^
+  --output-dir results\x86_qwen_cliff_<HOSTNAME>_<ts> ^
+  --resume Q2_K Q3_K_M
 ```
 
 **Output:** `results/x86_qwen_cliff_<HOSTNAME>_<ts>/cliff_<VARIANT>.jsonl`
+
+**Validation rule:** no row may contain `error`, every context must have
+`decode_tps > 0`, and every context must preserve `n_trials=5`. If the script
+exits nonzero, do not promote the run; inspect `_debug/*.txt`, then rerun the
+failed variants with `--output-dir ... --resume`.
 
 **After collecting:**
 ```bash
@@ -148,7 +161,57 @@ python3 scripts/bake_dashboard_data.py
 
 ---
 
-### 2. M4 Quality Evaluation Re-run
+### 2. Pixel NEON/simpleperf Counter Pass
+
+**Status:** Ready to run. No device is currently connected to this Mac.
+
+**Why:** Adds mechanistic evidence for the main explanation: Q6_K should show
+higher dequantization/cache pressure than Q2_K, and Q2_K should show a counter
+shift from ctx=256 to ctx=512 if the ARM cliff is cache driven.
+
+**Platform:** Pixel 6a via ADB.
+
+**Prerequisites:**
+```bash
+adb devices
+adb push /Users/krisdcosta/Library/Android/sdk/ndk/29.0.14206865/simpleperf/bin/android/arm64/simpleperf /data/local/tmp/simpleperf
+adb shell chmod +x /data/local/tmp/simpleperf
+
+adb shell ls /data/local/tmp/llama-completion
+for V in Q2_K Q3_K_M Q4_K_M Q6_K Q8_0; do
+  adb shell ls /data/local/tmp/Llama-3.2-3B-Instruct-${V}.gguf
+done
+```
+
+**Run default mechanistic pass:**
+```bash
+bash scripts/bench/pixel_neon_perf.sh
+```
+
+**Run a focused smoke test first if device availability is limited:**
+```bash
+bash scripts/bench/pixel_neon_perf.sh --ctx 256 Q2_K Q6_K
+```
+
+**Output:**
+- `results/pixel_neon_perf_<ts>/neon_perf_<VARIANT>.jsonl`
+- `results/pixel_neon_perf_<ts>/probe_results.json`
+- `results/pixel_neon_perf_<ts>/neon_perf_summary.json`
+- `results/pixel_neon_perf_<ts>/neon_perf_summary.md`
+
+**Post-run validation:**
+```bash
+python3 scripts/analyze/analyze_neon_perf.py results/pixel_neon_perf_<ts>
+```
+
+**Interpretation gate:** publish only if there are no missing decode trials and
+the counter set is strong enough for the claim. If only `cpu-cycles` and
+`instructions` are available, frame the result as an IPC/instruction proxy, not
+as L2-cache evidence. L2/cache claims require `cache-misses` or raw `r17`.
+
+---
+
+### 3. M4 Quality Evaluation Re-run
 
 **Status:** Complete. Canonical source: `results/quality_metrics_m4_server.json`.
 
@@ -217,7 +280,7 @@ dashboard quality toggle as `device=M4Mac`.
 
 ---
 
-### 3. Pixel 6a Full-Corpus PPL
+### 4. Pixel 6a Full-Corpus PPL
 
 **Status:** Complete. Canonical source: `results/pixel_6a_ppl_final/`.
 
@@ -272,7 +335,7 @@ The dashboard/report select full-corpus Pixel values over x86 values when both e
 
 ---
 
-### 4. Qwen M4 GPU TPS Sweep
+### 5. Qwen M4 GPU TPS Sweep
 
 **Why:** Establishes Qwen 2.5 1.5B Metal baseline TPS across context lengths.
 Complements existing Llama M4 Metal TPS data for cross-model comparison on GPU.
@@ -321,7 +384,7 @@ python3 scripts/bake_dashboard_data.py
 
 ---
 
-### 5. M4 CPU Qwen Cliff Sweep
+### 6. M4 CPU Qwen Cliff Sweep
 
 **Why:** Characterises KV-cache cliff behaviour for Qwen 2.5 1.5B on M4 CPU
 (no Metal GPU). Complements Llama M4 CPU cliff data and Qwen M4 Metal cliff data.

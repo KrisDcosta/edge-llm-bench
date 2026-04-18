@@ -36,6 +36,7 @@ Usage:
   py -3 scripts/bench/x86_qwen_cliff.py              # all 7 variants
   py -3 scripts/bench/x86_qwen_cliff.py Q4_K_M Q8_0  # subset
   py -3 scripts/bench/x86_qwen_cliff.py --resume      # skip completed
+  py -3 scripts/bench/x86_qwen_cliff.py --output-dir results/x86_qwen_cliff_HOST_TS --resume Q2_K
   py -3 scripts/bench/x86_qwen_cliff.py --threads 8   # override thread count
 
 Output:  results/x86_qwen_cliff_<HOSTNAME>_<ts>/cliff_<VARIANT>.jsonl
@@ -53,6 +54,7 @@ import statistics
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
@@ -68,6 +70,8 @@ TG_TOKENS     = 128
 NUM_TRIALS    = 5
 NGL           = 0        # CPU only
 MODEL_PREFIX  = "Qwen2.5-1.5B-Instruct"
+COMMAND_TIMEOUT_S = 900
+DEFAULT_RETRIES   = 2
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -113,8 +117,8 @@ def find_models_dir():
     return r"C:\temp\qwen2_5_1_5b_gguf"
 
 
-def run_llama_bench(llama_bench, model_path, pp_tokens, tg_tokens, trials, ngl, threads):
-    """Run llama-bench and return stdout as string."""
+def run_llama_bench(llama_bench, model_path, pp_tokens, tg_tokens, trials, ngl, threads, timeout_s):
+    """Run llama-bench and return command metadata plus captured output."""
     cmd = [
         llama_bench,
         "-m",  model_path,
@@ -130,13 +134,31 @@ def run_llama_bench(llama_bench, model_path, pp_tokens, tg_tokens, trials, ngl, 
             cmd,
             capture_output=True,
             text=True,
-            timeout=600,
+            timeout=timeout_s,
         )
-        return result.stdout + result.stderr
+        return {
+            "cmd": cmd,
+            "output": result.stdout + result.stderr,
+            "returncode": result.returncode,
+            "timed_out": False,
+            "exception": None,
+        }
     except subprocess.TimeoutExpired:
-        return ""
-    except Exception:
-        return ""
+        return {
+            "cmd": cmd,
+            "output": "",
+            "returncode": None,
+            "timed_out": True,
+            "exception": f"timeout after {timeout_s}s",
+        }
+    except Exception as exc:
+        return {
+            "cmd": cmd,
+            "output": "",
+            "returncode": None,
+            "timed_out": False,
+            "exception": repr(exc),
+        }
 
 
 def parse_bench_output(output, pp_tokens, tg_tokens, variant, ctx, threads):
@@ -161,6 +183,9 @@ def parse_bench_output(output, pp_tokens, tg_tokens, variant, ctx, threads):
             "variant": variant, "context": ctx,
             "decode_tps": 0, "prefill_tps": 0,
             "error": "missing_rows",
+            "json_rows_seen": len(rows),
+            "has_pp_row": bool(pp_row),
+            "has_pg_row": bool(pg_row),
         }
 
     pp_samples = pp_row.get("samples_ts", [pp_row.get("avg_ts", 0)])
@@ -197,6 +222,51 @@ def parse_bench_output(output, pp_tokens, tg_tokens, variant, ctx, threads):
         "ts":          datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
         "methodology": "cliff_sweep",
     }
+
+
+def is_valid_record(record):
+    return (
+        not record.get("error") and
+        float(record.get("decode_tps", 0) or 0) > 0 and
+        int(record.get("n_trials", 0) or 0) == NUM_TRIALS
+    )
+
+
+def load_existing_valid_rows(output_file):
+    rows = {}
+    if not os.path.isfile(output_file):
+        return rows
+    with open(output_file) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if is_valid_record(row):
+                rows[int(row["context"])] = row
+    return rows
+
+
+def write_debug_failure(results_dir, variant, ctx, attempt, run_meta, record):
+    debug_dir = Path(results_dir) / "_debug"
+    debug_dir.mkdir(parents=True, exist_ok=True)
+    path = debug_dir / f"{variant}_ctx{ctx}_attempt{attempt}.txt"
+    payload = {
+        "variant": variant,
+        "context": ctx,
+        "attempt": attempt,
+        "record": record,
+        "returncode": run_meta.get("returncode"),
+        "timed_out": run_meta.get("timed_out"),
+        "exception": run_meta.get("exception"),
+        "cmd": run_meta.get("cmd"),
+        "output": run_meta.get("output"),
+    }
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return str(path)
 
 
 def print_cliff_summary(results_dir, variants):
@@ -237,8 +307,11 @@ def print_cliff_summary(results_dir, variants):
 def main():
     parser = argparse.ArgumentParser(description="x86 Qwen 2.5 1.5B KV-cache cliff sweep")
     parser.add_argument("variants", nargs="*", help="Variants to run (default: all 7)")
-    parser.add_argument("--resume",  action="store_true", help="Skip already-complete variants")
+    parser.add_argument("--resume",  action="store_true", help="Reuse valid rows in --output-dir and rerun missing/invalid cells")
     parser.add_argument("--threads", type=int, default=None, help="Thread count (default: nproc)")
+    parser.add_argument("--retries", type=int, default=DEFAULT_RETRIES, help=f"Retries per context if llama-bench output is incomplete (default: {DEFAULT_RETRIES})")
+    parser.add_argument("--timeout", type=int, default=COMMAND_TIMEOUT_S, help=f"Per-context command timeout in seconds (default: {COMMAND_TIMEOUT_S})")
+    parser.add_argument("--output-dir", default=None, help="Existing/new result directory. Required for resuming a previous run directory.")
     args = parser.parse_args()
 
     variants = args.variants if args.variants else ALL_VARIANTS
@@ -272,7 +345,7 @@ def main():
     ts   = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     script_dir   = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.normpath(os.path.join(script_dir, "..", ".."))
-    results_dir  = os.path.join(project_root, "results", f"x86_qwen_cliff_{host}_{ts}")
+    results_dir  = args.output_dir or os.path.join(project_root, "results", f"x86_qwen_cliff_{host}_{ts}")
     os.makedirs(results_dir, exist_ok=True)
 
     hr()
@@ -284,44 +357,83 @@ def main():
     log(f"Variants : {variants}")
     log(f"Contexts : {CTX_SIZES}")
     log(f"Trials   : {NUM_TRIALS}  |  TG tokens: {TG_TOKENS}")
+    log(f"Retries  : {args.retries}  |  Timeout: {args.timeout}s")
     log(f"Results  : {results_dir}")
     hr()
 
     start_s = time.time()
     n_ctx   = len(CTX_SIZES)
+    failed_cells = []
 
     for v_idx, variant in enumerate(variants, 1):
         model_path  = os.path.join(models_dir, f"{MODEL_PREFIX}-{variant}.gguf")
         output_file = os.path.join(results_dir, f"cliff_{variant}.jsonl")
         model_gb    = os.path.getsize(model_path) / 1e9
+        existing_valid = load_existing_valid_rows(output_file) if args.resume else {}
 
         if args.resume and os.path.isfile(output_file):
-            done = sum(1 for _ in open(output_file) if _.strip())
+            done = len(existing_valid)
             if done >= n_ctx:
-                log(f"  SKIP {variant} — complete ({done} rows)")
+                log(f"  SKIP {variant} — complete ({done}/{n_ctx} valid rows)")
                 continue
+            log(f"  RESUME {variant} — preserving {done}/{n_ctx} valid rows; rerunning missing/invalid contexts")
 
         log("")
         log(f"=== [{v_idx}/{len(variants)}] {variant}  ({model_gb:.1f} GB) ===")
 
         with open(output_file, "w") as out_f:
             for ctx_idx, ctx in enumerate(CTX_SIZES, 1):
+                if ctx in existing_valid:
+                    out_f.write(json.dumps(existing_valid[ctx]) + "\n")
+                    out_f.flush()
+                    d = existing_valid[ctx].get("decode_tps", 0)
+                    std = existing_valid[ctx].get("decode_std", 0)
+                    log(f"  [ctx={ctx} {ctx_idx}/{n_ctx}]  {variant}  reused decode={d:.2f}±{std:.2f}")
+                    continue
+
                 pp_tokens = ctx - TG_TOKENS
                 if pp_tokens <= 0:
                     log(f"  [ctx={ctx}] SKIP — ctx too small for TG_TOKENS={TG_TOKENS}")
                     continue
                 elapsed = int(time.time() - start_s)
 
-                raw = run_llama_bench(
-                    llama_bench, model_path,
-                    pp_tokens, TG_TOKENS,
-                    NUM_TRIALS, NGL, threads,
-                )
+                record = None
+                run_meta = None
+                for attempt in range(1, args.retries + 2):
+                    run_meta = run_llama_bench(
+                        llama_bench, model_path,
+                        pp_tokens, TG_TOKENS,
+                        NUM_TRIALS, NGL, threads,
+                        args.timeout,
+                    )
 
-                record = parse_bench_output(
-                    raw, pp_tokens, TG_TOKENS,
-                    variant, ctx, threads,
-                )
+                    record = parse_bench_output(
+                        run_meta["output"], pp_tokens, TG_TOKENS,
+                        variant, ctx, threads,
+                    )
+                    record["attempt"] = attempt
+                    record["returncode"] = run_meta.get("returncode")
+                    if run_meta.get("timed_out"):
+                        record["error"] = "timeout"
+                    elif run_meta.get("exception"):
+                        record["error"] = "exception"
+                        record["exception"] = run_meta.get("exception")
+                    elif run_meta.get("returncode") not in (0, None) and not is_valid_record(record):
+                        record["error"] = record.get("error") or f"returncode_{run_meta.get('returncode')}"
+
+                    if is_valid_record(record):
+                        break
+
+                    err = record.get("error", "invalid")
+                    seen = record.get("json_rows_seen", 0)
+                    log(f"  [ctx={ctx} attempt={attempt}/{args.retries + 1}] {variant} invalid: {err} (json_rows={seen})")
+                    if attempt <= args.retries:
+                        time.sleep(5)
+
+                if not is_valid_record(record):
+                    debug_path = write_debug_failure(results_dir, variant, ctx, record.get("attempt", 0), run_meta or {}, record)
+                    record["debug_file"] = debug_path
+                    failed_cells.append((variant, ctx, record.get("error", "invalid")))
 
                 out_f.write(json.dumps(record) + "\n")
                 out_f.flush()
@@ -343,9 +455,17 @@ def main():
     log("")
     hr()
     log(f"DONE  |  runtime: {elapsed//60}m {elapsed%60}s  |  results: {results_dir}")
+    if failed_cells:
+        log("FAILED CELLS REMAIN — not publishable:")
+        for variant, ctx, err in failed_cells:
+            log(f"  {variant} ctx={ctx}: {err}")
+        log("Next: rerun with --output-dir <same_dir> --resume <variants>")
+        hr()
+        return 2
     log(f"Next: git add results/x86_qwen_cliff_*  &&  git push")
     hr()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
