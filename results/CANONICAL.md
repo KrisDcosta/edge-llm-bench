@@ -168,6 +168,15 @@ clean M4 CPU TPS rerun. Failed or incomplete extension runs remain excluded.
 | Pending / blocked run | Status |
 |-----------------------|--------|
 | x86 Qwen cliff | Excluded: pushed runs `20260415_110111` and `20260417_005727` contain missing/zero-throughput rows at larger contexts |
+| Pixel NEON/simpleperf PMU appendix | Phase 1.1 pending: tooling supports filled-context PMU runs; promote only after a clean all-7-variant run passes `docs/PHASE_1_1_RUNBOOK.md` gates |
+
+### Phase 1.1 Mechanistic Evidence Rules
+
+NEON/simpleperf output is supplementary until explicitly promoted. When promoted,
+use the term `PMU cache-miss proxy/tok` unless `probe_results.json` shows raw
+`r17` was the active event. Do not cite generic `cache-misses:u` as definitive
+L2D refill, and do not claim the ctx=512 cliff is proven by L2 counters unless
+the validated all-variant run shows a proportional cache-miss proxy increase.
 
 ### Superseded / Abandoned (not cited)
 

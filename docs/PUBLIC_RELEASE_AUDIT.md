@@ -73,6 +73,9 @@ Additional release-contract checks:
 - The Hugging Face dataset card was re-uploaded and verified at commit `d22d68d055c0a8e4a384f14f3332f293da3e21ba` against the new counts (`3,437` total records).
 - The dashboard is generated and validated locally; GitHub Pages will reflect this after the updated build is pushed.
 - M4 quality is now included from `results/quality_metrics_m4_server.json`; older failed M4 quality attempts remain archived and excluded.
+- Phase 1.1 extension work is tracked separately in `docs/PHASE_1_1_RUNBOOK.md`.
+  NEON PMU/simpleperf and x86 Qwen cliff results must not be promoted into the
+  public dashboard or dataset until their validation gates pass.
 
 ## Recommended Release Checklist
 

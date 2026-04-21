@@ -257,7 +257,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 │   ├── pixel_llama_cliff_filled_20260330_212946/  # Q6_K clean solo rerun
 │   ├── pixel_qwen_tps_20260326_033619/    # Qwen TPS (non-monotonic replication)
 │   ├── pixel_qwen_cliff_filled_20260330_235410/  # Qwen cliff (ctx=512 cliff confirmed)
-│   ├── pixel_6a_ppl_final/                # Full WikiText-2 PPL (Q2_K, Q3_K_M)
+│   ├── pixel_6a_ppl_final/                # Full WikiText-2 PPL (all 7 variants)
 │   ├── pixel_power_20260320_173728/       # Battery measurement (fig5)
 │   ├── m4_llama_tps_20260326_001546/      # M4 Metal TPS sweep
 │   ├── m4_metal_cliff_20260323_015934/    # M4 Metal cliff (flat to +8.5%; no degradation)

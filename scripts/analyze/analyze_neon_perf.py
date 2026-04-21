@@ -92,7 +92,10 @@ def aggregate(rows: list[dict]) -> dict:
             cycles = [safe_int(r.get("cycles")) / row_tokens(r) for r in cr if safe_int(r.get("cycles")) > 0]
             instrs = [safe_int(r.get("instructions")) / row_tokens(r) for r in cr if safe_int(r.get("instructions")) > 0]
             l1 = [safe_int(r.get("l1d_refill")) / row_tokens(r) for r in cr if safe_int(r.get("l1d_refill")) > 0]
-            l2 = [safe_int(r.get("l2d_refill")) / row_tokens(r) for r in cr if safe_int(r.get("l2d_refill")) > 0]
+            cache_miss_proxy = [
+                safe_int(r.get("l2d_refill")) / row_tokens(r)
+                for r in cr if safe_int(r.get("l2d_refill")) > 0
+            ]
             stall = [safe_int(r.get("stall_backend")) / row_tokens(r) for r in cr if safe_int(r.get("stall_backend")) > 0]
             prompt_eval_tokens = [safe_int(r.get("prompt_eval_tokens")) for r in cr if safe_int(r.get("prompt_eval_tokens")) > 0]
             prompt_tokens_approx = [safe_int(r.get("prompt_tokens_approx")) for r in cr if safe_int(r.get("prompt_tokens_approx")) > 0]
@@ -116,7 +119,10 @@ def aggregate(rows: list[dict]) -> dict:
                 "cycles_per_token": rounded(cycles_mean),
                 "instructions_per_token": rounded(instrs_mean),
                 "l1d_refill_per_token": rounded(mean(l1)),
-                "l2d_refill_per_token": rounded(mean(l2)),
+                "cache_miss_proxy_per_token": rounded(mean(cache_miss_proxy)),
+                # Backward-compatible alias: older result rows store generic
+                # cache-misses or raw r17 in this field, depending on probe.
+                "l2d_refill_per_token": rounded(mean(cache_miss_proxy)),
                 "stall_backend_per_token": rounded(stall_mean),
                 "prompt_mode": ",".join(prompt_modes) if prompt_modes else None,
                 "prompt_eval_tokens_mean": rounded(mean(prompt_eval_tokens), 1),
@@ -155,17 +161,20 @@ def ratio(num: float | None, den: float | None) -> float | None:
 
 
 def compute_hypotheses(cells: dict) -> dict:
-    q2_l2_256 = cell_metric(cells, "Q2_K", 256, "l2d_refill_per_token")
-    q6_l2_256 = cell_metric(cells, "Q6_K", 256, "l2d_refill_per_token")
-    q2_l2_512 = cell_metric(cells, "Q2_K", 512, "l2d_refill_per_token")
+    q2_cache_256 = cell_metric(cells, "Q2_K", 256, "cache_miss_proxy_per_token")
+    q6_cache_256 = cell_metric(cells, "Q6_K", 256, "cache_miss_proxy_per_token")
+    q2_cache_512 = cell_metric(cells, "Q2_K", 512, "cache_miss_proxy_per_token")
 
     q2_instr_256 = cell_metric(cells, "Q2_K", 256, "instructions_per_token")
     q6_instr_256 = cell_metric(cells, "Q6_K", 256, "instructions_per_token")
     q8_instr_256 = cell_metric(cells, "Q8_0", 256, "instructions_per_token")
 
     return {
-        "h1_q6_vs_q2_l2_refill_ctx256": rounded(ratio(q6_l2_256, q2_l2_256)),
-        "h2_q2_l2_refill_ctx512_vs_256": rounded(ratio(q2_l2_512, q2_l2_256)),
+        "h1_q6_vs_q2_cache_miss_proxy_ctx256": rounded(ratio(q6_cache_256, q2_cache_256)),
+        "h2_q2_cache_miss_proxy_ctx512_vs_256": rounded(ratio(q2_cache_512, q2_cache_256)),
+        # Backward-compatible aliases for older notebooks/scripts.
+        "h1_q6_vs_q2_l2_refill_ctx256": rounded(ratio(q6_cache_256, q2_cache_256)),
+        "h2_q2_l2_refill_ctx512_vs_256": rounded(ratio(q2_cache_512, q2_cache_256)),
         "q6_vs_q2_instructions_ctx256": rounded(ratio(q6_instr_256, q2_instr_256)),
         "q8_vs_q2_instructions_ctx256": rounded(ratio(q8_instr_256, q2_instr_256)),
     }
@@ -192,7 +201,7 @@ def write_markdown(summary: dict, out_path: Path) -> None:
         "",
         "## Per-Token Counter Table",
         "",
-        "| Variant | Ctx | Mode | Prompt toks | n | TPS | CV | IPC | Instr/tok | L2 refill/tok | Backend stall % |",
+        "| Variant | Ctx | Mode | Prompt toks | n | TPS | CV | IPC | Instr/tok | PMU cache-miss proxy/tok | Backend stall % |",
         "|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
 
@@ -204,7 +213,7 @@ def write_markdown(summary: dict, out_path: Path) -> None:
                 f"{fmt(cell['prompt_eval_tokens_mean'], 0)} | {cell['n_decode_success']} | "
                 f"{fmt(cell['decode_tps_mean'])} | {fmt((cell['decode_tps_cv'] or 0) * 100, 1)}% | "
                 f"{fmt(cell['ipc'], 3)} | {fmt(cell['instructions_per_token'], 0)} | "
-                f"{fmt(cell['l2d_refill_per_token'], 0)} | {fmt(cell['stall_backend_pct'], 1)}% |"
+                f"{fmt(cell['cache_miss_proxy_per_token'], 0)} | {fmt(cell['stall_backend_pct'], 1)}% |"
             )
 
     lines.extend([
@@ -213,10 +222,10 @@ def write_markdown(summary: dict, out_path: Path) -> None:
         "",
         "| Check | Ratio | Expected |",
         "|---|---:|---|",
-        f"| Q6_K / Q2_K L2 refill per token at ctx=256 | {fmt_ratio(summary['hypotheses']['h1_q6_vs_q2_l2_refill_ctx256'])} | 1.5x to 6.0x, directionally near 3x |",
-        f"| Q2_K L2 refill ctx=512 / ctx=256 | {fmt_ratio(summary['hypotheses']['h2_q2_l2_refill_ctx512_vs_256'])} | >=1.5x if L2 overflow drives cliff |",
-        f"| Q6_K / Q2_K instructions per token at ctx=256 | {fmt_ratio(summary['hypotheses']['q6_vs_q2_instructions_ctx256'])} | >1.0x, directionally high |",
-        f"| Q8_0 / Q2_K instructions per token at ctx=256 | {fmt_ratio(summary['hypotheses']['q8_vs_q2_instructions_ctx256'])} | >1.0x, data-volume dominated |",
+        f"| Q6_K / Q2_K PMU cache-miss proxy per token at ctx=256 | {fmt_ratio(summary['hypotheses']['h1_q6_vs_q2_cache_miss_proxy_ctx256'])} | 1.5x to 6.0x, directionally near 3x |",
+        f"| Q2_K PMU cache-miss proxy ctx=512 / ctx=256 | {fmt_ratio(summary['hypotheses']['h2_q2_cache_miss_proxy_ctx512_vs_256'])} | >=1.5x if cache refill spike explains cliff |",
+        f"| Q6_K / Q2_K instructions per token at ctx=256 | {fmt_ratio(summary['hypotheses']['q6_vs_q2_instructions_ctx256'])} | diagnostic only; do not assume 3x instruction overhead |",
+        f"| Q8_0 / Q2_K instructions per token at ctx=256 | {fmt_ratio(summary['hypotheses']['q8_vs_q2_instructions_ctx256'])} | diagnostic only; cache pressure may dominate instruction count |",
         "",
         "## Validation Warnings",
         "",
@@ -233,6 +242,7 @@ def write_markdown(summary: dict, out_path: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Analyze Pixel NEON/simpleperf counter results")
     parser.add_argument("results_dir", type=Path)
+    parser.add_argument("--strict", action="store_true", help="Exit nonzero if validation warnings are present")
     args = parser.parse_args()
 
     if not args.results_dir.exists():
@@ -256,6 +266,8 @@ def main() -> int:
         print("validation warnings:")
         for warning in summary["validation_warnings"]:
             print(f"  - {warning}")
+        if args.strict:
+            return 1
     else:
         print("validation warnings: none")
     return 0

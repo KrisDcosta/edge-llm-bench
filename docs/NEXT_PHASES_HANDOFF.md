@@ -17,6 +17,12 @@ Before making any changes in later phases, always start by reading:
 - `artifacts/public_truth_table.md`
 - `results/CANONICAL.md`
 - `docs/PUBLIC_RELEASE_AUDIT.md`
+- `docs/PHASE_1_1_RUNBOOK.md`
+
+If the task is still Phase 1.1 cleanup, follow `docs/PHASE_1_1_RUNBOOK.md`
+before starting Phase 2. Phase 1.1 is for completing the NEON PMU appendix,
+clean x86 Qwen cliff, and full-corpus PPL verification without weakening the
+already-public Phase 1 baseline.
 
 ## Phase 1 Outcomes That Must Be Preserved
 

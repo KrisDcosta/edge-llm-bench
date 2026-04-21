@@ -8,12 +8,11 @@
 # Measures ARM PMU hardware performance counters per K-quant
 # variant to mechanistically validate the two claims in §6:
 #
-#   Claim A: Q6_K has ~3× higher L2 miss rate than Q2_K
+#   Claim A: Q6_K has materially higher PMU cache-miss pressure than Q2_K
 #            (split-bit layout ql[128]+qh[64] thrashes cache).
 #
-#   Claim B: KV-cache L2 overflow at ctx=512 explains the cliff.
-#            At ctx=256 (cache-resident), L2 miss rate is low;
-#            at ctx=512 (KV set > L2), it spikes sharply.
+#   Claim B to test, not assume: if KV-cache L2 overflow explains the cliff,
+#            the PMU cache-miss proxy should increase from ctx=256 to ctx=512.
 #
 # HARDWARE COUNTERS (Cortex-X1 PMU)
 # ----------------------------------
@@ -42,15 +41,15 @@
 #
 # PRE-EXPERIMENT HYPOTHESES (documented for expected vs actual comparison)
 # -------------------------------------------------------------------------
-#   H1: l2d_cache_refill / token: Q6_K ≈ 3× Q2_K at ctx=256
+#   H1: PMU cache-miss proxy / token: Q6_K > Q2_K at ctx=256
 #       Reasoning: Q6_K's ql[128]+qh[64] split-bit layout requires loading
 #       ~192B per 256-weight superblock; Q2_K only 32+32=64B.  3× data
-#       footprint per superblock → ~3× L2 refills per token.
+#       footprint per superblock → higher cache-refill pressure per token.
 #
-#   H2: l2d_cache_refill / token: Q2_K ctx=512 ≈ 2-5× Q2_K ctx=256
+#   H2: PMU cache-miss proxy / token: Q2_K ctx=512 ≈ 2-5× Q2_K ctx=256
 #       Reasoning: KV cache at ctx=512 = 512KB exactly (L2 capacity on X1).
-#       At ctx=256 the KV fits in L2; at ctx=512 it just overflows → L2 miss
-#       rate should jump sharply for attention computation.
+#       If the cliff is dominated by L2 refills, the PMU cache-miss proxy should
+#       jump sharply for attention computation.
 #
 #   H3: Q3_K_M shows smaller stall_backend increase from ctx=256→512
 #       than Q2_K (compute-masking: heavier FFN kernel keeps backend busy
@@ -60,8 +59,8 @@
 #       formats; Q8_0 slower only because of ~4× more data loaded)
 #
 # SURPRISING THRESHOLD (triggers root-cause investigation if exceeded)
-#   l2d_cache_refill ratio Q6_K/Q2_K > 6× or < 1.5×
-#   l2d_cache_refill increase Q2_K ctx=512/ctx=256 < 1.5× (cliff may be prefetch)
+#   PMU cache-miss proxy ratio Q6_K/Q2_K > 6× or < 1.5×
+#   PMU cache-miss proxy increase Q2_K ctx=512/ctx=256 < 1.5×
 #
 # USAGE
 #   bash scripts/bench/pixel_neon_perf.sh                   # all 5 variants
@@ -330,7 +329,7 @@ if printf '%s' "$PROBE_OUT" | grep -q "cpu-cycles"; then
       ${SIMPLEPERF_BIN} stat -e cache-misses:u echo hello 2>&1"
     PROBE_CACHE_OUT=$(adb shell "$PROBE_CACHE" 2>/dev/null || echo "FAILED")
     if printf '%s' "$PROBE_CACHE_OUT" | grep -q "cache-misses"; then
-        log "  ✅ cache-misses (generic, ARM L2-equivalent): available"
+        log "  ✅ cache-misses (generic PMU cache-miss proxy): available"
         ACTIVE_EVENTS="$EVENTS_HW_CACHE"
         # Try stall event
         PROBE_STALL="export LD_LIBRARY_PATH=${DEVICE_DIR} && \
@@ -379,10 +378,10 @@ printf '{"perf_event_paranoid":%s,"active_events":"%s","simpleperf_path":"%s","p
 HAS_CACHE_EVENTS=0
 if printf '%s' "$ACTIVE_EVENTS" | grep -qE "cache-misses|l2-cache-misses|r17|l2d_cache"; then
     HAS_CACHE_EVENTS=1
-    log "✅ L2 cache miss events available — full mechanistic analysis possible"
+    log "✅ PMU cache-miss proxy available — mechanistic cache-pressure analysis possible"
 else
-    warn "L2 cache miss events NOT available — analysis limited to IPC and cycle counts"
-    warn "Root the device and set perf_event_paranoid=-1 for L2/stall events."
+    warn "PMU cache-miss events NOT available — analysis limited to IPC and cycle counts"
+    warn "Root the device and set perf_event_paranoid=-1 for cache/stall events."
 fi
 
 # ── Main sweep ────────────────────────────────────────────────────────────────
@@ -545,19 +544,19 @@ PY
             if [ "$CYCLES" != "0" ] && [ "$INSTRS" != "0" ] 2>/dev/null; then
                 IPC=$(python3 -c "print(f'{int(\"${INSTRS}\")/int(\"${CYCLES}\"):.3f}')" 2>/dev/null || echo "N/A")
             fi
-            L2_PER_TOK="N/A"
+            CACHE_MISS_PER_TOK="N/A"
             COUNTER_DENOM="$OUTPUT_TOKENS"
             if [ "$FILLED_CONTEXT" -eq 1 ] && [ "$PROMPT_EVAL_TOKENS" != "0" ] 2>/dev/null; then
                 COUNTER_DENOM=$(( PROMPT_EVAL_TOKENS + OUTPUT_TOKENS ))
             fi
             if [ "$L2D_REFILL" != "0" ] 2>/dev/null; then
-                L2_PER_TOK=$(python3 -c "print(f'{int(\"${L2D_REFILL}\")/${COUNTER_DENOM}:.0f}')" 2>/dev/null || echo "N/A")
+                CACHE_MISS_PER_TOK=$(python3 -c "print(f'{int(\"${L2D_REFILL}\")/${COUNTER_DENOM}:.0f}')" 2>/dev/null || echo "N/A")
             fi
 
             if [ "$FILLED_CONTEXT" -eq 1 ]; then
-                log "    prompt_eval=${PROMPT_EVAL_TOKENS} tok  prefill=${PREFILL_TPS} t/s  decode=${DECODE_TPS} t/s  IPC=${IPC}  l2_miss/tok=${L2_PER_TOK}"
+                log "    prompt_eval=${PROMPT_EVAL_TOKENS} tok  prefill=${PREFILL_TPS} t/s  decode=${DECODE_TPS} t/s  IPC=${IPC}  cache_miss_proxy/tok=${CACHE_MISS_PER_TOK}"
             else
-                log "    decode=${DECODE_TPS} t/s  IPC=${IPC}  l2_miss/tok=${L2_PER_TOK}"
+                log "    decode=${DECODE_TPS} t/s  IPC=${IPC}  cache_miss_proxy/tok=${CACHE_MISS_PER_TOK}"
             fi
         done
     done
@@ -570,8 +569,8 @@ log ""
 hr
 log "NEON/PMU COUNTER ANALYSIS  —  Pixel 6a Cortex-X1  —  Llama 3.2 3B"
 log "Pre-experiment hypotheses:"
-log "  H1: l2d_refill/token(Q6_K) ≈ 3× l2d_refill/token(Q2_K) at ctx=256"
-log "  H2: l2d_refill/token(Q2_K,ctx=512) ≈ 2-5× l2d_refill/token(Q2_K,ctx=256)"
+log "  H1: PMU cache-miss proxy/token(Q6_K) > PMU cache-miss proxy/token(Q2_K) at ctx=256"
+log "  H2: PMU cache-miss proxy/token(Q2_K,ctx=512) ≈ 2-5× ctx=256 if cache refill spike explains cliff"
 log "  H3: Q3_K_M stall_backend delta (ctx=256→512) < Q2_K delta (compute-masking)"
 hr
 
@@ -625,7 +624,7 @@ if not data_by_variant:
 # ── Table 1: Per-token metrics by variant and context ─────────────────────────
 print(f"\n{'─'*100}")
 print(f"{'VARIANT':<10}  {'CTX':>5}  {'TPS':>7}  {'CYCLES/tok':>12}  {'INSTRS/tok':>12}  "
-      f"{'L1_miss/tok':>12}  {'L2_miss/tok':>12}  {'STALL_BE/tok':>12}  {'IPC':>6}  {'STALL%':>7}")
+      f"{'L1_miss/tok':>12}  {'CACHEMISS/tok':>14}  {'STALL_BE/tok':>12}  {'IPC':>6}  {'STALL%':>7}")
 print(f"{'─'*100}")
 
 # Store per-variant ctx=256 data for ratio computation
@@ -678,20 +677,20 @@ print(f"\n{'═'*80}")
 print("HYPOTHESIS VALIDATION")
 print(f"{'═'*80}")
 
-# H1: Q6_K L2 miss rate vs Q2_K at ctx=256
+# H1: Q6_K PMU cache-miss pressure vs Q2_K at ctx=256
 q2k_l2  = baseline_l2.get("Q2_K")
 q6k_l2  = baseline_l2.get("Q6_K")
 if q2k_l2 and q6k_l2 and q2k_l2 > 0:
     h1_ratio = q6k_l2 / q2k_l2
     h1_result = "✅ CONFIRMED" if 1.5 <= h1_ratio <= 6.0 else "❌ OUTSIDE EXPECTED RANGE"
     h1_surprise = " ← SURPRISING (>6x)" if h1_ratio > 6.0 else (" ← SURPRISING (<1.5x)" if h1_ratio < 1.5 else "")
-    print(f"\nH1: L2 miss/tok ratio Q6_K/Q2_K at ctx=256")
-    print(f"    Hypothesis: ~3× (expected range 1.5x–6.0x)")
+    print(f"\nH1: PMU cache-miss proxy/tok ratio Q6_K/Q2_K at ctx=256")
+    print(f"    Hypothesis: directionally higher (expected range 1.5x–6.0x)")
     print(f"    Result:     Q6_K={q6k_l2:,.0f}  Q2_K={q2k_l2:,.0f}  ratio={h1_ratio:.2f}x  {h1_result}{h1_surprise}")
 else:
-    print(f"\nH1: Cannot evaluate — L2 miss data not available (Q2_K: {q2k_l2}, Q6_K: {q6k_l2})")
+    print(f"\nH1: Cannot evaluate — PMU cache-miss proxy data not available (Q2_K: {q2k_l2}, Q6_K: {q6k_l2})")
 
-# H2: Q2_K L2 miss rate ctx=512 vs ctx=256
+# H2: Q2_K PMU cache-miss proxy ctx=512 vs ctx=256
 if "Q2_K" in data_by_variant:
     q2k_rows = data_by_variant["Q2_K"]
     q2k_256_l2 = [int(r["l2d_refill"]) / row_tokens(r) for r in q2k_rows
@@ -703,11 +702,11 @@ if "Q2_K" in data_by_variant:
     if mu_256 and mu_512 and mu_256 > 0:
         h2_ratio = mu_512 / mu_256
         h2_result = "✅ CONFIRMED" if h2_ratio >= 1.5 else "❌ BELOW EXPECTED (cliff may be prefetch-dominated)"
-        print(f"\nH2: Q2_K L2 miss/tok ratio ctx=512/ctx=256")
-        print(f"    Hypothesis: 2–5× (cliff = L2 overflow)")
+        print(f"\nH2: Q2_K PMU cache-miss proxy/tok ratio ctx=512/ctx=256")
+        print(f"    Hypothesis: 2–5× if cliff is explained by cache refill spike")
         print(f"    Result:     ctx=256: {mu_256:,.0f}  ctx=512: {mu_512:,.0f}  ratio={h2_ratio:.2f}x  {h2_result}")
     else:
-        print(f"\nH2: Cannot evaluate — Q2_K L2 miss data incomplete")
+        print(f"\nH2: Cannot evaluate — Q2_K PMU cache-miss proxy data incomplete")
 
 # H3: Q3_K_M vs Q2_K stall_backend delta
 print(f"\nH3: Compute-masking — stall_backend delta (ctx=256→512) smaller for Q3_K_M than Q2_K")
@@ -745,7 +744,7 @@ for v in ["Q2_K", "Q8_0"]:
 # ── Table 3: Dequant overhead proxy ──────────────────────────────────────────
 print(f"\n{'═'*80}")
 print("DEQUANTIZATION OVERHEAD PROXY  (instructions/token at ctx=256, normalized to Q2_K=1.0)")
-print("Expected: Q6_K ≈ 3.0×; Q8_0 ≈ 1.5–2.0×; Q4_K_M ≈ 1.5–2.5×")
+print("Diagnostic only: do not assume 3× instruction overhead; compare with cache-miss proxy and stall%.")
 print(f"{'═'*80}")
 
 q2k_256_ins = None
@@ -781,7 +780,7 @@ print(r"\label{tab:pmu_counters}")
 print(r"\begin{tabular}{@{}lccccc@{}}")
 print(r"\toprule")
 print(r"\textbf{Variant} & \textbf{TPS} & \textbf{IPC} & "
-      r"\textbf{L2 miss/tok} & \textbf{Insn/tok} & \textbf{Stall\%} \\")
+      r"\textbf{Cache-miss proxy/tok} & \textbf{Insn/tok} & \textbf{Stall\%} \\")
 print(r"\midrule")
 for variant in variants:
     if variant not in data_by_variant:
