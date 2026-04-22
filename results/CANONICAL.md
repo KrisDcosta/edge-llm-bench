@@ -164,19 +164,27 @@ clean M4 CPU TPS rerun. Failed or incomplete extension runs remain excluded.
 | `m4_qwen_tps_20260415_130955/` | ✅ M4 Qwen TPS validated and promoted |
 | `m4_qwen_cliff_20260416_021323/` | ✅ M4 Qwen cliff validated and promoted |
 | `quality_metrics_m4_server.json` | ✅ promoted: M4 quality, 7 variants × 6 benchmarks × 100 prompts |
+| `pixel_neon_perf_20260422_025741/` | ✅ Phase 1.1 supplementary PMU appendix: 7 variants × 2 ctx × 3 trials, filled-context, no validation warnings |
 
 | Pending / blocked run | Status |
 |-----------------------|--------|
 | x86 Qwen cliff | Excluded: pushed runs `20260415_110111` and `20260417_005727` contain missing/zero-throughput rows at larger contexts |
-| Pixel NEON/simpleperf PMU appendix | Phase 1.1 pending: tooling supports filled-context PMU runs; promote only after a clean all-7-variant run passes `docs/PHASE_1_1_RUNBOOK.md` gates |
 
 ### Phase 1.1 Mechanistic Evidence Rules
 
-NEON/simpleperf output is supplementary until explicitly promoted. When promoted,
-use the term `PMU cache-miss proxy/tok` unless `probe_results.json` shows raw
-`r17` was the active event. Do not cite generic `cache-misses:u` as definitive
-L2D refill, and do not claim the ctx=512 cliff is proven by L2 counters unless
-the validated all-variant run shows a proportional cache-miss proxy increase.
+NEON/simpleperf output from `pixel_neon_perf_20260422_025741/` is supplementary
+mechanistic evidence, not part of the public parquet/dashboard schema. Use the
+term `PMU cache-miss proxy/tok`: `probe_results.json` used generic
+`cache-misses:u`, not raw `r17`. Do not cite it as definitive L2D refill.
+
+Validated summary:
+- 42/42 rows passed strict validation, all `prompt_mode=filled_context`
+- ctx=256 prompt eval ≈113 tokens; ctx=512 prompt eval ≈369 tokens
+- Q6_K/Q2_K PMU cache-miss proxy at ctx=256: 1.92x
+- Q8_0/Q2_K PMU cache-miss proxy at ctx=256: 3.21x
+- Q2_K ctx=512/ctx=256 PMU cache-miss proxy: 1.07x
+- Therefore: cache pressure differs strongly by quantization format, but the
+  ctx=512 throughput cliff is not explained by a simple cache-refill spike.
 
 ### Superseded / Abandoned (not cited)
 

@@ -24,11 +24,11 @@ Phase 1.1 tooling is ready for the remaining runs:
 
 | Work item | Status | Blocking reason |
 |---|---|---|
-| Pixel NEON PMU, all 7 variants | Pending | 5-variant pass was clean; `Q4_K_S` and `Q5_K_M` still need either a single 7-variant canonical rerun or a clearly documented supplemental merge. |
+| Pixel NEON PMU, all 7 variants | Complete | `results/pixel_neon_perf_20260422_025741/` passed strict validation: 42/42 success rows, filled-context prompts, no warnings. |
 | x86 Qwen cliff | Pending | Previous pushed runs had missing/zero-throughput cells; hardened runner must produce a clean all-variant directory. |
-| WikiText full-corpus audit | Verification pending | Public build already enforces full-corpus Pixel PPL; Phase 1.1 should re-run the checks before any report update. |
-| Report/dashboard integration | Pending | Should happen only after the new run directories pass validation. |
-| Hugging Face re-upload | Pending | Only needed if Phase 1.1 changes parquet outputs. |
+| WikiText full-corpus audit | Complete | Public PPL split has Pixel6a=7 and x86=7 rows, all `wikitext2_full`, no missing PPL values. |
+| Report/dashboard integration | Partial | Report/canonical docs can cite NEON PMU as supplementary; dashboard/public parquet remain unchanged until x86 Qwen is clean. |
+| Hugging Face re-upload | Not needed yet | NEON PMU is supplementary raw results; public parquet counts remain unchanged. |
 
 ## Execution Order
 
@@ -199,27 +199,27 @@ git diff --check
 Safe wording:
 
 > Filled-context ARM PMU counters show that quantization format materially
-> changes cache pressure. In the validated 5-variant preliminary pass, Q6_K and
-> Q8_0 showed higher PMU cache-miss proxy per measured token than Q2_K at
-> ctx=256. However, the ctx=512 throughput cliff was not accompanied by a
-> proportional cache-miss proxy increase, so the cliff is not explained by a
-> simple cache-refill spike alone.
+> changes cache pressure. In the validated all-7-variant pass, Q6_K showed
+> 1.92x and Q8_0 showed 3.21x the PMU cache-miss proxy per measured token
+> relative to Q2_K at ctx=256. However, the Q2_K ctx=512 throughput cliff was
+> not accompanied by a proportional cache-miss proxy increase (1.07x), so the
+> cliff is not explained by a simple cache-refill spike alone.
 
 Do not write:
 
 - `Q6_K has 3x instruction overhead`
 - `KV cliff confirmed by L2 counters`
 - `cache-misses:u is exactly L2D refill`
-- `Phase 1.1 is complete` before all 7 NEON variants and clean x86 Qwen cliff pass
+- `Phase 1.1 is complete` before clean x86 Qwen cliff passes
 
 ## Final Phase 1.1 Checklist
 
-- [ ] Pixel NEON PMU all 7 variants complete and validated
+- [x] Pixel NEON PMU all 7 variants complete and validated
 - [ ] x86 Qwen cliff all 7 variants complete and validated
-- [ ] WikiText full-corpus audit passes
-- [ ] canonical manifest updated with promoted Phase 1.1 run directories
-- [ ] report updated with constrained PMU wording
-- [ ] dashboard has no blank/`-` sections for promoted data
-- [ ] `python3 scripts/build_public_release.py` passes
+- [x] WikiText full-corpus audit passes
+- [x] canonical manifest updated with promoted NEON run directory
+- [x] report updated with constrained PMU wording
+- [x] dashboard/public parquet unchanged; no Phase 1.1 PMU blanks introduced
+- [x] `python3 scripts/build_public_release.py` passes
 - [ ] GitHub Actions pass after push
 - [ ] Hugging Face dataset re-uploaded if parquet outputs changed

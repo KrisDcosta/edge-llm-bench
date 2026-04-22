@@ -210,11 +210,13 @@ We chose this model because it's small enough to run on constrained hardware but
 
 llama.cpp stores the KV cache in fp16 by default regardless of weight quantization. This is a design choice in the software, not in our methodology. We test the KV Q8_0 mitigation separately. The fp16 assumption is what makes the cliff formula hardware-derivable.
 
-### Assumption 6: Static analysis of SIMD instruction counts is representative
+### Assumption 6: Static analysis plus PMU counters are both useful, but answer different questions
 
-We counted SIMD operations from source code (`arm/quants.c`, `x86/quants.c`) rather than running hardware performance counters. This is because running `simpleperf` (ARM's PMU tool) requires privileged access we don't have on a production Pixel 6a.
+The original mechanistic analysis counted SIMD operations from source code (`arm/quants.c`, `x86/quants.c`). Phase 1.1 adds a filled-context `simpleperf` PMU run on Pixel 6a (`results/pixel_neon_perf_20260422_025741/`) covering all 7 variants at ctx=256 and ctx=512.
 
-**We validated this indirectly:** The predicted ordering from instruction counts exactly matches the observed TPS ordering on both ARM and x86. The correlation is strong enough to use as a mechanistic explanation.
+**What the PMU run supports:** quantization format materially changes cache pressure. At ctx=256, Q6_K shows 1.92× and Q8_0 shows 3.21× the PMU cache-miss proxy per measured token relative to Q2_K.
+
+**What the PMU run does not support:** the ctx=512 throughput cliff is not accompanied by a proportional cache-miss proxy spike. For Q2_K, throughput drops from 7.30 to 5.17 tok/s, but the PMU cache-miss proxy rises only 1.07×. So the cliff is real, but a simple "L2 miss spike explains everything" story is not strong enough.
 
 ---
 
@@ -696,7 +698,7 @@ START
 
 4. **No NPU / DSP testing.** Modern SoCs (Snapdragon 8 Gen 3, Apple Neural Engine) have dedicated neural processing hardware. llama.cpp primarily targets the CPU path. Dedicated NPU inference could yield substantially different results.
 
-5. **Static SIMD analysis, not hardware counters.** Our mechanistic explanation uses instruction counts from source code. We do not have hardware PMU data (L2 miss rates, stall cycles) due to permission limitations on a production Pixel 6a. The `pixel_neon_perf.sh` script in the repo would collect this data if run on a rooted device.
+5. **PMU counters are a proxy, not a complete causal proof.** Phase 1.1 adds Pixel 6a `simpleperf` evidence, but the active event is generic `cache-misses:u`, so we report it as `PMU cache-miss proxy/tok`, not definitive L2D refill. The PMU data supports quantization-dependent cache pressure, but it does not prove that the ctx=512 cliff is caused by a proportional cache-refill spike.
 
 6. **No quantization-aware training (QAT).** We test post-training quantization (PTQ) only. QAT variants (where the model is fine-tuned to compensate for quantization error) may behave very differently.
 

@@ -1,0 +1,160 @@
+[02:57:41] ========================================================================
+[02:57:41] Pixel 6a  —  NEON/PMU Perf Counter Sweep  (Phase 2A)
+[02:57:41] Variants : Q2_K Q3_K_M Q4_K_S Q4_K_M Q5_K_M Q6_K Q8_0
+[02:57:41] Contexts : 256 512
+[02:57:41] Prompt   : filled_context via prompt files  |  margin: 16 tokens
+[02:57:41] Trials   : 3  |  Output tokens: 128  |  Timeout: 1200s
+[02:57:41] Results  : results/pixel_neon_perf_20260422_025741
+[02:57:41] ========================================================================
+[02:57:42] ✅ Device: 33201JEGR11917
+[02:57:42] ✅ llama-completion found
+[02:57:42] ✅ All 7 model(s) present
+[02:57:42] 
+[02:57:42] Preparing filled-context prompt files...
+[02:57:42]   ctx=256: target_prompt_tokens≈112, file=/data/local/tmp/neon_prompt_20260422_025741_ctx256.txt, bytes=225
+[02:57:42]   ctx=512: target_prompt_tokens≈368, file=/data/local/tmp/neon_prompt_20260422_025741_ctx512.txt, bytes=737
+[02:57:42] 
+[02:57:42] === SIMPLEPERF PROBE ===
+[02:57:42] ✅ simpleperf found at /system/bin/simpleperf
+[02:57:42] perf_event_paranoid = -1
+[02:57:42] 
+[02:57:42] Probing available PMU events...
+[02:57:43]   ✅ cpu-cycles: available
+[02:57:44]   ✅ cache-misses (generic PMU cache-miss proxy): available
+[02:57:45]   ✅ stalled-cycles-backend: available
+[02:57:45] Active event set: cpu-cycles:u,instructions:u,cache-misses:u,stalled-cycles-backend:u
+[02:57:45] ✅ PMU cache-miss proxy available — mechanistic cache-pressure analysis possible
+[02:57:45] 
+[02:57:45] ========================================================================
+[02:57:45] Starting PMU counter sweep...
+[02:57:45] ========================================================================
+[02:57:45] 
+[02:57:45] ━━━ Q2_K ━━━
+[02:57:45]   [1/42 eta=0s]  Q2_K  ctx=256  trial=1  ...
+[02:58:15]     prompt_eval=113 tok  prefill=10.96 t/s  decode=7.61 t/s  IPC=2.849  cache_miss_proxy/tok=759354
+[02:58:15]   [2/42 eta=600s]  Q2_K  ctx=256  trial=2  ...
+[02:58:46]     prompt_eval=113 tok  prefill=10.22 t/s  decode=7.25 t/s  IPC=2.813  cache_miss_proxy/tok=773783
+[02:58:46]   [3/42 eta=793s]  Q2_K  ctx=256  trial=3  ...
+[02:59:19]     prompt_eval=113 tok  prefill=9.88 t/s  decode=7.04 t/s  IPC=2.796  cache_miss_proxy/tok=777191
+[02:59:19]   [4/42 eta=893s]  Q2_K  ctx=512  trial=1  ...
+[03:00:24]     prompt_eval=369 tok  prefill=9.29 t/s  decode=5.66 t/s  IPC=2.809  cache_miss_proxy/tok=808540
+[03:00:24]   [5/42 eta=1176s]  Q2_K  ctx=512  trial=2  ...
+[03:01:34]     prompt_eval=369 tok  prefill=8.67 t/s  decode=5.18 t/s  IPC=2.820  cache_miss_proxy/tok=831333
+[03:01:34]   [6/42 eta=1374s]  Q2_K  ctx=512  trial=3  ...
+[03:02:57]     prompt_eval=369 tok  prefill=7.23 t/s  decode=4.67 t/s  IPC=2.711  cache_miss_proxy/tok=830271
+[03:02:57]   ✅ Saved results/pixel_neon_perf_20260422_025741/neon_perf_Q2_K.jsonl  (6 rows)
+[03:02:57] 
+[03:02:57] ━━━ Q3_K_M ━━━
+[03:02:57]   [7/42 eta=1560s]  Q3_K_M  ctx=256  trial=1  ...
+[03:03:45]     prompt_eval=113 tok  prefill=6.96 t/s  decode=4.90 t/s  IPC=2.924  cache_miss_proxy/tok=1018152
+[03:03:45]   [8/42 eta=1530s]  Q3_K_M  ctx=256  trial=2  ...
+[03:04:34]     prompt_eval=113 tok  prefill=6.64 t/s  decode=4.78 t/s  IPC=2.941  cache_miss_proxy/tok=1000538
+[03:04:34]   [9/42 eta=1499s]  Q3_K_M  ctx=256  trial=3  ...
+[03:05:25]     prompt_eval=113 tok  prefill=6.17 t/s  decode=4.72 t/s  IPC=2.921  cache_miss_proxy/tok=1012202
+[03:05:25]   [10/42 eta=1472s]  Q3_K_M  ctx=512  trial=1  ...
+[03:06:56]     prompt_eval=369 tok  prefill=6.52 t/s  decode=4.25 t/s  IPC=2.927  cache_miss_proxy/tok=1008478
+[03:06:56]   [11/42 eta=1552s]  Q3_K_M  ctx=512  trial=2  ...
+[03:08:31]     prompt_eval=369 tok  prefill=6.26 t/s  decode=4.29 t/s  IPC=2.936  cache_miss_proxy/tok=1004961
+[03:08:31]   [12/42 eta=1615s]  Q3_K_M  ctx=512  trial=3  ...
+[03:10:07]     prompt_eval=369 tok  prefill=6.20 t/s  decode=4.17 t/s  IPC=2.935  cache_miss_proxy/tok=1009430
+[03:10:07]   ✅ Saved results/pixel_neon_perf_20260422_025741/neon_perf_Q3_K_M.jsonl  (6 rows)
+[03:10:07] 
+[03:10:07] ━━━ Q4_K_S ━━━
+[03:10:07]   [13/42 eta=1655s]  Q4_K_S  ctx=256  trial=1  ...
+[03:10:52]     prompt_eval=113 tok  prefill=7.65 t/s  decode=5.28 t/s  IPC=2.887  cache_miss_proxy/tok=1159710
+[03:10:52]   [14/42 eta=1574s]  Q4_K_S  ctx=256  trial=2  ...
+[03:11:38]     prompt_eval=113 tok  prefill=7.43 t/s  decode=5.14 t/s  IPC=2.896  cache_miss_proxy/tok=1148265
+[03:11:38]   [15/42 eta=1499s]  Q4_K_S  ctx=256  trial=3  ...
+[03:12:24]     prompt_eval=113 tok  prefill=7.19 t/s  decode=5.18 t/s  IPC=2.897  cache_miss_proxy/tok=1141319
+[03:12:24]   [16/42 eta=1428s]  Q4_K_S  ctx=512  trial=1  ...
+[03:13:48]     prompt_eval=369 tok  prefill=7.20 t/s  decode=4.64 t/s  IPC=2.891  cache_miss_proxy/tok=1049833
+[03:13:48]   [17/42 eta=1416s]  Q4_K_S  ctx=512  trial=2  ...
+[03:15:16]     prompt_eval=369 tok  prefill=6.89 t/s  decode=4.69 t/s  IPC=2.928  cache_miss_proxy/tok=1034478
+[03:15:16]   [18/42 eta=1401s]  Q4_K_S  ctx=512  trial=3  ...
+[03:16:45]     prompt_eval=369 tok  prefill=6.83 t/s  decode=4.56 t/s  IPC=2.953  cache_miss_proxy/tok=1065796
+[03:16:45]   ✅ Saved results/pixel_neon_perf_20260422_025741/neon_perf_Q4_K_S.jsonl  (6 rows)
+[03:16:45] 
+[03:16:45] ━━━ Q4_K_M ━━━
+[03:16:45]   [19/42 eta=1380s]  Q4_K_M  ctx=256  trial=1  ...
+[03:17:36]     prompt_eval=113 tok  prefill=6.36 t/s  decode=4.65 t/s  IPC=2.917  cache_miss_proxy/tok=1153581
+[03:17:36]   [20/42 eta=1310s]  Q4_K_M  ctx=256  trial=2  ...
+[03:18:28]     prompt_eval=113 tok  prefill=6.44 t/s  decode=4.61 t/s  IPC=2.921  cache_miss_proxy/tok=1162328
+[03:18:28]   [21/42 eta=1243s]  Q4_K_M  ctx=256  trial=3  ...
+[03:19:19]     prompt_eval=113 tok  prefill=6.37 t/s  decode=4.63 t/s  IPC=2.925  cache_miss_proxy/tok=1161409
+[03:19:19]   [22/42 eta=1176s]  Q4_K_M  ctx=512  trial=1  ...
+[03:20:53]     prompt_eval=369 tok  prefill=6.48 t/s  decode=4.21 t/s  IPC=2.920  cache_miss_proxy/tok=1119360
+[03:20:53]   [23/42 eta=1146s]  Q4_K_M  ctx=512  trial=2  ...
+[03:22:26]     prompt_eval=369 tok  prefill=6.43 t/s  decode=4.23 t/s  IPC=2.924  cache_miss_proxy/tok=1078728
+[03:22:26]   [24/42 eta=1110s]  Q4_K_M  ctx=512  trial=3  ...
+[03:24:00]     prompt_eval=369 tok  prefill=6.41 t/s  decode=4.19 t/s  IPC=2.916  cache_miss_proxy/tok=1072069
+[03:24:00]   ✅ Saved results/pixel_neon_perf_20260422_025741/neon_perf_Q4_K_M.jsonl  (6 rows)
+[03:24:00] 
+[03:24:00] ━━━ Q5_K_M ━━━
+[03:24:00]   [25/42 eta=1071s]  Q5_K_M  ctx=256  trial=1  ...
+[03:25:07]     prompt_eval=113 tok  prefill=4.69 t/s  decode=3.63 t/s  IPC=2.756  cache_miss_proxy/tok=1172858
+[03:25:07]   [26/42 eta=1010s]  Q5_K_M  ctx=256  trial=2  ...
+[03:26:13]     prompt_eval=113 tok  prefill=4.73 t/s  decode=3.62 t/s  IPC=2.753  cache_miss_proxy/tok=1167132
+[03:26:13]   [27/42 eta=948s]  Q5_K_M  ctx=256  trial=3  ...
+[03:27:19]     prompt_eval=113 tok  prefill=4.79 t/s  decode=3.60 t/s  IPC=2.751  cache_miss_proxy/tok=1165861
+[03:27:19]   [28/42 eta=887s]  Q5_K_M  ctx=512  trial=1  ...
+[03:29:21]     prompt_eval=369 tok  prefill=4.80 t/s  decode=3.31 t/s  IPC=2.747  cache_miss_proxy/tok=1156503
+[03:29:21]   [29/42 eta=849s]  Q5_K_M  ctx=512  trial=2  ...
+[03:31:23]     prompt_eval=369 tok  prefill=4.86 t/s  decode=3.30 t/s  IPC=2.744  cache_miss_proxy/tok=1177193
+[03:31:23]   [30/42 eta=807s]  Q5_K_M  ctx=512  trial=3  ...
+[03:33:23]     prompt_eval=369 tok  prefill=4.89 t/s  decode=3.33 t/s  IPC=2.742  cache_miss_proxy/tok=1191558
+[03:33:23]   ✅ Saved results/pixel_neon_perf_20260422_025741/neon_perf_Q5_K_M.jsonl  (6 rows)
+[03:33:23] 
+[03:33:23] ━━━ Q6_K ━━━
+[03:33:23]   [31/42 eta=758s]  Q6_K  ctx=256  trial=1  ...
+[03:34:32]     prompt_eval=113 tok  prefill=4.63 t/s  decode=3.44 t/s  IPC=2.686  cache_miss_proxy/tok=1489972
+[03:34:32]   [32/42 eta=689s]  Q6_K  ctx=256  trial=2  ...
+[03:35:42]     prompt_eval=113 tok  prefill=4.49 t/s  decode=3.45 t/s  IPC=2.695  cache_miss_proxy/tok=1474337
+[03:35:42]   [33/42 eta=621s]  Q6_K  ctx=256  trial=3  ...
+[03:36:52]     prompt_eval=113 tok  prefill=4.48 t/s  decode=3.45 t/s  IPC=2.698  cache_miss_proxy/tok=1477296
+[03:36:52]   [34/42 eta=552s]  Q6_K  ctx=512  trial=1  ...
+[03:39:03]     prompt_eval=369 tok  prefill=4.44 t/s  decode=3.14 t/s  IPC=2.705  cache_miss_proxy/tok=1421580
+[03:39:03]   [35/42 eta=495s]  Q6_K  ctx=512  trial=2  ...
+[03:41:13]     prompt_eval=369 tok  prefill=4.50 t/s  decode=3.10 t/s  IPC=2.699  cache_miss_proxy/tok=1459462
+[03:41:13]   [36/42 eta=434s]  Q6_K  ctx=512  trial=3  ...
+[03:43:23]     prompt_eval=369 tok  prefill=4.53 t/s  decode=3.12 t/s  IPC=2.694  cache_miss_proxy/tok=1422986
+[03:43:23]   ✅ Saved results/pixel_neon_perf_20260422_025741/neon_perf_Q6_K.jsonl  (6 rows)
+[03:43:23] 
+[03:43:23] ━━━ Q8_0 ━━━
+[03:43:23]   [37/42 eta=370s]  Q8_0  ctx=256  trial=1  ...
+[03:44:18]     prompt_eval=113 tok  prefill=7.16 t/s  decode=4.24 t/s  IPC=2.714  cache_miss_proxy/tok=2464210
+[03:44:18]   [38/42 eta=294s]  Q8_0  ctx=256  trial=2  ...
+[03:45:14]     prompt_eval=113 tok  prefill=6.88 t/s  decode=4.18 t/s  IPC=2.698  cache_miss_proxy/tok=2483682
+[03:45:14]   [39/42 eta=219s]  Q8_0  ctx=256  trial=3  ...
+[03:46:09]     prompt_eval=113 tok  prefill=6.87 t/s  decode=4.22 t/s  IPC=2.706  cache_miss_proxy/tok=2463235
+[03:46:09]   [40/42 eta=145s]  Q8_0  ctx=512  trial=1  ...
+[03:47:45]     prompt_eval=369 tok  prefill=6.85 t/s  decode=3.82 t/s  IPC=2.877  cache_miss_proxy/tok=1783881
+[03:47:45]   [41/42 eta=73s]  Q8_0  ctx=512  trial=2  ...
+[03:49:21]     prompt_eval=369 tok  prefill=6.92 t/s  decode=3.85 t/s  IPC=2.862  cache_miss_proxy/tok=1743112
+[03:49:21]   [42/42 eta=0s]  Q8_0  ctx=512  trial=3  ...
+[03:50:57]     prompt_eval=369 tok  prefill=6.85 t/s  decode=3.83 t/s  IPC=2.867  cache_miss_proxy/tok=1783923
+[03:50:57]   ✅ Saved results/pixel_neon_perf_20260422_025741/neon_perf_Q8_0.jsonl  (6 rows)
+[03:50:57] 
+[03:50:57] ========================================================================
+[03:50:57] NEON/PMU COUNTER ANALYSIS  —  Pixel 6a Cortex-X1  —  Llama 3.2 3B
+[03:50:57] Pre-experiment hypotheses:
+[03:50:57]   H1: PMU cache-miss proxy/token(Q6_K) > PMU cache-miss proxy/token(Q2_K) at ctx=256
+[03:50:57]   H2: PMU cache-miss proxy/token(Q2_K,ctx=512) ≈ 2-5× ctx=256 if cache refill spike explains cliff
+[03:50:57]   H3: Q3_K_M stall_backend delta (ctx=256→512) < Q2_K delta (compute-masking)
+[03:50:57] ========================================================================
+[03:50:57] 
+[03:50:57] Writing machine-readable NEON summary...
+wrote results/pixel_neon_perf_20260422_025741/neon_perf_summary.json
+wrote results/pixel_neon_perf_20260422_025741/neon_perf_summary.md
+validation warnings: none
+[03:50:58] 
+[03:50:58] ========================================================================
+[03:50:58] DONE  |  runtime: 53m 13s  |  results: results/pixel_neon_perf_20260422_025741
+[03:50:58] 
+[03:50:58] Next steps:
+[03:50:58]   1. Check hypothesis validation above against pre-experiment predictions
+[03:50:58]   2. For KV-cache H2, only use runs with prompt_mode=filled_context and prompt_eval_tokens near ctx-output_tokens
+[03:50:58]   3. If H1 ratio ∉ [1.5×, 6.0×] — investigate kernel source (llama.cpp commit 1a29907)
+[03:50:58]   4. If H2 ratio < 1.5× in filled_context mode — KV cliff may be prefetch-mediated; inspect simpleperf record
+[03:50:58]   5. Copy LaTeX table snippet into report §6 after validating numbers
+[03:50:58]   6. Run with --all-variants --filled-context for supplementary material
+[03:50:58] ========================================================================

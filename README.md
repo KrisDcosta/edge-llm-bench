@@ -377,6 +377,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | imatrix calibration (5 variants, BoolQ) | ✅ Complete | — | `quality_scores.json` |
 | KV-cache Q8_0 mitigation | ✅ Complete | n=5 | `quality_scores.json` |
 | Battery/power measurement | ✅ Complete | — | `pixel_power_20260320_173728/` |
+| NEON/simpleperf PMU counters | ✅ Supplementary | 7 variants × 2 ctx × 3 trials | `results/pixel_neon_perf_20260422_025741/` |
 | Flash Attention (FA not supported on Tensor G1) | ✅ Documented | — | `-fa` flag: unsupported |
 | Thermal drift characterization | ✅ Complete | — | Measured: baseline 8.33±0.42, throttle 4.72–4.96, recovery 7.04±0.29 t/s |
 | GSM8K (50q) | ⚠️ Methodology broken | — | Chat-template incompatibility (see Limitations) |
@@ -408,6 +409,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | **GSM8K/HumanEval methodology broken** | ⚠️ Archived | Mac `--single-turn` with few-shot prompt → chat template wraps entire prompt as user turn; model echoes few-shot context; results near-zero accuracy; archived in `archive/broken_evals/`; not a blocker (optional eval) |
 | **P-core affinity mask bug** | ✅ Documented | `--cpu-mask 0x0F` targets little cores (cpu0–3, 1803 MHz), NOT P-cores. Tensor G1 layout: cpu0-3=little, cpu4-5=medium (2253 MHz), cpu6-7=P-cores (2802 MHz). Correct mask: `0xC0` (P-only) or `0xF0` (P+M). P-core affinity data is invalid — not cited in paper |
 | **WikiText-2 PPL cross-device** | ✅ Complete | Pixel full-corpus PPL is canonical for all 7 variants; x86 full-corpus PPL is retained as supplementary cross-device reference. |
+| **NEON PMU counters** | ✅ Supplementary | Filled-context simpleperf validates quantization-dependent PMU cache-miss pressure. Use `PMU cache-miss proxy/tok`; generic `cache-misses:u` is not definitive L2D refill. |
 | **Q2_K HellaSwag collapse** | ✅ Documented | 19% score is instruction-following failure, not accuracy; all responses "No"; documented as regime failure in paper |
 | **imatrix hurts at low bpw** | ✅ Documented | Q2_K (−5%), Q3_K_M (−8%) BoolQ; paper recommends imatrix only at ≥4 bpw |
 | **Thermal throttling on sustained load** | ✅ Characterized | Onset ~60s; plateau 4.72–4.96 t/s (−43%); 5-min cooldown protocol mitigates in benchmarks |
