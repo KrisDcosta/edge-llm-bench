@@ -1,14 +1,14 @@
-# Phase 1.1 Runbook
+# Public v1.1 Extension Runbook
 
 Date: 2026-04-21
 
-Phase 1 is the public release baseline. Phase 1.1 is an extension pass for
-evidence that missed the public-release cutoff. Do not mix incomplete Phase 1.1
+Public v1 is the release baseline. Public v1.1 is an extension pass for
+evidence that missed the public-release cutoff. Do not mix incomplete v1.1
 results into the dashboard, Hugging Face dataset, or report claims.
 
 ## Current Status
 
-Phase 1.1 tooling is ready for the remaining runs:
+v1.1 tooling is ready for the remaining runs:
 
 - Pixel NEON/simpleperf runner supports `--filled-context` and records
   `prompt_mode`, `prompt_eval_tokens`, prefill TPS, decode TPS, PMU counters,
@@ -17,7 +17,7 @@ Phase 1.1 tooling is ready for the remaining runs:
   unless the active event set explicitly uses raw `r17`.
 - x86 Qwen cliff runner retries incomplete `llama-bench` output, supports
   `--resume`, writes debug payloads, and exits nonzero if invalid cells remain.
-- Public Phase 1 build remains unchanged: x86 Qwen cliff and NEON PMU data are
+- Public v1 build remains unchanged: x86 Qwen cliff and NEON PMU data are
   excluded until the validation gates below pass.
 
 ## What Remains
@@ -44,7 +44,7 @@ Expected state:
 - build exits `0`
 - `artifacts/public_release_manifest.json` still reports `3,437` total records
 - x86 Qwen cliff remains excluded
-- no Phase 1.1 PMU rows appear in public parquet
+- no v1.1 PMU rows appear in public parquet
 
 ### 1. Run Canonical Pixel NEON PMU
 
@@ -175,7 +175,7 @@ python3 scripts/parse_ppl_full.py results/pixel_wikitext_ppl_<timestamp>
 python3 scripts/build_public_release.py
 ```
 
-### 4. Promote Phase 1.1 Results
+### 4. Promote v1.1 Results
 
 Only after steps 1-3 pass:
 
@@ -210,16 +210,16 @@ Do not write:
 - `Q6_K has 3x instruction overhead`
 - `KV cliff confirmed by L2 counters`
 - `cache-misses:u is exactly L2D refill`
-- `Phase 1.1 is complete` before clean x86 Qwen cliff passes
+- `v1.1 is complete` before clean x86 Qwen cliff passes
 
-## Final Phase 1.1 Checklist
+## Final v1.1 Checklist
 
 - [x] Pixel NEON PMU all 7 variants complete and validated
 - [ ] x86 Qwen cliff all 7 variants complete and validated
 - [x] WikiText full-corpus audit passes
 - [x] canonical manifest updated with promoted NEON run directory
 - [x] report updated with constrained PMU wording
-- [x] dashboard/public parquet unchanged; no Phase 1.1 PMU blanks introduced
+- [x] dashboard/public parquet unchanged; no v1.1 PMU blanks introduced
 - [x] `python3 scripts/build_public_release.py` passes
 - [ ] GitHub Actions pass after push
 - [ ] Hugging Face dataset re-uploaded if parquet outputs changed

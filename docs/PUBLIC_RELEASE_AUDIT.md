@@ -51,7 +51,7 @@ Additional release-contract checks:
 | M4 Qwen split | cliff\_sweep=91, standard\_sweep=7 |
 | Dashboard collapse thresholds | Pixel6a=512, Pixel Qwen=512, x86=1300–1400, M4 Llama/Qwen=none |
 
-## Files Added For Phase 1
+## Files Added For Public v1
 
 - `scripts/build_public_release.py`
 - `artifacts/public_release_manifest.json`
@@ -60,7 +60,7 @@ Additional release-contract checks:
 - `docs/PUBLIC_RELEASE_AUDIT.md`
 - `docs/NEXT_PHASES_HANDOFF.md`
 
-## What Phase 1 Now Guarantees
+## What Public v1 Now Guarantees
 
 - One canonical public rebuild command
 - One generated public manifest with split counts and dashboard contract
@@ -73,7 +73,7 @@ Additional release-contract checks:
 - The Hugging Face dataset card was re-uploaded and verified at commit `d22d68d055c0a8e4a384f14f3332f293da3e21ba` against the new counts (`3,437` total records).
 - The dashboard is generated and validated locally; GitHub Pages will reflect this after the updated build is pushed.
 - M4 quality is now included from `results/quality_metrics_m4_server.json`; older failed M4 quality attempts remain archived and excluded.
-- Phase 1.1 extension work is tracked separately in `docs/PHASE_1_1_RUNBOOK.md`.
+- v1.1 extension work is tracked separately in `docs/PHASE_1_1_RUNBOOK.md`.
   NEON PMU/simpleperf and x86 Qwen cliff results must not be promoted into the
   public dashboard or dataset until their validation gates pass.
 

@@ -69,8 +69,9 @@ local.properties
 *.log
 vendor/
 
-# Archive directory (kept locally, not tracked)
+# Archive directories (kept locally, not tracked)
 archive/
+.archive/
 
 # Claude Code worktrees (local only, not for CI)
 .claude/worktrees/
@@ -81,7 +82,7 @@ archive/
 # Scratch / temp directory
 tmp/
 
-# Course paper / LaTeX source — not yet public
+# Draft paper / LaTeX source — not yet public
 report/
 
 # Internal planning and in-progress documents

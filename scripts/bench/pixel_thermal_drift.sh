@@ -9,7 +9,7 @@
 #
 # PROTOCOL:
 #   Phase 0 — BASELINE:   5 trials, Q4_K_M, ctx=256, normal cooldown
-#   Phase 1 — NO-COOLDOWN: 50 consecutive trials, Q4_K_M, ctx=256,
+#   Stage 1 — NO-COOLDOWN: 50 consecutive trials, Q4_K_M, ctx=256,
 #              NO sleep between trials.  Records trial index and
 #              wall-clock timestamp per trial.
 #   Phase 2 — RECOVERY:  Wait exactly 120 seconds, then 5 trials.
@@ -53,7 +53,7 @@ log "Model     : ${MODEL_PREFIX}-${VARIANT}.gguf"
 log "Context   : ${CTX}  |  Output tokens: ${OUTPUT_TOKENS}"
 log "Protocol  :"
 log "  Phase 0 (baseline)   : ${FRAMING_TRIALS} trials with standard cooldown"
-log "  Phase 1 (no-cooldown): ${NO_COOLDOWN_TRIALS} consecutive trials, no sleep between"
+log "  Stage 1 (no-cooldown): ${NO_COOLDOWN_TRIALS} consecutive trials, no sleep between"
 log "  Phase 2 (recovery)   : ${COOLDOWN_SECONDS}s cooldown, then ${FRAMING_TRIALS} trials"
 log "Results   : ${RESULTS_DIR}"
 hr
@@ -148,7 +148,7 @@ log "  No sleep between trials.  Recording thermal drift."
 for TRIAL in $(seq 1 $NO_COOLDOWN_TRIALS); do
     run_trial "no_cooldown" "$TRIAL"
 done
-log "Phase 1 complete."
+log "Stage 1 complete."
 
 PHASE1_END_S=$(date +%s)
 log ""

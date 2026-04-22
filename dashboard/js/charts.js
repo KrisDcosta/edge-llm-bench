@@ -79,7 +79,7 @@ function renderTpsChart() {
       btn.disabled = !hasData;
       btn.classList.toggle('opacity-40', !hasData);
       btn.classList.toggle('cursor-not-allowed', !hasData);
-      btn.title = hasData ? '' : `No ${model} Phase 1 TPS data for this device`;
+      btn.title = hasData ? '' : `No validated public-release TPS data for ${model} on this device`;
       if (!hasData && btn.classList.contains('active')) {
         btn.classList.remove('active');
         deviceGroup.querySelector('[data-value="all"]')?.classList.add('active');
@@ -603,7 +603,7 @@ function renderHeatmap() {
   const ctxData   = modelData[ctxKey] || {};
   const x86Tps    = _heatmapData.x86_tps?.[model] || {};
 
-  // x86 Qwen cliff attempts are excluded from Phase 1, so hide x86 for Qwen
+  // x86 Qwen cliff attempts are excluded from the public release, so hide x86 for Qwen
   // instead of rendering dash-filled cells that look like missing evidence.
   const x86HasCliffData = model === 'Llama';
 

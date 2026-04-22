@@ -2,11 +2,11 @@
 
 Date: 2026-04-17
 
-This document is for the next agent taking over after phase 1.
+This document is for the next agent taking over after the public v1 release.
 
 ## Current Baseline
 
-Phase 1 is complete. The project now has:
+Public v1 is complete. The project now has:
 - one canonical public rebuild command: `python3 scripts/build_public_release.py`
 - one generated release manifest: `artifacts/public_release_manifest.json`
 - one generated public truth table: `artifacts/public_truth_table.md`
@@ -19,12 +19,12 @@ Before making any changes in later phases, always start by reading:
 - `docs/PUBLIC_RELEASE_AUDIT.md`
 - `docs/PHASE_1_1_RUNBOOK.md`
 
-If the task is still Phase 1.1 cleanup, follow `docs/PHASE_1_1_RUNBOOK.md`
-before starting Phase 2. Phase 1.1 is for completing the NEON PMU appendix,
+If the task is still v1.1 cleanup, follow `docs/PHASE_1_1_RUNBOOK.md`
+before starting the next product/research phase. v1.1 is for completing the NEON PMU appendix,
 clean x86 Qwen cliff, and full-corpus PPL verification without weakening the
-already-public Phase 1 baseline.
+already-public v1 baseline.
 
-## Phase 1 Outcomes That Must Be Preserved
+## Public v1 Outcomes That Must Be Preserved
 
 Do not regress these:
 - public parquet excludes contaminated Pixel Qwen cliff data
@@ -45,7 +45,7 @@ python3 scripts/build_public_release.py
 
 ## Recommended Execution Order
 
-### Phase 2 — Structured Evaluation Layer
+### Next Step 1 — Structured Evaluation Layer
 
 Goal: turn the benchmark from score reporting into a behavioral evaluation framework.
 
@@ -70,7 +70,7 @@ Suggested implementation shape:
 - keep benchmark scoring in `results/quality_scores.json`, but add a derived report layer rather than overloading the raw score file
 - expose summaries in the dashboard only after they have a stable schema and validator checks
 
-### Phase 3 — Quantization Recommendation Engine v1
+### Next Step 2 — Quantization Recommendation Engine v1
 
 Goal: convert the benchmark into a decision system.
 
@@ -95,7 +95,7 @@ Implementation guidance:
 - expose the recommender in the dashboard as an additional view, not a separate product
 - add validator checks for policy outputs so recommendations remain traceable to measured data
 
-### Phase 4 — Adaptive Quantization Recommendation Engine
+### Next Step 3 — Adaptive Quantization Recommendation Engine
 
 Goal: move from static recommendation to runtime-aware policy switching.
 
@@ -115,7 +115,7 @@ Expected output:
 - a policy engine that can explain why it switched variants
 - scenario cards showing when the adaptive policy outperforms any static single-quant choice
 
-### Phase 5 — Publication Strengthening
+### Next Step 4 — Publication Strengthening
 
 Goal: raise the work from strong public project to stronger publication candidate.
 
@@ -141,10 +141,11 @@ Do not spend time on:
 ## Resume / Positioning Notes
 
 When future phases land, keep the narrative consistent:
-- phase 1: artifact-quality benchmark and public release
-- phase 2: structured behavioral evaluation
-- phase 3: recommendation engine
-- phase 4: adaptive policy engine
-- phase 5: publication-strengthening cross-device systems study
+- v1: artifact-quality benchmark and public release
+- v1.1: complete excluded-but-important evidence without weakening the release baseline
+- next: structured behavioral evaluation
+- next: recommendation engine
+- next: adaptive policy engine
+- next: publication-strengthening cross-device systems study
 
 This sequencing keeps the project coherent instead of turning it into a pile of unrelated LLM features.

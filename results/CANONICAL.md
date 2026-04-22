@@ -1,5 +1,5 @@
 # Canonical Results Manifest
-## DSC 291 EAI — GGUF Quantization on Mobile ARM
+## Edge LLM Bench — GGUF Quantization On Mobile And Edge Hardware
 
 This file maps every paper figure and table claim to its source result directory.
 All other result directories under `results/` are exploratory runs or superseded.
@@ -164,13 +164,13 @@ clean M4 CPU TPS rerun. Failed or incomplete extension runs remain excluded.
 | `m4_qwen_tps_20260415_130955/` | ✅ M4 Qwen TPS validated and promoted |
 | `m4_qwen_cliff_20260416_021323/` | ✅ M4 Qwen cliff validated and promoted |
 | `quality_metrics_m4_server.json` | ✅ promoted: M4 quality, 7 variants × 6 benchmarks × 100 prompts |
-| `pixel_neon_perf_20260422_025741/` | ✅ Phase 1.1 supplementary PMU appendix: 7 variants × 2 ctx × 3 trials, filled-context, no validation warnings |
+| `pixel_neon_perf_20260422_025741/` | ✅ v1.1 supplementary PMU appendix: 7 variants × 2 ctx × 3 trials, filled-context, no validation warnings |
 
 | Pending / blocked run | Status |
 |-----------------------|--------|
 | x86 Qwen cliff | Excluded: pushed runs `20260415_110111` and `20260417_005727` contain missing/zero-throughput rows at larger contexts |
 
-### Phase 1.1 Mechanistic Evidence Rules
+### v1.1 Mechanistic Evidence Rules
 
 NEON/simpleperf output from `pixel_neon_perf_20260422_025741/` is supplementary
 mechanistic evidence, not part of the public parquet/dashboard schema. Use the

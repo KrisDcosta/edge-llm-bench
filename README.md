@@ -1,6 +1,6 @@
 # Beyond Bit-Width: SIMD Dequantization Overhead Creates a CPU/GPU Performance Divide in GGUF K-Quant LLM Inference
 
-**DSC 291 — Efficient AI** | UC San Diego · Halicioglu Data Science Institute
+**Independent edge LLM benchmarking study** | Android · ARM NEON · x86 AVX2 · Apple Metal
 
 [![Dashboard](https://img.shields.io/badge/Dashboard-Live-10B981?style=flat-square)](https://krisdcosta.github.io/291_EAI/)
 [![Dataset](https://img.shields.io/badge/HuggingFace-Dataset-FF6B35?style=flat-square)](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench)
@@ -123,6 +123,9 @@
 | **Release Truth Table** | ✅ Generated | `artifacts/public_truth_table.md` | Public metric summary + dashboard contract |
 | **Plain-English Report** | ✅ Complete | `PROJECT_REPORT_PLAIN_ENGLISH.md` | Full narrative writeup, no jargon |
 
+The repository and dashboard URL retain the legacy `291_EAI` path for link stability; the project
+is now maintained as an independent public benchmark.
+
 ---
 
 ## Reproducing Results
@@ -213,7 +216,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 ## Project Structure
 
 ```
-291_EAI/
+edge-llm-bench/
 ├── README.md                              # This file
 ├── CONTRIBUTING.md                        # How to add data, devices, models
 ├── PROJECT_REPORT_PLAIN_ENGLISH.md        # Full plain-English project writeup
@@ -458,7 +461,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full pipeline walkthrough and ins
 ## Citation
 
 ```bibtex
-@misc{291EAI2026,
+@misc{EdgeLLMBench2026,
   title  = {Beyond Bit-Width: SIMD Dequantization Overhead Creates a CPU/GPU Performance Divide in GGUF K-Quant LLM Inference},
   author = {Costa, Krisdonia},
   year   = {2026},
@@ -470,8 +473,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full pipeline walkthrough and ins
 
 ## License
 
-Research project for DSC 291 (Efficient AI). Contact author for usage permissions.
+Independent research project. Contact author for usage permissions.
 
 ---
 
-**Last Updated:** April 17, 2026 | **Status:** All primary experiments complete · Dataset published · Dashboard live
+**Last Updated:** April 22, 2026 | **Status:** Public v1 released · Dataset published · Dashboard live

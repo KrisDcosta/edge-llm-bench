@@ -1,1 +1,0 @@
-{"perf_event_paranoid":-1,"active_events":"cpu-cycles,instructions,l1d-cache-misses,l2-cache-misses,stalled-cycles-backend","simpleperf_path":"/system/bin/simpleperf","probe_ts":"2026-04-06T10:27:49Z"}

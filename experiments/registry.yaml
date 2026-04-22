@@ -911,7 +911,7 @@ experiments:
 
   # ===========================================================================
   # GROUP 9: M4 Mac CPU re-run (corrected)
-  # Replaces corrupted m4_mac_cpu_* data (archived .archive/m4_cpu_corrupted/).
+  # Replaces corrupted m4_mac_cpu_* data removed from the public tree.
   # Root cause: old script parsed ggml_metal_device_init log line
   # (recommendedMaxWorkingSetSize = 19069.67 MB) as decode_tps.
   # Fix: use llama-bench -ngl 0 (CPU only) — clean JSON output, no log scraping.
@@ -941,7 +941,7 @@ experiments:
       tg128 results (t/s): Q2_K=27.08, Q4_K_S=25.68, Q3_K_M=23.67, Q4_K_M=22.29,
         Q8_0=18.80, Q5_K_M=15.80, Q6_K=14.97. All n=10, no corrupt values.
       Key finding: CPU-only M4 decoding is non-monotonic by quantization level. Q8_0 CPU
-        remains faster than Q8_0 Metal in the validated Phase 1 evidence set.
+        remains faster than Q8_0 Metal in the validated public-release evidence set.
       Integrated into dataset/m4_inference.parquet, dashboard JSON, and the canonical release manifest.
 
   # ===========================================================================

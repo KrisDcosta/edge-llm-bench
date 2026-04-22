@@ -212,7 +212,7 @@ llama.cpp stores the KV cache in fp16 by default regardless of weight quantizati
 
 ### Assumption 6: Static analysis plus PMU counters are both useful, but answer different questions
 
-The original mechanistic analysis counted SIMD operations from source code (`arm/quants.c`, `x86/quants.c`). Phase 1.1 adds a filled-context `simpleperf` PMU run on Pixel 6a (`results/pixel_neon_perf_20260422_025741/`) covering all 7 variants at ctx=256 and ctx=512.
+The original mechanistic analysis counted SIMD operations from source code (`arm/quants.c`, `x86/quants.c`). The v1.1 extension adds a filled-context `simpleperf` PMU run on Pixel 6a (`results/pixel_neon_perf_20260422_025741/`) covering all 7 variants at ctx=256 and ctx=512.
 
 **What the PMU run supports:** quantization format materially changes cache pressure. At ctx=256, Q6_K shows 1.92× and Q8_0 shows 3.21× the PMU cache-miss proxy per measured token relative to Q2_K.
 
@@ -698,7 +698,7 @@ START
 
 4. **No NPU / DSP testing.** Modern SoCs (Snapdragon 8 Gen 3, Apple Neural Engine) have dedicated neural processing hardware. llama.cpp primarily targets the CPU path. Dedicated NPU inference could yield substantially different results.
 
-5. **PMU counters are a proxy, not a complete causal proof.** Phase 1.1 adds Pixel 6a `simpleperf` evidence, but the active event is generic `cache-misses:u`, so we report it as `PMU cache-miss proxy/tok`, not definitive L2D refill. The PMU data supports quantization-dependent cache pressure, but it does not prove that the ctx=512 cliff is caused by a proportional cache-refill spike.
+5. **PMU counters are a proxy, not a complete causal proof.** The v1.1 extension adds Pixel 6a `simpleperf` evidence, but the active event is generic `cache-misses:u`, so we report it as `PMU cache-miss proxy/tok`, not definitive L2D refill. The PMU data supports quantization-dependent cache pressure, but it does not prove that the ctx=512 cliff is caused by a proportional cache-refill spike.
 
 6. **No quantization-aware training (QAT).** We test post-training quantization (PTQ) only. QAT variants (where the model is fine-tuned to compensate for quantization error) may behave very differently.
 

@@ -4,7 +4,7 @@
 #                    M4 Mac · CPU only (ngl=0) · uses llama-bench
 #
 # This is the CORRECTED re-run script replacing the corrupt
-# m4_mac_cpu_20260317_* data (archived to .archive/m4_cpu_corrupted/).
+# m4_mac_cpu_20260317_* data (removed from the public tree).
 #
 # Root cause of previous corruption:
 #   - Old script parsed 'recommendedMaxWorkingSetSize = 19069.67 MB'
