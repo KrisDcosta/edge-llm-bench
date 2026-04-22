@@ -463,7 +463,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full pipeline walkthrough and ins
 ```bibtex
 @misc{EdgeLLMBench2026,
   title  = {Beyond Bit-Width: SIMD Dequantization Overhead Creates a CPU/GPU Performance Divide in GGUF K-Quant LLM Inference},
-  author = {Costa, Krisdonia},
+  author = {Dcosta, Kris},
   year   = {2026},
   url    = {https://github.com/krisdcosta/291_EAI}
 }

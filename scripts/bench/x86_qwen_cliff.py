@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """
-x86_qwen_cliff.py  —  Qwen 2.5 1.5B KV-cache cliff sweep
-                       x86_64 CPU · AVX2 · uses llama-bench
+x86_qwen_cliff.py  -  Qwen 2.5 1.5B KV-cache cliff sweep
+                       x86_64 CPU - AVX2 - uses llama-bench
 
 Measures decode TPS at 11 context lengths to detect KV-cache cliff behaviour.
-Method: pp-only + pg combined run per context → derive decode TPS.
+Method: pp-only + pg combined run per context -> derive decode TPS.
 
-Key change from v1: TG_TOKENS raised from 32 → 128.
+Key change from v1: TG_TOKENS raised from 32 -> 128.
   On a fast x86 (i5-1235U at ~20 t/s), 32 tokens = ~1.6s decode window.
   Any OS scheduling jitter (Windows Defender, background updates) dominates.
-  128 tokens = ~6.4s window → CV typically < 15% instead of 50–80%.
+  128 tokens = ~6.4s window -> CV typically < 15% instead of 50-80%.
 
 Prerequisites:
-  1. llama-bench binary — set LLAMA_BENCH_PATH or add to PATH.
+  1. llama-bench binary - set LLAMA_BENCH_PATH or add to PATH.
      Default search locations:
        C:\\temp\\llama.cpp\\build\\bin\\Release\\llama-bench.exe
        C:\\temp\\llama.cpp\\build\\bin\\Release\\llama-bench
@@ -64,7 +64,7 @@ ALL_VARIANTS  = ["Q2_K", "Q3_K_M", "Q4_K_S", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0"]
 # Starts at 256 to capture the low-context baseline and early cliff onset.
 CTX_SIZES     = [256, 512, 768, 1024, 1200, 1300, 1400, 1500, 1600, 1800, 2048]
 
-# 128 tokens gives ~6s decode window on i5-1235U → CV < 15% (was 32 → CV 50-80%)
+# 128 tokens gives ~6s decode window on i5-1235U -> CV < 15% (was 32 -> CV 50-80%)
 TG_TOKENS     = 128
 
 NUM_TRIALS    = 5
@@ -162,7 +162,7 @@ def run_llama_bench(llama_bench, model_path, pp_tokens, tg_tokens, trials, ngl, 
 
 
 def parse_bench_output(output, pp_tokens, tg_tokens, variant, ctx, threads):
-    """Parse llama-bench jsonl output → cliff record."""
+    """Parse llama-bench jsonl output -> cliff record."""
     rows = []
     for line in output.splitlines():
         line = line.strip()
@@ -272,7 +272,7 @@ def write_debug_failure(results_dir, variant, ctx, attempt, run_meta, record):
 def print_cliff_summary(results_dir, variants):
     print()
     hr()
-    log(f"CLIFF ANALYSIS  —  x86 CPU  —  Qwen 2.5 1.5B")
+    log(f"CLIFF ANALYSIS  -  x86 CPU  -  Qwen 2.5 1.5B")
     hr()
     for variant in variants:
         path = os.path.join(results_dir, f"cliff_{variant}.jsonl")
@@ -349,7 +349,7 @@ def main():
     os.makedirs(results_dir, exist_ok=True)
 
     hr()
-    log(f"x86 CPU  —  Qwen 2.5 1.5B KV-Cache Cliff Sweep  (v2: TG={TG_TOKENS})")
+    log(f"x86 CPU  -  Qwen 2.5 1.5B KV-Cache Cliff Sweep  (v2: TG={TG_TOKENS})")
     log(f"Host     : {socket.gethostname()}  (x86_64)")
     log(f"Binary   : {llama_bench}")
     log(f"Models   : {models_dir}")
@@ -374,9 +374,9 @@ def main():
         if args.resume and os.path.isfile(output_file):
             done = len(existing_valid)
             if done >= n_ctx:
-                log(f"  SKIP {variant} — complete ({done}/{n_ctx} valid rows)")
+                log(f"  SKIP {variant} - complete ({done}/{n_ctx} valid rows)")
                 continue
-            log(f"  RESUME {variant} — preserving {done}/{n_ctx} valid rows; rerunning missing/invalid contexts")
+            log(f"  RESUME {variant} - preserving {done}/{n_ctx} valid rows; rerunning missing/invalid contexts")
 
         log("")
         log(f"=== [{v_idx}/{len(variants)}] {variant}  ({model_gb:.1f} GB) ===")
@@ -393,7 +393,7 @@ def main():
 
                 pp_tokens = ctx - TG_TOKENS
                 if pp_tokens <= 0:
-                    log(f"  [ctx={ctx}] SKIP — ctx too small for TG_TOKENS={TG_TOKENS}")
+                    log(f"  [ctx={ctx}] SKIP - ctx too small for TG_TOKENS={TG_TOKENS}")
                     continue
                 elapsed = int(time.time() - start_s)
 
@@ -456,7 +456,7 @@ def main():
     hr()
     log(f"DONE  |  runtime: {elapsed//60}m {elapsed%60}s  |  results: {results_dir}")
     if failed_cells:
-        log("FAILED CELLS REMAIN — not publishable:")
+        log("FAILED CELLS REMAIN - not publishable:")
         for variant, ctx, err in failed_cells:
             log(f"  {variant} ctx={ctx}: {err}")
         log("Next: rerun with --output-dir <same_dir> --resume <variants>")

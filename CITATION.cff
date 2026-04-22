@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this benchmark, dataset, or dashboard, please cite it as below."
+type: software
+title: "Beyond Bit-Width: SIMD Dequantization Overhead Creates a CPU/GPU Performance Divide in GGUF K-Quant LLM Inference"
+authors:
+  - family-names: "Dcosta"
+    given-names: "Kris"
+year: 2026
+repository-code: "https://github.com/KrisDcosta/291_EAI"
+url: "https://krisdcosta.github.io/291_EAI/"
+keywords:
+  - edge inference
+  - large language models
+  - quantization
+  - GGUF
+  - llama.cpp
+  - Android
+  - benchmarking
