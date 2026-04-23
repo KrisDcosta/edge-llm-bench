@@ -16,7 +16,7 @@
 > at ctx≈512, Q3_K_M cliff-attenuated (<±11%), Q2_K HellaSwag collapse (19%), Q4_K_S Pareto-dominant (74% BoolQ),
 > Q6_K Pareto-dominated, KV-cache Q8_0 eliminates cliff at cost of −46% baseline throughput, confirmed on Qwen 2.5 1.5B.
 >
-> **Outputs:** 3,253 published inference rows + 184 evaluation rows (3,437 total public records) ·
+> **Outputs:** 3,260 published inference rows + 184 evaluation rows (3,444 total public records) ·
 > 6 quality benchmarks (standard + imatrix where validated) · WikiText-2 PPL (full corpus, all 7 variants) ·
 > 17 analysis figures · Thermal characterization · Cross-model replication (Qwen 2.5 1.5B)
 
@@ -118,7 +118,7 @@
 | Artifact | Status | Location | Notes |
 |----------|--------|----------|-------|
 | **Interactive Dashboard** | ✅ Live | [krisdcosta.github.io/edge-llm-bench](https://krisdcosta.github.io/edge-llm-bench/) | Chart.js · GitHub Pages · all 7 variants |
-| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 3,437 records · 5 parquet splits |
+| **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 3,444 records · 5 parquet splits |
 | **Canonical Results** | ✅ Updated | `results/CANONICAL.md` | Maps every table/figure to source JSONL |
 | **Release Truth Table** | ✅ Generated | `artifacts/public_truth_table.md` | Public metric summary + dashboard contract |
 | **Plain-English Report** | ✅ Complete | `PROJECT_REPORT_PLAIN_ENGLISH.md` | Full narrative writeup, no jargon |

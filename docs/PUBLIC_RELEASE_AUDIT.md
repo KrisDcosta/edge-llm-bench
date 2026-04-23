@@ -1,6 +1,6 @@
 # Public Release Audit
 
-Date: 2026-04-17
+Date: 2026-04-23 (refreshed post-pipeline fixes)
 
 This audit was completed against the canonical public build path:
 
@@ -32,18 +32,18 @@ From the validated release manifest:
 | Split | Rows |
 |---|---:|
 | `pixel_inference.parquet` | 1,819 |
-| `m4_inference.parquet` | 1,035 |
+| `m4_inference.parquet` | 1,042 |
 | `x86_inference.parquet` | 399 |
 | `quality_benchmarks.parquet` | 170 |
 | `perplexity.parquet` | 14 |
-| **Total published records** | **3,437** |
+| **Total published records** | **3,444** |
 
 Additional release-contract checks:
 
 | Check | Result |
 |---|---|
-| Published inference rows | 3,253 |
-| Dashboard `raw_table.json` rows | 3,253 |
+| Published inference rows | 3,260 |
+| Dashboard `raw_table.json` rows | 3,260 |
 | Quality device split | Pixel6a=86, M4Mac=42, x86=42 |
 | Pixel Qwen rows | 522 |
 | Pixel Qwen split | cliff\_sweep=385, standard\_sweep=137 |
@@ -70,7 +70,7 @@ Additional release-contract checks:
 
 ## Remaining Caveats
 
-- The Hugging Face dataset card was re-uploaded and verified at commit `d22d68d055c0a8e4a384f14f3332f293da3e21ba` against the new counts (`3,437` total records).
+- The Hugging Face dataset card was re-uploaded and verified against the current counts (3,444 total records, including fixed M4 short-context TPS data). See `artifacts/public_release_manifest.json` for latest validated build.
 - The dashboard is generated and validated locally; GitHub Pages will reflect this after the updated build is pushed.
 - M4 quality is now included from `results/quality_metrics_m4_server.json`; older failed M4 quality attempts remain archived and excluded.
 - v1.1 extension work is tracked separately in `docs/PHASE_1_1_RUNBOOK.md`.
