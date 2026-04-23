@@ -2,7 +2,7 @@
 
 **Independent edge LLM benchmarking study** | Android · ARM NEON · x86 AVX2 · Apple Metal
 
-[![Dashboard](https://img.shields.io/badge/Dashboard-Live-10B981?style=flat-square)](https://krisdcosta.github.io/291_EAI/)
+[![Dashboard](https://img.shields.io/badge/Dashboard-Live-10B981?style=flat-square)](https://krisdcosta.github.io/edge-llm-bench/)
 [![Dataset](https://img.shields.io/badge/HuggingFace-Dataset-FF6B35?style=flat-square)](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench)
 
 > **Comprehensive benchmarking study:** 7 GGUF K-quant variants (Q2_K–Q8_0) on Google Pixel 6a (Tensor G1 ARM64),
@@ -117,14 +117,13 @@
 
 | Artifact | Status | Location | Notes |
 |----------|--------|----------|-------|
-| **Interactive Dashboard** | ✅ Live | [krisdcosta.github.io/291_EAI](https://krisdcosta.github.io/291_EAI/) | Chart.js · GitHub Pages · all 7 variants |
+| **Interactive Dashboard** | ✅ Live | [krisdcosta.github.io/edge-llm-bench](https://krisdcosta.github.io/edge-llm-bench/) | Chart.js · GitHub Pages · all 7 variants |
 | **HuggingFace Dataset** | ✅ Published | [KrisDcosta/edge-llm-bench](https://huggingface.co/datasets/KrisDcosta/edge-llm-bench) | 3,437 records · 5 parquet splits |
 | **Canonical Results** | ✅ Updated | `results/CANONICAL.md` | Maps every table/figure to source JSONL |
 | **Release Truth Table** | ✅ Generated | `artifacts/public_truth_table.md` | Public metric summary + dashboard contract |
 | **Plain-English Report** | ✅ Complete | `PROJECT_REPORT_PLAIN_ENGLISH.md` | Full narrative writeup, no jargon |
 
-The repository and dashboard URL retain the legacy `291_EAI` path for link stability; the project
-is now maintained as an independent public benchmark.
+The repository is published as `edge-llm-bench` and maintained as an independent public benchmark.
 
 ---
 
@@ -465,7 +464,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full pipeline walkthrough and ins
   title  = {Beyond Bit-Width: SIMD Dequantization Overhead Creates a CPU/GPU Performance Divide in GGUF K-Quant LLM Inference},
   author = {Dcosta, Kris},
   year   = {2026},
-  url    = {https://github.com/krisdcosta/291_EAI}
+  url    = {https://github.com/krisdcosta/edge-llm-bench}
 }
 ```
 

@@ -5,7 +5,7 @@
 #
 # Sweeps ctx 1200–1600 at fine granularity to pinpoint the exact
 # cliff location per variant. Captures powermetrics for bandwidth.
-# Run from 291_EAI directory: bash scripts/kv_cache_cliff_sweep.sh
+# Run from edge-llm-bench directory: bash scripts/kv_cache_cliff_sweep.sh
 # ================================================================
 
 set -e

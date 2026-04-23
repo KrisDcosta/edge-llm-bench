@@ -5,7 +5,7 @@ last = {}
 
 while True:
     try:
-        d = json.load(open('C:/Users/Kris/291_EAI/results/quality_scores.json'))
+        d = json.load(open('C:/Users/Kris/edge-llm-bench/results/quality_scores.json'))
         done = {
             k.split(':')[1]: v
             for k, v in d.items()

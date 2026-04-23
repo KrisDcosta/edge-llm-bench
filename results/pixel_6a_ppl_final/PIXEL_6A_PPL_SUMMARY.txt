@@ -7,7 +7,7 @@ COMPLETED VARIANTS:
 ✅ Q6_K - 17K bytes - Full perplexity measured
 
 SAFE BACKUP LOCATION:
-~/291_EAI/results/pixel_6a_ppl_final/ppl_full_Q6_K.txt
+~/edge-llm-bench/results/pixel_6a_ppl_final/ppl_full_Q6_K.txt
 
 FILES IN THIS DIRECTORY:
 $(ls -lh ppl_full_Q6_K.txt 2>/dev/null)

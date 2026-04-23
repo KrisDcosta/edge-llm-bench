@@ -6,8 +6,8 @@ authors:
   - family-names: "Dcosta"
     given-names: "Kris"
 year: 2026
-repository-code: "https://github.com/KrisDcosta/291_EAI"
-url: "https://krisdcosta.github.io/291_EAI/"
+repository-code: "https://github.com/KrisDcosta/edge-llm-bench"
+url: "https://krisdcosta.github.io/edge-llm-bench/"
 keywords:
   - edge inference
   - large language models

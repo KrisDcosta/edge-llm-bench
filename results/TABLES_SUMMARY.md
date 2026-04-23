@@ -72,4 +72,4 @@ Three output files have been generated:
 2. **paper_tables_final.csv** - CSV format with all three tables concatenated
 3. **TABLES_SUMMARY.md** - This markdown document with formatted tables
 
-All files are located in: `/Users/krisdcosta/291_EAI/results/`
+All files are located in the repository `results/` directory.

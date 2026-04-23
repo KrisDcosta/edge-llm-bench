@@ -30,7 +30,7 @@ if(DEFINED ANDROID_ABI)
     endif()
 endif()
 
-# 5 levels up from android/lib/src/main/cpp → project root (291_EAI)
+# 5 levels up from android/lib/src/main/cpp to the project root
 # then into vendor/llama.cpp
 set(LLAMA_SRC ${CMAKE_CURRENT_LIST_DIR}/../../../../../vendor/llama.cpp)
 add_subdirectory(${LLAMA_SRC} build-llama)

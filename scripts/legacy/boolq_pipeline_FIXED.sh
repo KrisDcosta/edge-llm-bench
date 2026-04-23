@@ -2,7 +2,7 @@
 # FIXED: BoolQ monitoring - corrected JSON parsing for dict-based structure
 
 set -e
-cd /Users/krisdcosta/291_EAI
+cd /Users/krisdcosta/edge-llm-bench
 
 RESULTS_FILE="results/quality_scores.json"
 VARIANTS=("Q2_K" "Q3_K_M" "Q4_K_M" "Q6_K" "Q8_0" "F16")

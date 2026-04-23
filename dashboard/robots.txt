@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://krisdcosta.github.io/291_EAI/sitemap.xml
+Sitemap: https://krisdcosta.github.io/edge-llm-bench/sitemap.xml

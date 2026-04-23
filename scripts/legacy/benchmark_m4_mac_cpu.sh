@@ -2,7 +2,7 @@
 #
 # M4 Mac CPU Benchmark Script (Comparison baseline)
 # Benchmarks all 7 GGUF variants on M4 Mac using CPU ONLY (no Metal GPU)
-# Run from 291_EAI directory: bash scripts/benchmark_m4_mac_cpu.sh
+# Run from edge-llm-bench directory: bash scripts/benchmark_m4_mac_cpu.sh
 #
 # Use this to compare CPU vs GPU performance on the same M4 hardware
 
@@ -23,7 +23,7 @@ PROMPT="The future of artificial intelligence is"
 # Check if models directory exists
 if [ ! -d "$MODELS_DIR" ]; then
     echo "ERROR: Models directory not found: $MODELS_DIR"
-    echo "Make sure you're in the 291_EAI directory"
+    echo "Make sure you're in the edge-llm-bench directory"
     exit 1
 fi
 
