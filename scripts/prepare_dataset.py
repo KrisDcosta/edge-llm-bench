@@ -331,9 +331,9 @@ def collect_m4(results: Path, verbose: bool) -> list[dict]:
     for d in sorted(results.glob("m4_cpu_cliff_*")):
         add_flat(d, "cliff_sweep")
 
-    # M4 TPS sweeps — Llama
+    # M4 TPS sweeps — Llama (use tps_aggregate parser for llama-bench tps_*.jsonl format)
     for d in sorted(results.glob("m4_llama_tps_*")):
-        add_flat(d, "tps_sweep")
+        add_tps_aggregate(d, "standard_sweep", MODEL_LLAMA)
 
     # M4 CPU TPS — Llama, clean idle rerun (ngl=0, n=10, tg128).
     # Older M4 CPU TPS attempts remain in /results for audit but are not public evidence.

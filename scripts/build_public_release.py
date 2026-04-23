@@ -218,7 +218,8 @@ def cross_device_summary(m4: pd.DataFrame, x86: pd.DataFrame) -> dict:
     m4_llama = m4[
         (m4["model"] == MODEL_LLAMA) &
         (m4["backend"] == "Metal") &
-        (m4["experiment_type"] == "tps_sweep")
+        (m4["experiment_type"] == "standard_sweep") &
+        (m4["context_len"] <= 256)  # short-ctx baseline (tg mode uses 0)
     ]
     x86_llama = x86[
         (x86["model"] == MODEL_LLAMA) &

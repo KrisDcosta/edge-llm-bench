@@ -6,7 +6,7 @@ All other result directories under `results/` are exploratory runs or superseded
 
 ---
 
-## Paper: `report/report.pdf` (20 pages)
+## Paper: `PROJECT_REPORT_PLAIN_ENGLISH.md` (comprehensive plain-English narrative + all figures/tables)
 
 ### Table 1 — Main Results (TPS, PPL, BoolQ)
 

@@ -1,22 +1,22 @@
 {
-  "generated_at_utc": "2026-04-23T07:26:03+00:00",
+  "generated_at_utc": "2026-04-23T09:34:58+00:00",
   "build_command": "python3 scripts/build_public_release.py",
   "split_counts": {
     "pixel_inference": 1819,
-    "m4_inference": 1035,
+    "m4_inference": 1042,
     "x86_inference": 399,
     "quality_benchmarks": 170,
     "perplexity": 14
   },
-  "inference_total": 3253,
-  "total_records": 3437,
+  "inference_total": 3260,
+  "total_records": 3444,
   "quality_devices": {
     "M4Mac": 42,
     "Pixel6a": 86,
     "x86": 42
   },
   "dashboard_contract": {
-    "raw_table_rows": 3253,
+    "raw_table_rows": 3260,
     "collapse_threshold": {
       "Pixel6a_Llama": {
         "start": 512,
@@ -130,7 +130,7 @@
   "cross_device_summary": {
     "x86_ctx256_q2k_tps": 14.05,
     "x86_ctx256_q6k_tps": 6.8,
-    "m4_q4ks_tps": null,
-    "m4_q8_tps": null
+    "m4_q4ks_tps": 19.8793,
+    "m4_q8_tps": 6.3939
   }
 }
